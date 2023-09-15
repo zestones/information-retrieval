@@ -1,4 +1,0 @@
-citizen
-NOT graduate
-citizen AND kane
-casablanca OR godfather

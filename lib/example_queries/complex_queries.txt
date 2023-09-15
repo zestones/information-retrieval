@@ -1,4 +1,0 @@
-(casablanca OR godfather) AND NOT graduate
-(citizen AND kane) OR (casablanca OR godfather)
-((citizen AND kane) OR (casablanca OR godfather)) AND NOT graduate
-(citizen AND (casablanca OR godfather)) OR (wizard AND oz)
