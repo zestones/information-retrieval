@@ -1,4 +1,3 @@
-from exercise2.boolean_query_parser import BooleanQueryParser
 from exercise2.document_collection import DocumentCollection
 
 from colorama import Fore, Style
@@ -7,8 +6,8 @@ import sys
 
 
 def main(argv):
-    document_collection = DocumentCollection('../lib/data/practice_01/collection.xml')
-    collection = document_collection.read_documents()
+    document_collection = DocumentCollection()
+    collection = document_collection.read_documents('../lib/data/practice_02')
     document_collection.construct_inverted_index(collection)
 
     # Calculate the collection frequencies

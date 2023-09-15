@@ -79,8 +79,8 @@ def main(argv):
         print("Invalid option. Use -h or --help for usage information.")
         sys.exit(-1)
 
-    document_collection = DocumentCollection('../lib/data/practice_01/collection.xml')
-    collection = document_collection.read_documents()
+    document_collection = DocumentCollection()
+    collection = document_collection.read_document('../lib/data/practice_01/collection.xml')
     document_collection.construct_inverted_index(collection)
 
     for opt, _ in opts:

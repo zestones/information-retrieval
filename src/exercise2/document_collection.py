@@ -1,7 +1,8 @@
 from exercise2.text_processor import TextProcessor
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
-
+import os
+import gzip 
 
 """
     This class represents a collection of documents.
@@ -9,8 +10,7 @@ import matplotlib.pyplot as plt
     construct the inverted index, and calculate term frequencies.
 """
 class DocumentCollection:
-    def __init__(self, filename) -> None:
-        self.filename = filename
+    def __init__(self) -> None:
         self.text_processor = TextProcessor()
         self.inverted_index = {}
         self.collection_size = 0  
@@ -19,11 +19,12 @@ class DocumentCollection:
         self.vocabulary_sizes = [] 
         self.collection_frequencies = {} 
 
-    def read_documents(self) -> list:
+
+    def read_document(self, filename : str) -> list:
         """
         Reads the documents from the file.
         """
-        with open(self.filename, 'r', encoding='utf-8') as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
             result = []
@@ -34,6 +35,28 @@ class DocumentCollection:
                     result.append({docno: content})
 
             return result
+        
+    def read_documents(self, folder_path: str) -> list:
+        """
+        Reads and extracts documents from the folder.
+        """
+        documents = []
+        
+        # List all files in the folder
+        file_names = os.listdir(folder_path)
+        
+        for file_name in file_names:
+            if file_name.endswith('.gz'):
+                # Construct the full path to the compressed document
+                full_path = os.path.join(folder_path, file_name)
+                
+                with gzip.open(full_path, 'rt', encoding='utf-8') as gz_file:
+                    # Read the content of the compressed document (text file)
+                    document_data = gz_file.read()
+                    document = self.read_document(document_data)
+                    documents.append(document)
+        
+        return documents
 
     def construct_inverted_index(self, collection: list) -> dict:
         """
