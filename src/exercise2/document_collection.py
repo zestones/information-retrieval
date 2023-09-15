@@ -80,7 +80,7 @@ class DocumentCollection:
         Calculate collection frequency of terms.
         """
         for term, postings in self.inverted_index.items():
-            frequency = sum([self.term_frequency(docno, term) for docno in postings])
+            frequency = sum(self.term_frequency(docno, term) for docno in postings)
             self.collection_frequencies[term] = frequency
 
     def construct_inverted_index(self, collection: list) -> dict:
