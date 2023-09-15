@@ -11,6 +11,6 @@ help:
 	@echo "  make help - Display this help message"
 	@echo "  make practice1 - Run practice1.py script"
 
-# run practice1.py script
+# run practice1 script
 practice1:
 	$(PYTHON) $(PRACTICE_DIR)/practice1.py $(filter-out $@,$(MAKECMDGOALS))
