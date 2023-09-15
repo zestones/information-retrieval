@@ -111,12 +111,13 @@ class DocumentCollection:
                         index[token].append(docno)
 
             # Calculate term length and update vocabulary size
-            term_length = len(index)  # Vocabulary size
+            term_length = len(index) 
             self.term_lengths.append(term_length)
-            self.vocabulary_sizes.append(len(index))
+            self.vocabulary_sizes.append(len(index)) # TODO: not sure if we should count unique terms
 
         self.inverted_index = index
         self.term_frequencies = term_frequencies
+        # TODO: not sure if this is the best way to calculate collection size 
         self.collection_size = len(collection)
 
     def print_title(self, text: str) -> None:
