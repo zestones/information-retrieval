@@ -1,5 +1,5 @@
-from exercise2.document_collection import DocumentCollection
 from exercise2.boolean_query_parser import BooleanQueryParser
+from exercise2.document_collection import DocumentCollection
 
 from colorama import Fore, Style
 import getopt

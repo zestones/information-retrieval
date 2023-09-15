@@ -1,0 +1,16 @@
+PYTHON = python3
+PRACTICE_DIR = practice
+
+.PHONY: help practice1
+
+# Set PYTHONPATH to include the project's root directory
+export PYTHONPATH := $(PYTHONPATH):$(PWD)
+
+help:
+	@echo "Usage:"
+	@echo "  make help - Display this help message"
+	@echo "  make practice1 - Run practice1.py script"
+
+# run practice1.py script
+practice1:
+	$(PYTHON) $(PRACTICE_DIR)/practice1.py $(filter-out $@,$(MAKECMDGOALS))
