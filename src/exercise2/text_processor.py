@@ -42,4 +42,6 @@ class TextProcessor:
         """
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
+        tokens = self.stem(tokens)
+        tokens = self.remove_stop_words(tokens)
         return tokens

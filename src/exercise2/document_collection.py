@@ -24,67 +24,30 @@ class DocumentCollection:
         """
         Reads the documents from the file.
         """
-        with open(filename, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-
-            result = []
-            for line in lines:
-                if '<doc><docno>' in line:
-                    docno = line.split('<doc><docno>')[1].split('</docno>')[0]
-                    content = line.split('</docno>')[1].split('</doc>')[0]
-                    result.append({docno: content})
-
-            return result
+        if (filename.endswith('.gz')):
+            with gzip.open(filename, 'rt', encoding='utf-8') as f:
+                return self._read_document_lines(f.readlines())
+        else:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return self._read_document_lines(f.readlines())
         
-    def read_documents(self, folder_path: str) -> list:
+    def _read_document_lines(self, lines: str) -> list:
         """
-        Reads and extracts documents from the folder.
+        Reads the documents from the content.
         """
-        documents = []
+        result = []
+        current_content = ''
+        current_docno = ''
         
-        # List all files in the folder
-        file_names = os.listdir(folder_path)
-        
-        for file_name in file_names:
-            if file_name.endswith('.gz'):
-                # Construct the full path to the compressed document
-                full_path = os.path.join(folder_path, file_name)
-                
-                with gzip.open(full_path, 'rt', encoding='utf-8') as gz_file:
-                    # Read the content of the compressed document (text file)
-                    document_data = gz_file.read()
-                    document = self.read_document(document_data)
-                    documents.append(document)
-        
-        return documents
+        for line in lines:
+            if '<doc><docno>' in line:
+                docno = line.split('<doc><docno>')[1].split('</docno>')[0]
+            elif '</doc>' in line: 
+                result.append({ docno: current_content })
+                current_content = ''
+            else: current_content += line
 
-    def construct_inverted_index(self, collection: list) -> dict:
-        """
-        Constructs the inverted index.
-        """
-        index = {}
-        term_frequencies = {}
-
-        for doc in collection:
-            docno = list(doc.keys())[0]
-            content = list(doc.values())[0]
-
-            tokens = self.text_processor.post_processing(content)
-
-            for token in tokens:
-                if token not in index:
-                    index[token] = [docno]
-                    term_frequencies[token] = {docno: 1}
-                else:
-                    term_frequencies.setdefault(token, {}).setdefault(docno, 0)
-                    term_frequencies[token][docno] += 1
-                    
-                    if docno not in index[token]:
-                        index[token].append(docno)
-
-        self.inverted_index = index
-        self.term_frequencies = term_frequencies
-        return index
+        return result
 
     def document_frequency(self, term: str) -> int:
         """
