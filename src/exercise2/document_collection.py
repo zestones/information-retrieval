@@ -162,7 +162,7 @@ class DocumentCollection:
         """
         Displays the term frequencies.
         """
-        self.print_title('Term Frequencies')
+        self.print_title(f"Term Frequencies of '{self.file_name}'")
         
         for term in self.term_frequencies:
             print(term, end=': ')

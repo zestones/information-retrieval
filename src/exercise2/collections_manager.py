@@ -7,7 +7,7 @@ class CollectionsManager:
         self.folder_path = folder_path
         self.collections = []
 
-    def index_documents_in_folder(self):
+    def calculate_collections_indexes(self):
         """
         Indexes all documents in the folder.
         """
@@ -23,8 +23,25 @@ class CollectionsManager:
                 file_collection = collection.read_document()
                 collection.construct_inverted_index(file_collection)
                 self.collections.append(collection)
-                
+
+    def calculate_collections_tf(self):
+        """
+        Calculate collection frequencies for all collections.
+        """
+        for collection in self.collections:
+            collection.calculate_collection_frequencies()
+    
+    def display_collections_tf(self):
+        """
+        Displays term frequencies for all collections.
+        """
+        for collection in self.collections:
+            collection.display_term_frequencies()        
+        
 
     def display_collections_indexes(self):
+        """
+        Display inverted_index for all collections.
+        """
         for collection in self.collections:
             collection.display_inverted_index()
