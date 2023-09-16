@@ -3,14 +3,14 @@ from colorama import Fore, Style
 import matplotlib.pyplot as plt
 import os
 import gzip 
-
+import re
 """
     This class represents a collection of documents.
     The class provides methods to read the documents from a file, 
     construct the inverted index, and calculate term frequencies.
 """
 class DocumentCollection:
-    def __init__(self) -> None:
+    def __init__(self,file_name : str) -> None:
         self.text_processor = TextProcessor()
         self.inverted_index = {}
         self.collection_size = 0  
@@ -18,17 +18,17 @@ class DocumentCollection:
         self.term_lengths = [] 
         self.vocabulary_sizes = [] 
         self.collection_frequencies = {} 
+        self.file_name = file_name
 
-
-    def read_document(self, filename : str) -> list:
+    def read_document(self) -> list:
         """
         Reads the documents from the file.
         """
-        if (filename.endswith('.gz')):
-            with gzip.open(filename, 'rt', encoding='utf-8') as f:
+        if (self.file_name.endswith('.gz')):
+            with gzip.open(self.file_name, 'rt', encoding='utf-8') as f:
                 return self._read_document_lines(f.readlines())
         else:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(self.file_name, 'r', encoding='utf-8') as f:
                 return self._read_document_lines(f.readlines())
         
     def _read_document_lines(self, lines: str) -> list:
@@ -48,6 +48,7 @@ class DocumentCollection:
             else: current_content += line
 
         return result
+    
 
     def document_frequency(self, term: str) -> int:
         """
@@ -75,7 +76,6 @@ class DocumentCollection:
         """
         index = {}
         term_frequencies = {}
-
         for doc in collection:
             docno = list(doc.keys())[0]
             content = list(doc.values())[0]
@@ -148,15 +148,14 @@ class DocumentCollection:
         plt.tight_layout()
         plt.show()
 
-    def display_index(self) -> None:
+    def display_inverted_index(self):
         """
-        Displays the inverted index.
+        Displays the inverted index with a title indicating the document name.
         """
-        self.print_title('Inverted Index')
+        self.print_title(f"\nInverted Index of '{self.file_name}\n'")
         for term, docnos in self.inverted_index.items():
             docno_list = ', '.join([f'{Fore.GREEN}{docno}{Style.RESET_ALL}' for docno in docnos])
             print(f"{term}: {docno_list}")
-
         print()
 
     def display_term_frequencies(self) -> None:
