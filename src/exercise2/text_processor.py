@@ -20,7 +20,7 @@ class TextProcessor:
 
     def normalize(self, tokens: list) -> list:
         """
-        Normalizes the tokens.
+        Normalizes the tokens. 
         """
         return [token.lower() for token in tokens]
 
@@ -44,4 +44,13 @@ class TextProcessor:
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
         tokens = self.remove_stop_words(tokens)
+        return tokens
+    
+    
+    def pre_processing(self, text: str) -> list:
+        """
+        Performs pre-processing on the text.
+        """
+        tokens = self.tokenize(text)
+        tokens = self.normalize(tokens)
         return tokens

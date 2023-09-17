@@ -103,6 +103,8 @@ class BooleanQueryParser:
         """
         Evaluates a boolean query and returns the set of documents that satisfy the query.
         """
-        query = self._text_processor.post_processing(query)
+        query = self._text_processor.pre_processing(query)
+        if not query: return set()
+        
         query = self._shunting_yard(query)
         return self._evaluate_postfix(query)

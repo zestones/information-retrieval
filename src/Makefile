@@ -12,6 +12,11 @@ help:
 	@echo "  make help - Display this help message"
 	@echo "  make practice1 - Run practice1.py script"
 
+
+install:
+	$(PYTHON) -m pip install -r requirements.txt && \
+	$(PYTHON) -c "import nltk; nltk.download('wordnet'); nltk.download('punkt')" && \ 
+
 # run practice1 script
 practice1:
 	$(PYTHON) $(PRACTICE_DIR)/practice1.py $(ARGS)

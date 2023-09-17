@@ -1,7 +1,7 @@
-import os
-from exercise2.document_collection import DocumentCollection
-import time
+from exercise2.collection import Collection
 import matplotlib.pyplot as plt
+import time
+import os
 
 
 """
@@ -12,37 +12,40 @@ construct the inverted index, and calculate term frequencies.
 class CollectionsManager:
     def __init__(self, folder_path):
         self.folder_path = folder_path
+        
         self.collections = []
         self.collection_sizes = []
+        
+        # Stats
+        self.indexing_times = []
+        
+        # Resources folder to save the plots
+        self.RESOURCES_FOLDER = '../docs/practice-2/resources/'
 
     def calculate_collections_indexes(self):
         """
         Indexes all documents in the folder.
         """
         # List all files in the folder
-        file_names = os.listdir(self.folder_path)
-        indexing_times = []
+        filenames = os.listdir(self.folder_path)
 
-        for file_name in file_names:
-            if file_name.endswith('.gz'):
-                # Construct the full path to the compressed document
-                full_path = os.path.join(self.folder_path, file_name)
+        for filename in filenames:
+            if filename.endswith('.gz'):
+                file_path = os.path.join(self.folder_path, filename)
                 
-                # Create a DocumentCollection for each file
-                collection = DocumentCollection(full_path)
-                file_collection = collection.read_document()
-                
+                # Create a Collection for each file
+                collection = Collection(file_path)
+
                 start_time = time.time()
-                collection.construct_inverted_index(file_collection)
+                collection.construct_inverted_index()
                 end_time = time.time()
             
                 self.collections.append(collection)
                 
                 indexing_time = end_time - start_time
-                indexing_times.append(indexing_time)
+                self.indexing_times.append(indexing_time)
             
         self.collection_sizes = [collection.collection_size for collection in self.collections]
-        return indexing_times
 
     def calculate_collections_tf(self):
         """
@@ -69,6 +72,8 @@ class CollectionsManager:
         """
         Display statistics for all collections.
         """
+        collection_size_label = 'Collection Size'
+        
         # Sub plots (bar chart) of document lengths by collection size
         plt.figure(figsize=(10, 6))
         plt.subplot(2, 2, 1)
@@ -78,7 +83,7 @@ class CollectionsManager:
             document_lengths = [sum(collection.document_lengths) for collection in self.collections]
             plt.bar(range(len(document_lengths)), document_lengths)
             
-        plt.xlabel('Collection Size')
+        plt.xlabel(collection_size_label)
         plt.ylabel('Document Length')
         plt.title('Document Length Evolution')
 
@@ -88,7 +93,7 @@ class CollectionsManager:
             term_lengths = [len(collection.term_lengths) for collection in self.collections]
             plt.bar(range(len(term_lengths)), term_lengths)
             
-        plt.xlabel('Collection Size')
+        plt.xlabel(collection_size_label)
         plt.ylabel('Term Length')
         plt.title('Term Length Evolution')
        
@@ -104,13 +109,21 @@ class CollectionsManager:
         plt.title('Collection Frequency of Terms')
         
         plt.tight_layout()
+        
+        plt.savefig(self.RESOURCES_FOLDER + 'statistics.png')
         plt.show()
         
-    def plot_efficiency(self, size_values, time_values):
+    def plot_indexing_time_by_collection_size(self):
+        """
+        Display efficiency for all collections.
+        """
         plt.figure(figsize=(10, 6))
-        plt.plot(size_values, time_values, marker='o', linestyle='-')
-        plt.title('Efficiency vs. Collection Size')
+        plt.plot(self.collection_sizes, self.indexing_times, marker='o', linestyle='-')
+        
+        plt.title('Indexing Time by Collection Size')
         plt.xlabel('Collection Size')
         plt.ylabel('Time (seconds)')
         plt.grid(True)
+        
+        plt.savefig(self.RESOURCES_FOLDER + 'efficiency.png')
         plt.show()
