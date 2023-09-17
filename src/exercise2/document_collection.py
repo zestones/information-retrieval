@@ -37,7 +37,6 @@ class DocumentCollection:
         """
         result = []
         current_content = ''
-        current_docno = ''
         
         for line in lines:
             if '<doc><docno>' in line:
@@ -49,7 +48,6 @@ class DocumentCollection:
 
         return result
     
-
     def document_frequency(self, term: str) -> int:
         """
         Returns the document frequency of a term.
@@ -98,6 +96,7 @@ class DocumentCollection:
 
             # Calculate term length and update vocabulary size
             term_length = len(index) 
+            print(index)
             self.term_lengths.append(term_length)
             self.vocabulary_sizes.append(len(index)) # TODO: not sure if we should count unique terms
 
