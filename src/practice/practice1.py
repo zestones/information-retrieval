@@ -68,7 +68,6 @@ def main(argv):
         sys.exit(-1)
 
     collection = Collection('../lib/data/practice_01/collection.xml')
-    collection.construct_inverted_index()
 
     for opt, _ in opts:
         if opt in ("-h", "--help"): print_usage()

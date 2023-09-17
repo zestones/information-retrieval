@@ -1,4 +1,6 @@
 from exercise2.text_processor import TextProcessor
+from exercise2.collection_statistics import CollectionStatistics
+
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
 import gzip 
@@ -24,13 +26,9 @@ class Collection:
         
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
-        self.collection_frequencies = {} 
-        
-        # Stats to move inside a new class
-        self.collection_size = 0  
-        self.document_lengths = [] 
-        self.term_lengths = [] 
-        self.vocabulary_sizes = [] 
+        self.collection_frequencies = {}
+        self.construct_inverted_index()
+        self.collection_statistics = CollectionStatistics(self)
 
     def parse_document(self) -> list:
         """
@@ -95,9 +93,6 @@ class Collection:
 
             tokens = self.text_processor.pre_processing(content)
 
-            doc_length = len(tokens)  # Calculate document length
-            self.document_lengths.append(doc_length)
-
             for token in tokens:
                 if token not in index:
                     index[token] = [docno]
@@ -109,15 +104,8 @@ class Collection:
                     if docno not in index[token]:
                         index[token].append(docno)
 
-            # Calculate term length and update vocabulary size
-            term_length = len(index) 
-            self.term_lengths.append(term_length)
-            self.vocabulary_sizes.append(len(index)) # TODO: not sure if we should count unique terms
-
         self.inverted_index = index
         self.term_frequencies = term_frequencies
-        # TODO: not sure if this is the best way to calculate collection size 
-        self.collection_size = len(self.parsed_documents)
 
     def print_title(self, text: str) -> None:
         """
@@ -125,43 +113,6 @@ class Collection:
         """
         print(Fore.BLUE + text + Style.RESET_ALL)
         print('-' * len(text))
-
-    def plot_statistics(self):
-        """
-        Plot the evolution of statistics as the collection size grows.
-        """
-        collection_size_label = 'Collection Size'
-        
-        plt.figure(figsize=(12, 6))
-
-        plt.subplot(2, 2, 1)
-        plt.plot(range(self.collection_size), self.document_lengths)
-        plt.xlabel(collection_size_label)
-        plt.ylabel('Document Length')
-        plt.title('Document Length Evolution')
-
-        plt.subplot(2, 2, 2)
-        plt.plot(range(self.collection_size), self.term_lengths)
-        plt.xlabel(collection_size_label)
-        plt.ylabel('Term Length')
-        plt.title('Term Length Evolution')
-
-        plt.subplot(2, 2, 3)
-        plt.plot(range(self.collection_size), self.vocabulary_sizes)
-        plt.xlabel(collection_size_label)
-        plt.ylabel('Vocabulary Size')
-        plt.title('Vocabulary Size Evolution')
-
-        plt.subplot(2, 2, 4)
-        terms = list(self.collection_frequencies.keys())
-        frequencies = list(self.collection_frequencies.values())
-        plt.barh(terms, frequencies)
-        plt.xlabel('Collection Frequency')
-        plt.ylabel('Terms')
-        plt.title('Collection Frequency of Terms')
-
-        plt.tight_layout()
-        plt.show()
 
     def display_inverted_index(self):
         """
