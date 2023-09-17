@@ -59,7 +59,7 @@ class CollectionStatistics:
         
     def plot_statistics(self):
         """
-        Plot the collection statistics.
+        Plot the collection statistics and annotate the plot with additional information.
         """
         plt.figure(figsize=(12, 6))
 
@@ -69,6 +69,7 @@ class CollectionStatistics:
         plt.xlabel('Document Length')
         plt.ylabel('Frequency')
         plt.title('Document Length Distribution')
+        self.annotate_statistics(plt.gca(), self.document_lengths)
 
         # Plot Term Lengths
         plt.subplot(2, 2, 2)
@@ -76,6 +77,7 @@ class CollectionStatistics:
         plt.xlabel('Term Length')
         plt.ylabel('Frequency')
         plt.title('Term Length Distribution')
+        self.annotate_statistics(plt.gca(), self.term_lengths)
 
         # Plot Vocabulary Sizes
         plt.subplot(2, 2, 3)
@@ -83,6 +85,7 @@ class CollectionStatistics:
         plt.xlabel('Vocabulary Size')
         plt.ylabel('Frequency')
         plt.title('Vocabulary Size Distribution')
+        self.annotate_statistics(plt.gca(), self.vocabulary_sizes)
 
         # Plot Document Length vs Term Length
         plt.subplot(2, 2, 4)
@@ -90,10 +93,35 @@ class CollectionStatistics:
         plt.xlabel('Document Length')
         plt.ylabel('Term Length')
         plt.title('Document Length vs Term Length')
+        self.annotate_statistics(plt.gca(), self.document_lengths, x_text='upper right')
+        self.annotate_statistics(plt.gca(), self.term_lengths, x_text='upper left')
 
         plt.tight_layout()
-        
-        # Save the plot
         filename = self.collection.filename.split('/')[-1].split('.')[0]
         plt.savefig(self.RESOURCES_FOLDER + filename + '_statistics.png')
         plt.show()
+
+    def annotate_statistics(self, ax, data, x_text='upper left'):
+        """
+        Annotate the plot with statistics information.
+        """
+        ax.text(
+            0.05,
+            0.95,
+            f'Mean: {statistics.mean(data):.2f}',
+            verticalalignment='top',
+            horizontalalignment=x_text,
+            transform=ax.transAxes,
+            color='blue',
+            fontsize=10,
+        )
+        ax.text(
+            0.05,
+            0.90,
+            f'Stdev: {statistics.stdev(data):.2f}',
+            verticalalignment='top',
+            horizontalalignment=x_text,
+            transform=ax.transAxes,
+            color='red',
+            fontsize=10,
+        )       
