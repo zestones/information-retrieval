@@ -3,3 +3,5 @@ nltk
 matplotlib
 flake8
 flake8-import-order
+spacy
+gensim

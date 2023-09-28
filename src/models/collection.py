@@ -1,4 +1,5 @@
 from manager.text_processor import TextProcessor
+from manager.text_processor import SnowballTextProcessor
 from models.statistics import Statistics
 
 from colorama import Fore, Style
@@ -14,7 +15,7 @@ import gzip
 
 class Collection:
     def __init__(self, filename: str) -> None:
-        self.text_processor = TextProcessor()
+        self.text_processor = SnowballTextProcessor()
         self.filename = filename
         self.label = filename.split('/')[-1].split('.')[0]
 
