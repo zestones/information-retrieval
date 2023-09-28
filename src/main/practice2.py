@@ -3,7 +3,7 @@ import sys
 
 
 def main(_):
-    collections_manager = CollectionsManager('../lib/data/test')
+    collections_manager = CollectionsManager('../lib/data/practice_02/')
     collections_manager.plot_statistics()
 
 

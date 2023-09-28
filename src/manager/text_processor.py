@@ -28,6 +28,18 @@ class TextProcessor:
         """
         return [token.lower() for token in tokens]
 
+    def stem(self, tokens: list) -> list:
+        """
+        Stems the tokens.
+        """
+        return tokens
+
+    def remove_stop_words(self, tokens: list) -> list:
+        """
+        Removes the stop words from the tokens.
+        """
+        return tokens
+
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.

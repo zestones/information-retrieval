@@ -15,7 +15,7 @@ import gzip
 
 class Collection:
     def __init__(self, filename: str) -> None:
-        self.text_processor = SnowballTextProcessor()
+        self.text_processor = TextProcessor()
         self.filename = filename
         self.label = filename.split('/')[-1].split('.')[0]
 
