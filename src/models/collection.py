@@ -1,8 +1,7 @@
 from manager.text_processor import TextProcessor
-from stats.collection_statistics import CollectionStatistics
+from models.statistics import Statistics
 
 from colorama import Fore, Style
-import matplotlib.pyplot as plt
 import gzip
 
 
@@ -31,7 +30,7 @@ class Collection:
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
         self.construct_inverted_index()
-        self.collection_statistics = CollectionStatistics(self)
+        self.collection_statistics = Statistics(self)
 
     def parse_document(self) -> list:
         """

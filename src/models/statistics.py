@@ -2,7 +2,7 @@ import statistics
 import matplotlib.pyplot as plt
 
 
-class CollectionStatistics:
+class Statistics:
     def __init__(self, collection):
         self.collection = collection
 
