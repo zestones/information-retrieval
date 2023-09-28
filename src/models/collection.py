@@ -17,6 +17,7 @@ class Collection:
     def __init__(self, filename: str) -> None:
         self.text_processor = TextProcessor()
         self.filename = filename
+        self.label = filename.split('/')[-1].split('.')[0]
 
         # A dictionary with the document number as key and the content as value
         # ex: {'doc1': [This, is, the, content, of, the, document]}
