@@ -1,9 +1,9 @@
-from exercise2.text_processor import TextProcessor
-from exercise2.collection_statistics import CollectionStatistics
+from manager.text_processor import TextProcessor
+from stats.collection_statistics import CollectionStatistics
 
 from colorama import Fore, Style
 import matplotlib.pyplot as plt
-import gzip 
+import gzip
 
 
 """
@@ -11,6 +11,8 @@ import gzip
     The class provides methods to read the documents from a file, 
     construct the inverted index, and calculate term frequencies.
 """
+
+
 class Collection:
     def __init__(self, filename: str) -> None:
         self.text_processor = TextProcessor()
@@ -19,11 +21,11 @@ class Collection:
         # A dictionary with the document number as key and the content as value
         # ex: {'doc1': [This, is, the, content, of, the, document]}
         self.parsed_documents = []
-        
+
         # A dictionary with the term as key and a list of document numbers as value
-        # ex: {'term': ['doc1', 'doc2']} 
+        # ex: {'term': ['doc1', 'doc2']}
         self.inverted_index = {}
-        
+
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
@@ -40,36 +42,37 @@ class Collection:
         else:
             with open(self.filename, 'r', encoding='utf-8') as f:
                 self.parsed_documents = self._parse_document_lines(f.readlines())
-        
+
     def _parse_document_lines(self, lines: str) -> list:
         """
         Parses the document lines and returns a list of dictionaries.
         """
         parsed_dictionnary = []
         current_content = ''
-        
+
         for line in lines:
             if '<doc><docno>' in line:
                 docno = line.split('<doc><docno>')[1].split('</docno>')[0]
-            elif '</doc>' in line: 
-                parsed_dictionnary.append({ docno: current_content })
+            elif '</doc>' in line:
+                parsed_dictionnary.append({docno: current_content})
                 current_content = ''
-            else: current_content += line
+            else:
+                current_content += line
 
         return parsed_dictionnary
-    
+
     def document_frequency(self, term: str) -> int:
         """
         Returns the document frequency of a term.
         """
         return len(self.inverted_index.get(term, []))
-    
+
     def term_frequency(self, docno: str, term: str) -> int:
         """
         Returns the term frequency of a term in a document.
         """
         return self.term_frequencies.get(term, {}).get(docno, 0)
-    
+
     def calculate_collection_frequencies(self):
         """
         Calculate collection frequency of terms.
@@ -86,7 +89,7 @@ class Collection:
 
         index = {}
         term_frequencies = {}
-        
+
         for doc in self.parsed_documents:
             docno = list(doc.keys())[0]
             content = list(doc.values())[0]
@@ -120,7 +123,8 @@ class Collection:
         """
         self.print_title(f"\nInverted Index of '{self.filename}\n'")
         for term, docnos in self.inverted_index.items():
-            docno_list = ', '.join([f'{Fore.GREEN}{docno}{Style.RESET_ALL}' for docno in docnos])
+            docno_list = ', '.join(
+                [f'{Fore.GREEN}{docno}{Style.RESET_ALL}' for docno in docnos])
             print(f"{term}: {docno_list}")
         print()
 
@@ -129,11 +133,12 @@ class Collection:
         Displays the term frequencies.
         """
         self.print_title(f"Term Frequencies of '{self.filename}'")
-        
+
         for term in self.term_frequencies:
             print(term, end=': ')
             for docno in self.term_frequencies[term]:
-                print(Fore.GREEN + docno + Style.RESET_ALL + '(' + str(self.term_frequencies[term][docno]) + ')', end=' ')
+                print(Fore.GREEN + docno + Style.RESET_ALL
+                      + '(' + str(self.term_frequencies[term][docno]) + ')', end=' ')
             print()
-        
+
         print()

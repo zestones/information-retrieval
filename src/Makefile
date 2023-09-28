@@ -1,5 +1,5 @@
 PYTHON = python3
-PRACTICE_DIR = practice
+MAIN_DIR = main
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 .PHONY: help practice1
@@ -19,8 +19,8 @@ install:
 
 # run practice1 script
 practice1:
-	$(PYTHON) $(PRACTICE_DIR)/practice1.py $(ARGS)
+	$(PYTHON) $(MAIN_DIR)/practice1.py $(ARGS)
 
 # run practice2 script
 practice2:
-	$(PYTHON) $(PRACTICE_DIR)/practice2.py $(ARGS)
+	$(PYTHON) $(MAIN_DIR)/practice2.py $(ARGS)
