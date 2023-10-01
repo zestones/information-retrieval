@@ -36,8 +36,6 @@ class CollectionsManager:
             if filename.endswith('.gz'):
                 file_path = os.path.join(self.folder_path, filename)
 
-                # Create a Collection for each file
-
                 start_time = time.time()
                 collection = Collection(file_path)
                 end_time = time.time()

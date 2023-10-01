@@ -23,10 +23,13 @@ class PlotsManager:
         plt.title('Indexing Time by Collection Size')
         plt.xlabel(self.__xlabel)
         plt.ylabel('Time (seconds)')
+
+        plt.xticks(collection_sizes)
+        plt.yticks(self.collections_manager.indexing_times)
+
         plt.grid(True)
 
-        plt.savefig(self.RESSOURCES_FOLDER
-                    + 'indexing_time_by_collection_size.png')
+        plt.savefig(self.RESSOURCES_FOLDER + 'indexing_time_by_collection_size.png')
         plt.show()
 
     def plot_document_length_evolution(self):
@@ -56,28 +59,28 @@ class PlotsManager:
     def plot_term_length_evolution(self):
         """
         Plot the evolution of term length as the collection size grows.
-        TODO : fix this plot (hard to read)
         """
-
-        # Extract collection sizes and term lengths
         collection_sizes = [
             collection.collection_statistics.collection_size for collection in self.collections_manager.collections]
         term_lengths = [
             collection.collection_statistics.term_lengths_in_collection for collection in self.collections_manager.collections]
 
-        plt.figure(figsize=(20, 6))
+        plt.figure(figsize=(50, 20))
         for i in range(len(self.collections_manager.collections)):
             plt.bar(
                 collection_sizes[i],
                 term_lengths[i],
                 label=self.collections_manager.collections[i].label,
-                alpha=0.5
+                alpha=1
             )
 
         plt.title('Term Length Evolution')
         plt.xlabel(self.__xlabel)
         plt.ylabel('Term Length')
         plt.legend()
+
+        plt.text(collection_sizes[i], term_lengths[i], str(
+            term_lengths[i]), ha='center', va='bottom')
 
         plt.savefig(self.RESSOURCES_FOLDER + 'term_length_evolution.png')
         plt.show()
@@ -109,30 +112,32 @@ class PlotsManager:
     def plot_collection_frequency_of_terms_evolution(self):
         """
         Plot the evolution of collection frequency of terms as the collection size grows.
-        TODO : fix this plot (hard to read and possibly wrong)
         """
-        plt.figure(figsize=(10, 6))
-
-        # Extract collection sizes and term lengths
         collection_sizes = [
             collection.collection_statistics.collection_size for collection in self.collections_manager.collections]
         collection_frequencies = [
             collection.collection_statistics.collection_frequency_of_terms for collection in self.collections_manager.collections]
 
-        plt.figure(figsize=(20, 6))
+        plt.figure(figsize=(50, 20))
         for i in range(len(self.collections_manager.collections)):
             plt.bar(
                 collection_sizes[i],
                 collection_frequencies[i],
                 label=self.collections_manager.collections[i].label,
-                alpha=0.5
+                alpha=1
             )
+
+            # Ajouter une annotation textuelle avec la valeur exacte
+            plt.text(collection_sizes[i], collection_frequencies[i], str(
+                collection_frequencies[i]), ha='center', va='bottom')
 
         plt.title('Collection Frequency of Terms Evolution')
         plt.xlabel(self.__xlabel)
         plt.ylabel('Collection Frequency of Terms')
         plt.legend()
 
-        plt.savefig(self.RESSOURCES_FOLDER
-                    + 'collection_frequency_of_terms_evolution.png')
+        # Activer le quadrillage
+        plt.grid(True)
+
+        plt.savefig(self.RESSOURCES_FOLDER + 'collection_frequency_of_terms_evolution.png')
         plt.show()
