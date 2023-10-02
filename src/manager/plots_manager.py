@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Agg')  # TODO : remove this line if you want to display plots
 
 
 class PlotsManager:

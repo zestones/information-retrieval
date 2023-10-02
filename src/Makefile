@@ -11,6 +11,7 @@ help:
 	@echo "Usage:"
 	@echo "  make help - Display this help message"
 	@echo "  make practice1 - Run practice1.py script"
+	@echo "  make practice2 - Run practice2.py script"
 
 
 install:
