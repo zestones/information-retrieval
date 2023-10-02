@@ -1,5 +1,5 @@
 PYTHON = python3
-PRACTICE_DIR = practice
+MAIN_DIR = main
 ARGS = $(filter-out $@,$(MAKECMDGOALS))
 
 .PHONY: help practice1
@@ -11,11 +11,17 @@ help:
 	@echo "Usage:"
 	@echo "  make help - Display this help message"
 	@echo "  make practice1 - Run practice1.py script"
+	@echo "  make practice2 - Run practice2.py script"
+
+
+install:
+	$(PYTHON) -m pip install -r requirements.txt && \
+	$(PYTHON) -c "import nltk; nltk.download('wordnet'); nltk.download('punkt')" && \ 
 
 # run practice1 script
 practice1:
-	$(PYTHON) $(PRACTICE_DIR)/practice1.py $(ARGS)
+	$(PYTHON) $(MAIN_DIR)/practice1.py $(ARGS)
 
 # run practice2 script
 practice2:
-	$(PYTHON) $(PRACTICE_DIR)/practice2.py $(ARGS)
+	$(PYTHON) $(MAIN_DIR)/practice2.py $(ARGS)
