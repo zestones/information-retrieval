@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 
 
 class PlotsManager:
@@ -15,7 +17,7 @@ class PlotsManager:
         plt.figure(figsize=(10, 6))
 
         collection_sizes = [
-            collection.collection_statistics.collection_size for collection in self.collections_manager.collections]
+            collection.collection_size for collection in self.collections_manager.collections]
         plt.plot(collection_sizes, self.collections_manager.indexing_times, marker='o', linestyle='-')
 
         plt.title('Indexing Time by Collection Size')
@@ -38,7 +40,7 @@ class PlotsManager:
 
         for collection in self.collections_manager.collections:
             collection_sizes = [
-                collection.collection_statistics.collection_size] * len(collection.collection_statistics.document_lengths)
+                collection.collection_size] * len(collection.collection_statistics.document_lengths)
 
             document_lengths = collection.collection_statistics.document_lengths
 
@@ -59,7 +61,7 @@ class PlotsManager:
         Plot the evolution of term length as the collection size grows.
         """
         collection_sizes = [
-            collection.collection_statistics.collection_size for collection in self.collections_manager.collections]
+            collection.collection_size for collection in self.collections_manager.collections]
         term_lengths = [
             collection.collection_statistics.term_lengths_in_collection for collection in self.collections_manager.collections]
 
@@ -91,7 +93,7 @@ class PlotsManager:
 
         for collection in self.collections_manager.collections:
             collection_sizes = [
-                collection.collection_statistics.collection_size] * len(collection.collection_statistics.documents_vocabulary_sizes)
+                collection.collection_size] * len(collection.collection_statistics.documents_vocabulary_sizes)
 
             vocabulary_sizes = collection.collection_statistics.documents_vocabulary_sizes
 
@@ -112,7 +114,7 @@ class PlotsManager:
         Plot the evolution of collection frequency of terms as the collection size grows.
         """
         collection_sizes = [
-            collection.collection_statistics.collection_size for collection in self.collections_manager.collections]
+            collection.collection_size for collection in self.collections_manager.collections]
         collection_frequencies = [
             collection.collection_statistics.collection_frequency_of_terms for collection in self.collections_manager.collections]
 

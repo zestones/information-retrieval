@@ -6,7 +6,6 @@ class Statistics:
     def __init__(self, collection):
         self.collection = collection
 
-        self.collection_size = 0
         self.document_lengths = []
 
         self.term_lengths_in_docs = []  # Number of terms in a document
@@ -25,7 +24,6 @@ class Statistics:
         """
         Calculates statistics for the collection.
         """
-        self.collection_size = len(self.collection.parsed_documents)
 
         for doc in self.collection.parsed_documents:
             content = list(doc.values())[0]

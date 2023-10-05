@@ -5,6 +5,7 @@ from manager.text_processor import SpacyTextProcessor
 from manager.text_processor import CustomTextProcessor
 
 from models.statistics import Statistics
+import time
 
 from colorama import Fore, Style
 import gzip
@@ -18,8 +19,9 @@ import gzip
 
 
 class Collection:
-    def __init__(self, filename: str) -> None:
+    def __init__(self, filename: str, statistics: bool = True) -> None:
         self.text_processor = CustomTextProcessor()
+
         self.filename = filename
         self.label = filename.split('/')[-1].split('.')[0]
 
@@ -35,7 +37,13 @@ class Collection:
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
         self.construct_inverted_index()
-        self.collection_statistics = Statistics(self)
+        self.collection_size = len(self.parsed_documents)
+
+        if statistics:
+            start_time = time.time()
+            self.collection_statistics = Statistics(self)
+            end_time = time.time()
+            print(f'Statistics time: {end_time - start_time} seconds')
 
     def parse_document(self) -> list:
         """
@@ -90,11 +98,16 @@ class Collection:
         """
         Constructs the inverted index and computes statistics.
         """
+        start_time = time.time()
         self.parse_document()
+        end_time = time.time()
+
+        print(f'Parsing time: {end_time - start_time} seconds')
 
         index = {}
         term_frequencies = {}
 
+        start_time = time.time()
         for doc in self.parsed_documents:
             docno = list(doc.keys())[0]
             content = list(doc.values())[0]
@@ -103,14 +116,14 @@ class Collection:
 
             for token in tokens:
                 if token not in index:
-                    index[token] = [docno]
+                    index[token] = {docno}
                     term_frequencies[token] = {docno: 1}
                 else:
+                    index[token].add(docno)
                     term_frequencies.setdefault(token, {}).setdefault(docno, 0)
                     term_frequencies[token][docno] += 1
-
-                    if docno not in index[token]:
-                        index[token].append(docno)
+        end_time = time.time()
+        print(f'Indexing time: {end_time - start_time} seconds')
 
         self.inverted_index = index
         self.term_frequencies = term_frequencies

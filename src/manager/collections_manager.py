@@ -11,13 +11,14 @@ construct the inverted index, and calculate term frequencies.
 
 
 class CollectionsManager:
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, statistics=False):
         self.folder_path = folder_path
 
         self.collections = []
 
         # Stats
         self.indexing_times = []
+        self.statistics = statistics
 
         # Resources folder to save the plots
         self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
@@ -37,7 +38,7 @@ class CollectionsManager:
                 file_path = os.path.join(self.folder_path, filename)
 
                 start_time = time.time()
-                collection = Collection(file_path)
+                collection = Collection(file_path, statistics=self.statistics)
                 end_time = time.time()
 
                 self.collections.append(collection)
@@ -71,8 +72,17 @@ class CollectionsManager:
         Display statistics for all collections.
         """
         plots_manager = PlotsManager(self)
-        plots_manager.plot_indexing_time_by_collection_size()
         plots_manager.plot_document_length_evolution()
         plots_manager.plot_term_length_evolution()
         plots_manager.plot_vocabulary_size_evolution()
         plots_manager.plot_collection_frequency_of_terms_evolution()
+
+    def plot_indexing_time_by_collection_size(self):
+        """
+        Display efficiency for all collections.
+        """
+        plots_manager = PlotsManager(self)
+        print("=====================================")
+        print(self.indexing_times)
+        print("=====================================")
+        plots_manager.plot_indexing_time_by_collection_size()
