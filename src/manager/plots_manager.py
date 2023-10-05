@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-
+import matplotlib
+matplotlib.use('Agg')
 
 class PlotsManager:
     def __init__(self, collections_manager) -> None:
@@ -58,27 +59,20 @@ class PlotsManager:
         """
         Plot the evolution of term length as the collection size grows.
         """
+        plt.figure(figsize=(10, 6))
+
         collection_sizes = [
             collection.collection_size for collection in self.collections_manager.collections]
-        term_lengths = [
-            collection.collection_statistics.term_lengths_in_collection for collection in self.collections_manager.collections]
+        
+        avg_term_lengths_in_collection = [
+            collection.collection_statistics.avg_term_lengths_in_collection for collection in self.collections_manager.collections]
 
-        plt.figure(figsize=(50, 20))
-        for i in range(len(self.collections_manager.collections)):
-            plt.bar(
-                collection_sizes[i],
-                term_lengths[i],
-                label=self.collections_manager.collections[i].label,
-                alpha=1
-            )
+        plt.plot(collection_sizes, avg_term_lengths_in_collection, marker='o', linestyle='-')
 
         plt.title('Term Length Evolution')
         plt.xlabel(self.__xlabel)
         plt.ylabel('Term Length')
-        plt.legend()
-
-        plt.text(collection_sizes[i], term_lengths[i], str(
-            term_lengths[i]), ha='center', va='bottom')
+        plt.grid(True)
 
         plt.savefig(self.RESSOURCES_FOLDER + 'term_length_evolution.png')
         plt.show()
@@ -88,21 +82,19 @@ class PlotsManager:
         Plot the evolution of vocabulary size as the collection size grows.
         """
         plt.figure(figsize=(10, 6))
+        
+        collection_sizes = [
+            collection.collection_size for collection in self.collections_manager.collections]
+        
+        collection_vocabulary_sizes = [
+            collection.collection_statistics.collection_vocabulary_sizes for collection in self.collections_manager.collections]
 
-        for collection in self.collections_manager.collections:
-            collection_sizes = [
-                collection.collection_size] * len(collection.collection_statistics.documents_vocabulary_sizes)
-
-            vocabulary_sizes = collection.collection_statistics.documents_vocabulary_sizes
-
-            plt.plot(collection_sizes, vocabulary_sizes, marker='o',
-                     linestyle='-', label=collection.label)
+        plt.plot(collection_sizes, collection_vocabulary_sizes, marker='o', linestyle='-')
 
         plt.title('Vocabulary Size Evolution')
         plt.xlabel(self.__xlabel)
         plt.ylabel('Vocabulary Size')
         plt.grid(True)
-        plt.legend()
 
         plt.savefig(self.RESSOURCES_FOLDER + 'vocabulary_size_evolution.png')
         plt.show()
