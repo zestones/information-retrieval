@@ -20,7 +20,7 @@ import gzip
 
 class Collection:
     def __init__(self, filename: str, statistics: bool = True) -> None:
-        self.text_processor = CustomTextProcessor()
+        self.text_processor = TextProcessor()
 
         self.filename = filename
         self.label = filename.split('/')[-1].split('.')[0]
@@ -28,6 +28,9 @@ class Collection:
         # A dictionary with the document number as key and the content as value
         # ex: {'doc1': [This, is, the, content, of, the, document]}
         self.parsed_documents = []
+
+        # We store the indexing time for each collection
+        self.indexing_time = 0
 
         # A dictionary with the term as key and a list of document numbers as value
         # ex: {'term': ['doc1', 'doc2']}
@@ -40,10 +43,7 @@ class Collection:
         self.collection_size = len(self.parsed_documents)
 
         if statistics:
-            start_time = time.time()
             self.collection_statistics = Statistics(self)
-            end_time = time.time()
-            print(f'Statistics time: {end_time - start_time} seconds')
 
     def parse_document(self) -> list:
         """
@@ -98,21 +98,24 @@ class Collection:
         """
         Constructs the inverted index and computes statistics.
         """
-        start_time = time.time()
         self.parse_document()
-        end_time = time.time()
-
-        print(f'Parsing time: {end_time - start_time} seconds')
-
         index = {}
         term_frequencies = {}
+        processed_documents = []
 
-        start_time = time.time()
+        # pre processing the content of the document
         for doc in self.parsed_documents:
             docno = list(doc.keys())[0]
             content = list(doc.values())[0]
 
             tokens = self.text_processor.pre_processing(content)
+
+            processed_documents.append({docno: tokens})
+
+        start_time = time.time()
+        for doc in processed_documents:
+            docno = list(doc.keys())[0]
+            tokens = list(doc.values())[0]
 
             for token in tokens:
                 if token not in index:
@@ -123,8 +126,8 @@ class Collection:
                     term_frequencies.setdefault(token, {}).setdefault(docno, 0)
                     term_frequencies[token][docno] += 1
         end_time = time.time()
-        print(f'Indexing time: {end_time - start_time} seconds')
 
+        self.indexing_time = end_time - start_time
         self.inverted_index = index
         self.term_frequencies = term_frequencies
 

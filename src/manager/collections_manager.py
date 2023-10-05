@@ -37,14 +37,9 @@ class CollectionsManager:
             if filename.endswith('.gz'):
                 file_path = os.path.join(self.folder_path, filename)
 
-                start_time = time.time()
                 collection = Collection(file_path, statistics=self.statistics)
-                end_time = time.time()
-
                 self.collections.append(collection)
-
-                indexing_time = end_time - start_time
-                self.indexing_times.append(indexing_time)
+                self.indexing_times.append(collection.indexing_time)
 
     def calculate_collections_tf(self):
         """
@@ -82,7 +77,4 @@ class CollectionsManager:
         Display efficiency for all collections.
         """
         plots_manager = PlotsManager(self)
-        print("=====================================")
-        print(self.indexing_times)
-        print("=====================================")
         plots_manager.plot_indexing_time_by_collection_size()
