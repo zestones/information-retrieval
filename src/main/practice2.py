@@ -5,15 +5,6 @@ import getopt
 import sys
 
 
-"""
-    Main script to run practice 2.
-    Usage: python3 practice2.py [-h] [-d] [-p] [-i]
-    -h, --help: Display this help message
-    -d, --display: Display inverted indexes
-    -p, --plot: Plot statistics
-    -i, --indexing-time: Plot indexing time by collection size
-"""
-
 def print_usage():
     print(Fore.YELLOW + Style.BRIGHT + "Usage:" + Style.RESET_ALL)
     print(Fore.CYAN + Style.BRIGHT + "Options:" + Style.RESET_ALL)

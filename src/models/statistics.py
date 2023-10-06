@@ -1,8 +1,6 @@
 import statistics
-import matplotlib.pyplot as plt
-
-
 import csv
+
 
 class Statistics:
     def __init__(self, collection):
@@ -19,7 +17,7 @@ class Statistics:
 
         self.collection_frequency_of_terms = []  # Number of times a term appears in the collection
 
-        # Resources folder to save the plots
+        # Resources folder to save the stats
         self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
         self.calculate_statistics()
 
