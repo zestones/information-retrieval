@@ -36,15 +36,14 @@ class PlotsManager:
         Plot the evolution of document length as the collection size grows.
         """
         plt.figure(figsize=(10, 6))
-
-        for collection in self.collections_manager.collections:
-            collection_sizes = [
-                collection.collection_size] * len(collection.collection_statistics.document_lengths)
-
-            document_lengths = collection.collection_statistics.document_lengths
-
-            plt.plot(collection_sizes, document_lengths, marker='o',
-                     linestyle='-', label=collection.label)
+        
+        collection_sizes = [
+            collection.collection_size for collection in self.collections_manager.collections]
+        
+        avg_collection_lengths = [
+            collection.collection_statistics.avg_collection_lengths for collection in self.collections_manager.collections]
+        
+        plt.plot(collection_sizes, avg_collection_lengths, marker='o', linestyle='-')
 
         plt.title('Document Length Evolution')
         plt.xlabel(self.__xlabel)

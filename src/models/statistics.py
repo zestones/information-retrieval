@@ -8,7 +8,8 @@ class Statistics:
     def __init__(self, collection):
         self.collection = collection
 
-        self.document_lengths = []
+        self.avg_document_lengths = []
+        self.avg_collection_lengths = []
 
         self.avg_term_lengths_in_docs = []  # Average term length in each document
         self.avg_term_lengths_in_collection = []  # Average term length in the collection
@@ -31,16 +32,17 @@ class Statistics:
             content = list(doc.values())[0]
             tokens = self.collection.text_processor.pre_processing(content)
 
-            self.document_lengths.append(len(tokens))
-
             term_length = sum(len(token) for token in tokens)
             self.avg_term_lengths_in_docs.append(term_length / len(tokens))
 
             self.documents_vocabulary_sizes.append(len(set(tokens)))
+            self.avg_document_lengths.append(len(tokens))
 
         self.collection_vocabulary_sizes = len(set(self.collection.inverted_index.keys()))
 
+        self.avg_collection_lengths = statistics.mean(self.avg_document_lengths)
         self.avg_term_lengths_in_collection = statistics.mean(self.avg_term_lengths_in_docs)
+
         self.collection.calculate_collection_frequencies()
         self.collection_frequency_of_terms = sum(
             list(self.collection.collection_frequencies.values()))
@@ -53,7 +55,7 @@ class Statistics:
             writer = csv.writer(file)
             writer.writerow(['Statistic', 'Value'])
             writer.writerow(['Number of documents', len(self.collection.parsed_documents)])
-            writer.writerow(['Average document length', statistics.mean(self.document_lengths)])
+            writer.writerow(['Average document length', statistics.mean(self.avg_document_lengths)])
             writer.writerow(['Average term length in collection', self.avg_term_lengths_in_collection])
             writer.writerow(['Number of unique terms in collection', self.collection_vocabulary_sizes])
             writer.writerow(['Total number of terms in collection', self.collection_frequency_of_terms])
