@@ -11,7 +11,7 @@ construct the inverted index, and calculate term frequencies.
 
 
 class CollectionsManager:
-    def __init__(self, folder_path, statistics=False):
+    def __init__(self, folder_path, statistics=False, import_collection=False, export_collection=False):
         self.folder_path = folder_path
 
         self.collections = []
@@ -19,6 +19,10 @@ class CollectionsManager:
         # Stats
         self.indexing_times = []
         self.statistics = statistics
+
+        # Collection parameters
+        self.import_collection = import_collection
+        self.export_collection = export_collection
 
         # Resources folder to save the plots
         self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
@@ -37,7 +41,8 @@ class CollectionsManager:
             if filename.endswith('.gz'):
                 file_path = os.path.join(self.folder_path, filename)
 
-                collection = Collection(file_path, statistics=self.statistics)
+                collection = Collection(file_path, statistics=self.statistics,
+                                        import_collection=self.import_collection, export_collection=self.export_collection)
                 self.collections.append(collection)
                 self.indexing_times.append(collection.indexing_time)
 
