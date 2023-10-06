@@ -55,15 +55,14 @@ def main(argv):
         elif opt in ("-s", "--statistics"):
             export_statistics = True
 
-    collections_manager = CollectionsManager('../lib/data/test/', plot_statistics=should_plot_statistics,
+    collections_manager = CollectionsManager('../lib/data/practice_03', plot_statistics=should_plot_statistics,
                                              import_collection=import_collection, export_collection=export_collection, export_statistics=export_statistics)
 
     if display_collections:
         collections_manager.display_collections_indexes()
 
-    if should_plot_statistics:
-        print(')))))Plotting statistics...')
-        collections_manager.plot_statistics()
+    if should_plot_statistics == True:
+        collections_manager.plot_all_statistics()
 
     if plot_indexing_time:
         collections_manager.plot_indexing_time_by_collection_size()

@@ -68,7 +68,7 @@ class CollectionsManager:
         for collection in self.collections:
             collection.display_inverted_index()
 
-    def plot_statistics(self):
+    def plot_all_statistics(self):
         """
         Display statistics for all collections.
         """

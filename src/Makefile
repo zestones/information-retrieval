@@ -18,12 +18,12 @@ help:
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt && \
-	$(PYTHON) -c "import nltk; nltk.download('wordnet'); nltk.download('punkt')" && \ 
+	$(PYTHON) -c "import nltk; nltk.download('wordnet'); nltk.download('punkt')"
 
 clean:
 	rm -rf $(MAIN_DIR)/__pycache__ && \
 	rm -rf manager/__pycache__ && \
-	rm -rf models/*.pyc && \
+	rm -rf models/__pycache__
 
 # run practice1 script
 practice1:
