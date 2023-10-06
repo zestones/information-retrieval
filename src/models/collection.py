@@ -6,6 +6,7 @@ from manager.text_processor import CustomTextProcessor
 
 from models.statistics import Statistics
 import time
+import json
 
 from colorama import Fore, Style
 import gzip
@@ -19,7 +20,7 @@ import gzip
 
 
 class Collection:
-    def __init__(self, filename: str, statistics: bool = True) -> None:
+    def __init__(self, filename: str, statistics: bool = True, import_collection: bool = False, export_collection: bool = False) -> None:
         self.text_processor = TextProcessor()
 
         self.filename = filename
@@ -39,7 +40,15 @@ class Collection:
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
-        self.construct_inverted_index()
+        if (import_collection):
+            print(f'Importing {self.label}...')
+            self.import_inverted_index(f'../res/{self.label}.json')
+        else:
+            print(f'Indexing {self.label}...')
+            self.construct_inverted_index()
+            if export_collection:
+                self.export_inverted_index(f'../res/{self.label}.json')
+
         self.collection_size = len(self.parsed_documents)
 
         if statistics:
@@ -98,10 +107,11 @@ class Collection:
         """
         Constructs the inverted index and computes statistics.
         """
-        self.parse_document()
-        index = {}
-        term_frequencies = {}
         processed_documents = []
+        term_frequencies = {}
+        index = {}
+
+        self.parse_document()
 
         # pre processing the content of the document
         for doc in self.parsed_documents:
@@ -109,7 +119,6 @@ class Collection:
             content = list(doc.values())[0]
 
             tokens = self.text_processor.pre_processing(content)
-
             processed_documents.append({docno: tokens})
 
         start_time = time.time()
@@ -130,6 +139,46 @@ class Collection:
         self.indexing_time = end_time - start_time
         self.inverted_index = index
         self.term_frequencies = term_frequencies
+
+    def export_inverted_index(self, filename: str) -> None:
+        """
+        Exports the inverted index to a JSON file.
+        """
+        inverted_index_data = {
+            "inverted_index": self.inverted_index,
+            "term_frequencies": self.term_frequencies,
+            "parsed_documents": self.parsed_documents,
+        }
+
+        # Convert sets to lists for serialization
+        inverted_index_data["inverted_index"] = {
+            k: list(v) for k, v in inverted_index_data["inverted_index"].items()}
+        inverted_index_data["term_frequencies"] = {
+            k: {k2: v2 for k2, v2 in v.items()} for k, v in inverted_index_data["term_frequencies"].items()}
+
+        with open(filename, "w") as file:
+            json.dump(inverted_index_data, file)
+
+    def import_inverted_index(self, filename: str) -> None:
+        """
+        Imports the inverted index from a JSON file.
+        """
+        try:
+            start_time = time.time()
+            with open(filename, "r") as file:
+                inverted_index_data = json.load(file)
+
+            self.inverted_index = inverted_index_data["inverted_index"]
+            end_time = time.time()
+
+            self.term_frequencies = inverted_index_data["term_frequencies"]
+            self.parsed_documents = inverted_index_data["parsed_documents"]
+            self.indexing_time = end_time - start_time
+        except FileNotFoundError:
+            print(f"File '{filename}' not found.")
+            print("Please run the program without the '-i' option to generate the inverted index.")
+        except Exception as e:
+            print(f"An error occurred while importing the inverted index: {str(e)}")
 
     def print_title(self, text: str) -> None:
         """

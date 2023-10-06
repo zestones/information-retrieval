@@ -25,6 +25,7 @@ class Statistics:
         """
         Calculates statistics for the collection.
         """
+        self.collection.calculate_collection_frequencies()
 
         for doc in self.collection.parsed_documents:
             content = list(doc.values())[0]
@@ -41,7 +42,6 @@ class Statistics:
         self.avg_collection_lengths = statistics.mean(self.avg_document_lengths)
         self.avg_term_lengths_in_collection = statistics.mean(self.avg_term_lengths_in_docs)
 
-        self.collection.calculate_collection_frequencies()
         self.collection_frequency_of_terms = sum(
             list(self.collection.collection_frequencies.values()))
 
@@ -54,9 +54,12 @@ class Statistics:
             writer.writerow(['Statistic', 'Value'])
             writer.writerow(['Number of documents', len(self.collection.parsed_documents)])
             writer.writerow(['Average document length', statistics.mean(self.avg_document_lengths)])
-            writer.writerow(['Average term length in collection', self.avg_term_lengths_in_collection])
-            writer.writerow(['Number of unique terms in collection', self.collection_vocabulary_sizes])
-            writer.writerow(['Total number of terms in collection', self.collection_frequency_of_terms])
+            writer.writerow(['Average term length in collection',
+                            self.avg_term_lengths_in_collection])
+            writer.writerow(['Number of unique terms in collection',
+                            self.collection_vocabulary_sizes])
+            writer.writerow(['Total number of terms in collection',
+                            self.collection_frequency_of_terms])
             writer.writerow(['Document vocabulary sizes'])
             for i, size in enumerate(self.documents_vocabulary_sizes):
                 writer.writerow([f'Document {i+1}', size])

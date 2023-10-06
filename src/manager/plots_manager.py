@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 
+
 class PlotsManager:
     def __init__(self, collections_manager) -> None:
 
@@ -11,31 +12,29 @@ class PlotsManager:
         self.__xlabel = 'Collection Size'
         self.collection_sizes = [
             collection.collection_size for collection in self.collections_manager.collections]
-        
-        
+
     def plot(self, title, xlabel, ylabel, xdata, ydata, filename):
         """
         Plot a graph.
         """
         plt.figure(figsize=(10, 6))
-        
+
         # Plot the data points with markers and lines
         plt.plot(xdata, ydata, marker='o', linestyle='-', label='Data Points')
-        
+
         # Set the title and axis labels
         plt.title(title)
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
-        
-        # Enable the grid 
+
+        # Enable the grid
         plt.grid(True)
-        
+
         # Save the plot to a file
         plt.savefig(self.RESSOURCES_FOLDER + filename)
-        
+
         # Show the plot
         plt.show()
-    
 
     def plot_indexing_time_by_collection_size(self):
         """
@@ -44,7 +43,8 @@ class PlotsManager:
         ylabel = 'Time (seconds)'
         filename = 'indexing_time_by_collection_size.png'
         ydata = self.collections_manager.indexing_times
-        self.plot('Indexing Time by Collection Size', self.__xlabel, ylabel, self.collection_sizes, ydata, filename)
+        self.plot('Indexing Time by Collection Size', self.__xlabel,
+                  ylabel, self.collection_sizes, ydata, filename)
 
     def plot_document_length_evolution(self):
         """
@@ -53,7 +53,8 @@ class PlotsManager:
         ylabel = 'Average Document Length'
         filename = 'document_length_evolution.png'
         ydata = [collection.collection_statistics.avg_collection_lengths for collection in self.collections_manager.collections]
-        self.plot('Document Length Evolution', self.__xlabel, ylabel, self.collection_sizes, ydata, filename)
+        self.plot('Document Length Evolution', self.__xlabel,
+                  ylabel, self.collection_sizes, ydata, filename)
 
     def plot_term_length_evolution(self):
         """
@@ -62,7 +63,8 @@ class PlotsManager:
         ylabel = 'Average Term Length'
         filename = 'term_length_evolution.png'
         ydata = [collection.collection_statistics.avg_term_lengths_in_collection for collection in self.collections_manager.collections]
-        self.plot('Term Length Evolution', self.__xlabel, ylabel, self.collection_sizes, ydata, filename)
+        self.plot('Term Length Evolution', self.__xlabel,
+                  ylabel, self.collection_sizes, ydata, filename)
 
     def plot_vocabulary_size_evolution(self):
         """
@@ -71,7 +73,8 @@ class PlotsManager:
         ylabel = 'Vocabulary Size'
         filename = 'vocabulary_size_evolution.png'
         ydata = [collection.collection_statistics.collection_vocabulary_sizes for collection in self.collections_manager.collections]
-        self.plot('Vocabulary Size Evolution', self.__xlabel, ylabel, self.collection_sizes, ydata, filename)
+        self.plot('Vocabulary Size Evolution', self.__xlabel,
+                  ylabel, self.collection_sizes, ydata, filename)
 
     def plot_collection_frequency_of_terms_evolution(self):
         """
