@@ -9,7 +9,9 @@ import time
 import json
 
 from colorama import Fore, Style
+import zipfile
 import gzip
+import io
 
 
 """
@@ -20,7 +22,7 @@ import gzip
 
 
 class Collection:
-    def __init__(self, filename: str, statistics: bool = True, import_collection: bool = False, export_collection: bool = False) -> None:
+    def __init__(self, filename: str, plot_statistics: bool = True, import_collection: bool = False, export_collection: bool = False, export_statistics: bool = False):
         self.text_processor = TextProcessor()
 
         self.filename = filename
@@ -50,9 +52,8 @@ class Collection:
                 self.export_inverted_index(f'../res/{self.label}.json')
 
         self.collection_size = len(self.parsed_documents)
-
-        if statistics:
-            self.collection_statistics = Statistics(self)
+        self.collection_statistics = Statistics(
+            self, export_statistics=export_statistics, plot_statistics=plot_statistics)
 
     def parse_document(self) -> list:
         """
@@ -61,6 +62,13 @@ class Collection:
         if (self.filename.endswith('.gz')):
             with gzip.open(self.filename, 'rt', encoding='utf-8') as f:
                 self.parsed_documents = self._parse_document_lines(f.readlines())
+        elif self.filename.endswith('.zip'):
+            with zipfile.ZipFile(self.filename, 'r') as zip_file:
+                self.parsed_documents = []
+                for file_name in zip_file.namelist():
+                    with zip_file.open(file_name) as binary_file:
+                        with io.TextIOWrapper(binary_file, encoding='utf-8') as f:
+                            self.parsed_documents.extend(self._parse_document_lines(f.readlines()))
         else:
             with open(self.filename, 'r', encoding='utf-8') as f:
                 self.parsed_documents = self._parse_document_lines(f.readlines())
@@ -69,19 +77,19 @@ class Collection:
         """
         Parses the document lines and returns a list of dictionaries.
         """
-        parsed_dictionnary = []
+        parsed_dictionary = []
         current_content = ''
 
         for line in lines:
             if '<doc><docno>' in line:
                 docno = line.split('<doc><docno>')[1].split('</docno>')[0]
             elif '</doc>' in line:
-                parsed_dictionnary.append({docno: current_content})
+                parsed_dictionary.append({docno: current_content})
                 current_content = ''
             else:
                 current_content += line
 
-        return parsed_dictionnary
+        return parsed_dictionary
 
     def document_frequency(self, term: str) -> int:
         """

@@ -11,18 +11,19 @@ construct the inverted index, and calculate term frequencies.
 
 
 class CollectionsManager:
-    def __init__(self, folder_path, statistics=False, import_collection=False, export_collection=False):
+    def __init__(self, folder_path: str, plot_statistics=False, import_collection=False, export_collection=False, export_statistics=False):
         self.folder_path = folder_path
 
         self.collections = []
 
         # Stats
         self.indexing_times = []
-        self.statistics = statistics
+        self.plot_statistics = plot_statistics
 
         # Collection parameters
         self.import_collection = import_collection
         self.export_collection = export_collection
+        self.export_statistics = export_statistics
 
         # Resources folder to save the plots
         self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
@@ -38,11 +39,11 @@ class CollectionsManager:
         filenames = os.listdir(self.folder_path)
 
         for filename in filenames:
-            if filename.endswith('.gz'):
+            if filename.endswith('.gz') or filename.endswith('.zip'):
                 file_path = os.path.join(self.folder_path, filename)
 
-                collection = Collection(file_path, statistics=self.statistics,
-                                        import_collection=self.import_collection, export_collection=self.export_collection)
+                collection = Collection(file_path, plot_statistics=self.plot_statistics,
+                                        import_collection=self.import_collection, export_collection=self.export_collection, export_statistics=self.export_statistics)
                 self.collections.append(collection)
                 self.indexing_times.append(collection.indexing_time)
 
@@ -71,6 +72,7 @@ class CollectionsManager:
         """
         Display statistics for all collections.
         """
+        print('Plotting statistics...')
         plots_manager = PlotsManager(self)
         plots_manager.plot_document_length_evolution()
         plots_manager.plot_term_length_evolution()

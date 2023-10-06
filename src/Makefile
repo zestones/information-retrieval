@@ -10,13 +10,20 @@ export PYTHONPATH := $(PYTHONPATH):$(PWD)
 help:
 	@echo "Usage:"
 	@echo "  make help - Display this help message"
+	@echo "  make install - Install requirements"
 	@echo "  make practice1 - Run practice1.py script"
 	@echo "  make practice2 - Run practice2.py script"
+	@echo "  make practice3 - Run practice3.py script"
 
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt && \
 	$(PYTHON) -c "import nltk; nltk.download('wordnet'); nltk.download('punkt')" && \ 
+
+clean:
+	rm -rf $(MAIN_DIR)/__pycache__ && \
+	rm -rf manager/__pycache__ && \
+	rm -rf models/*.pyc && \
 
 # run practice1 script
 practice1:
@@ -25,3 +32,7 @@ practice1:
 # run practice2 script
 practice2:
 	$(PYTHON) $(MAIN_DIR)/practice2.py $(ARGS)
+
+# run practice3 script
+practice3:
+	$(PYTHON) $(MAIN_DIR)/practice3.py $(ARGS)

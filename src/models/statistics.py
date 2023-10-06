@@ -1,9 +1,11 @@
 import statistics
-import csv
+import json
+
+import time
 
 
 class Statistics:
-    def __init__(self, collection):
+    def __init__(self, collection, export_statistics: bool = False, plot_statistics: bool = False) -> None:
         self.collection = collection
 
         self.avg_document_lengths = []
@@ -19,11 +21,19 @@ class Statistics:
 
         # Resources folder to save the stats
         self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
-        self.calculate_statistics()
+
+        if (plot_statistics or export_statistics):
+            start_time = time.time()
+            self.calculate_statistics()
+            end_time = time.time()
+            print(f'Calculated statistics in {end_time - start_time} seconds')
+        if (export_statistics):
+            self.export_stats(f'stats-{self.collection.label}.json')
 
     def calculate_statistics(self):
         """
         Calculates statistics for the collection.
+        TODO : refactor this method to use the inverted index instead of the parsed documents
         """
         self.collection.calculate_collection_frequencies()
 
@@ -47,19 +57,15 @@ class Statistics:
 
     def export_stats(self, filename):
         """
-        Exports all the statistics to a CSV file.
+        Exports all the statistics to a JSON file.
         """
-        with open(filename, mode='w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(['Statistic', 'Value'])
-            writer.writerow(['Number of documents', len(self.collection.parsed_documents)])
-            writer.writerow(['Average document length', statistics.mean(self.avg_document_lengths)])
-            writer.writerow(['Average term length in collection',
-                            self.avg_term_lengths_in_collection])
-            writer.writerow(['Number of unique terms in collection',
-                            self.collection_vocabulary_sizes])
-            writer.writerow(['Total number of terms in collection',
-                            self.collection_frequency_of_terms])
-            writer.writerow(['Document vocabulary sizes'])
-            for i, size in enumerate(self.documents_vocabulary_sizes):
-                writer.writerow([f'Document {i+1}', size])
+        stats = {
+            'indexing_time': self.collection.indexing_time,
+            'avg_collection_lengths': self.avg_collection_lengths,
+            'avg_term_lengths_in_collection': self.avg_term_lengths_in_collection,
+            'collection_vocabulary_sizes': self.collection_vocabulary_sizes,
+            'collection_frequency_of_terms': self.collection_frequency_of_terms,
+        }
+
+        with open(self.RESOURCES_FOLDER + filename, 'w') as outfile:
+            json.dump(stats, outfile, indent=4)
