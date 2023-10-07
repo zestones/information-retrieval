@@ -20,13 +20,15 @@ def print_usage():
           + Style.RESET_ALL + "Export the inverted index and term frenquencies to a JSON file")
     print(Fore.CYAN + "-i, --import".ljust(40)
           + Style.RESET_ALL + "Import the inverted index and term frenquencies from a JSON file")
+    print(Fore.CYAN + "-s, --statistics".ljust(40)
+          + Style.RESET_ALL + "Export statistics to a JSON file")
     sys.exit(2)
 
 
 def main(argv):
     try:
         opts, _ = getopt.getopt(
-            argv, "hdptei", ["help", "display", "plot", "indexing-time", "export", "import"])
+            argv, "hdpteis", ["help", "display", "plot", "indexing-time", "export", "import", "statistics"])
     except getopt.GetoptError:
         print_usage()
 
@@ -35,9 +37,10 @@ def main(argv):
     plot_indexing_time = False
     export_collection = False
     import_collection = False
+    export_statistics = False
 
     for opt, _ in opts:
-        if opt in ("-h", "--help"):
+        if opt in ("-h", "--help") or len(opts) == 0:
             print_usage()
         elif opt in ("-d", "--display"):
             display_collections = True
@@ -49,9 +52,11 @@ def main(argv):
             export_collection = True
         elif opt in ("-i", "--import"):
             import_collection = True
+        elif opt in ("-s", "--statistics"):
+            export_statistics = True
 
-    collections_manager = CollectionsManager('../lib/data/practice_02/', statistics=plot_statistics,
-                                             import_collection=import_collection, export_collection=export_collection)
+    collections_manager = CollectionsManager('../lib/data/practice_02/', plot_statistics=plot_statistics,
+                                             import_collection=import_collection, export_collection=export_collection, export_statistics=export_statistics)
 
     if display_collections:
         collections_manager.display_collections_indexes()
