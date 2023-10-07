@@ -26,7 +26,7 @@ class CollectionsManager:
         self.export_statistics = export_statistics
 
         # Resources folder to save the plots
-        self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
+        self.RESOURCES_FOLDER = '../docs/resources/'
 
         # Index all collections in the folder
         self.calculate_collections_indexes()

@@ -23,7 +23,7 @@ import io
 
 class Collection:
     def __init__(self, filename: str, plot_statistics: bool = True, import_collection: bool = False, export_collection: bool = False, export_statistics: bool = False):
-        self.text_processor = TextProcessor()
+        self.text_processor = CustomTextProcessor()
 
         self.filename = filename
         self.label = filename.split('/')[-1].split('.')[0]
@@ -59,19 +59,22 @@ class Collection:
         """
         Parses the document and save the result in a list.
         """
+        parsed_documents = []
         if (self.filename.endswith('.gz')):
             with gzip.open(self.filename, 'rt', encoding='utf-8') as f:
-                self.parsed_documents = self._parse_document_lines(f.readlines())
+                parsed_documents = self._parse_document_lines(f.readlines())
         elif self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
-                self.parsed_documents = []
+                parsed_documents = []
                 for file_name in zip_file.namelist():
                     with zip_file.open(file_name) as binary_file:
                         with io.TextIOWrapper(binary_file, encoding='utf-8') as f:
-                            self.parsed_documents.extend(self._parse_document_lines(f.readlines()))
+                            parsed_documents.extend(self._parse_document_lines(f.readlines()))
         else:
             with open(self.filename, 'r', encoding='utf-8') as f:
-                self.parsed_documents = self._parse_document_lines(f.readlines())
+                parsed_documents = self._parse_document_lines(f.readlines())
+
+        return parsed_documents
 
     def _parse_document_lines(self, lines: str) -> list:
         """
@@ -115,22 +118,21 @@ class Collection:
         """
         Constructs the inverted index and computes statistics.
         """
-        processed_documents = []
         term_frequencies = {}
         index = {}
 
-        self.parse_document()
+        parsed_documents = self.parse_document()
 
         # pre processing the content of the document
-        for doc in self.parsed_documents:
+        for doc in parsed_documents:
             docno = list(doc.keys())[0]
             content = list(doc.values())[0]
 
             tokens = self.text_processor.pre_processing(content)
-            processed_documents.append({docno: tokens})
+            self.parsed_documents.append({docno: tokens})
 
         start_time = time.time()
-        for doc in processed_documents:
+        for doc in self.parsed_documents:
             docno = list(doc.keys())[0]
             tokens = list(doc.values())[0]
 

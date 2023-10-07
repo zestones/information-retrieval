@@ -20,7 +20,7 @@ class Statistics:
         self.collection_frequency_of_terms = []  # Number of times a term appears in the collection
 
         # Resources folder to save the stats
-        self.RESOURCES_FOLDER = '../docs/practice_02/resources/'
+        self.RESOURCES_FOLDER = '../docs/resources/'
 
         if (plot_statistics or export_statistics):
             start_time = time.time()
@@ -33,13 +33,11 @@ class Statistics:
     def calculate_statistics(self):
         """
         Calculates statistics for the collection.
-        TODO : refactor this method to use the inverted index instead of the parsed documents
         """
         self.collection.calculate_collection_frequencies()
 
         for doc in self.collection.parsed_documents:
-            content = list(doc.values())[0]
-            tokens = self.collection.text_processor.pre_processing(content)
+            tokens = list(doc.values())[0]
 
             term_length = sum(len(token) for token in tokens)
             self.avg_term_lengths_in_docs.append(term_length / len(tokens))
