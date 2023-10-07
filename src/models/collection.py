@@ -7,6 +7,7 @@ from manager.text_processor import CustomTextProcessor
 from models.statistics import Statistics
 import time
 import json
+import math
 
 from colorama import Fore, Style
 import zipfile
@@ -22,7 +23,13 @@ import io
 
 
 class Collection:
-    def __init__(self, filename: str, plot_statistics: bool = True, import_collection: bool = False, export_collection: bool = False, export_statistics: bool = False):
+    def __init__(self, filename: str,
+                 plot_statistics: bool = True,
+                 import_collection: bool = False,
+                 export_collection: bool = False,
+                 export_statistics: bool = False,
+                 ltn_weighting: bool = False
+                 ):
         self.text_processor = CustomTextProcessor()
 
         self.filename = filename
@@ -38,6 +45,7 @@ class Collection:
         # A dictionary with the term as key and a list of document numbers as value
         # ex: {'term': ['doc1', 'doc2']}
         self.inverted_index = {}
+        self.weighted_index = {}
 
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
@@ -52,6 +60,11 @@ class Collection:
                 self.export_inverted_index(f'../res/{self.label}.json')
 
         self.collection_size = len(self.parsed_documents)
+
+        if (ltn_weighting):
+            print("Constructing weighted inverted index...")
+            self.construct_weighted_inverted_index()
+
         self.collection_statistics = Statistics(
             self, export_statistics=export_statistics, plot_statistics=plot_statistics)
 
@@ -106,6 +119,14 @@ class Collection:
         """
         return self.term_frequencies.get(term, {}).get(docno, 0)
 
+    def tf_idf_weight(self, docno: str, term: str) -> float:
+        """
+        Returns the tf-idf weight of a term in a document.
+        """
+        tf = self.term_frequency(docno, term)
+        df = self.document_frequency(term)
+        return (1 + math.log(tf)) * math.log(self.collection_size / df)
+
     def calculate_collection_frequencies(self):
         """
         Calculate collection frequency of terms.
@@ -114,6 +135,20 @@ class Collection:
             frequency = sum(self.term_frequency(docno, term) for docno in postings)
             self.collection_frequencies[term] = frequency
 
+    def construct_weighted_inverted_index(self) -> dict:
+        """
+        Constructs the weighted inverted index.
+        """
+        for term, postings in self.inverted_index.items():
+            self.weighted_index[term] = {}
+            for docno in postings:
+                self.weighted_index[term][docno] = self.tf_idf_weight(docno, term)
+
+        # save self.weighted_index to json file
+        with open(f'../res/{self.label}_weighted.json', 'w') as f:
+            json.dump(self.weighted_index, f)
+        return self.weighted_index
+
     def construct_inverted_index(self) -> dict:
         """
         Constructs the inverted index and computes statistics.
@@ -121,15 +156,7 @@ class Collection:
         term_frequencies = {}
         index = {}
 
-        parsed_documents = self.parse_document()
-
-        # pre processing the content of the document
-        for doc in parsed_documents:
-            docno = list(doc.keys())[0]
-            content = list(doc.values())[0]
-
-            tokens = self.text_processor.pre_processing(content)
-            self.parsed_documents.append({docno: tokens})
+        self.pre_process_documents()
 
         start_time = time.time()
         for doc in self.parsed_documents:
@@ -149,6 +176,18 @@ class Collection:
         self.indexing_time = end_time - start_time
         self.inverted_index = index
         self.term_frequencies = term_frequencies
+
+    def pre_process_documents(self) -> None:
+        """
+        Pre-processes the documents.
+        """
+        parsed_documents = self.parse_document()
+        for doc in parsed_documents:
+            docno = list(doc.keys())[0]
+            content = list(doc.values())[0]
+
+            tokens = self.text_processor.pre_processing(content)
+            self.parsed_documents.append({docno: tokens})
 
     def export_inverted_index(self, filename: str) -> None:
         """
