@@ -28,7 +28,8 @@ class Collection:
                  import_collection: bool = False,
                  export_collection: bool = False,
                  export_statistics: bool = False,
-                 ltn_weighting: bool = False
+                 ltn_weighting: bool = False,
+                 ltc_weighting: bool = False
                  ):
         self.text_processor = CustomTextProcessor()
 
@@ -63,7 +64,10 @@ class Collection:
 
         if (ltn_weighting):
             print("Constructing weighted inverted index...")
-            self.construct_weighted_inverted_index()
+            self.construct_smart_ltn_inverted_index()
+        elif (ltc_weighting):
+            print("Constructing weighted inverted index...")
+            self.construct_smart_ltc_inverted_index()
 
         self.collection_statistics = Statistics(
             self, export_statistics=export_statistics, plot_statistics=plot_statistics)
@@ -127,6 +131,22 @@ class Collection:
         df = self.document_frequency(term)
         return (1 + math.log(tf)) * math.log(self.collection_size / df)
 
+    def length_normalization(self: dict) -> dict:
+        """
+        Returns the length normalization of a weighted index.
+        """
+        for term, postings in self.inverted_index.items():
+            for docno in postings:
+                if docno in self.weighted_index[term]:
+                    # calculate the sum of squares of the weights of all terms in the document
+                    sum_of_squares = sum([math.pow(self.weighted_index[term].get(docno, 0), 2)
+                                          for term in self.weighted_index])
+
+                    # divide the weight of each term in the document by the square root of the sum of squares
+                    self.weighted_index[term][docno] /= math.sqrt(sum_of_squares)
+
+        return self.weighted_index
+
     def calculate_collection_frequencies(self):
         """
         Calculate collection frequency of terms.
@@ -135,7 +155,14 @@ class Collection:
             frequency = sum(self.term_frequency(docno, term) for docno in postings)
             self.collection_frequencies[term] = frequency
 
-    def construct_weighted_inverted_index(self) -> dict:
+    def construct_smart_ltc_inverted_index(self) -> dict:
+        """
+        Constructs the weighted inverted index.
+        """
+        self.construct_smart_ltn_inverted_index()
+        self.length_normalization()
+
+    def construct_smart_ltn_inverted_index(self) -> dict:
         """
         Constructs the weighted inverted index.
         """

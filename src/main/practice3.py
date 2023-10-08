@@ -19,6 +19,8 @@ def main(argv):
                         action='store_true', help='Import collection')
     parser.add_argument('-s', '--statistics', action='store_true', help='Export statistics')
     parser.add_argument('--ltn', action='store_true', help='Use LTN weighting')
+    parser.add_argument('--ltc', action='store_true',
+                        help='Use LTC weighting, length normalization and cosine similarity')
 
     args = parser.parse_args(argv)
 
@@ -27,7 +29,8 @@ def main(argv):
                             import_collection=args.import_inverted_index,
                             export_collection=args.export_inverted_index,
                             export_statistics=args.statistics,
-                            ltn_weighting=args.ltn)
+                            ltn_weighting=args.ltn,
+                            ltc_weighting=args.ltc)
 
     if args.display:
         collection.display_collections_indexes()
@@ -48,6 +51,18 @@ def main(argv):
                 break
 
             res = query_manager.evaluate_query(query)
+            query_manager.print_query_results(query, res)
+
+    elif args.ltc:
+        query_manager = QueryManager(collection)
+        while True:
+            query = input("Enter a query" + Fore.YELLOW
+                          + " (q to quit):\n> " + Style.RESET_ALL).strip(" ")
+
+            if query.lower() == 'q' or query.lower() == 'quit':
+                break
+
+            res = query_manager.evaluate_ltc_query(query)
             query_manager.print_query_results(query, res)
 
 
