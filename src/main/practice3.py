@@ -38,29 +38,19 @@ def main(argv):
     if args.display:
         collection.display_collections_indexes()
 
-    if args.ltn or args.bm25:
-        query_manager = QueryManager(collection)
-        while True:
-            query = input("Enter a query" + Fore.YELLOW
-                          + " (q to quit):\n> " + Style.RESET_ALL).strip(" ")
+    query_manager = QueryManager(collection)
 
-            if query.lower() == 'q' or query.lower() == 'quit':
-                break
+    while True:
+        query = input("Enter a query (q to quit):\n> ").strip(" ")
 
+        if query.lower() == 'q' or query.lower() == 'quit':
+            break
+
+        if args.ltn or args.bm25:
             res = query_manager.evaluate_query(query)
-            query_manager.print_query_results(query, res)
-
-    elif args.ltc:
-        query_manager = QueryManager(collection)
-        while True:
-            query = input("Enter a query" + Fore.YELLOW
-                          + " (q to quit):\n> " + Style.RESET_ALL).strip(" ")
-
-            if query.lower() == 'q' or query.lower() == 'quit':
-                break
-
+        elif args.ltc:
             res = query_manager.evaluate_ltc_query(query)
-            query_manager.print_query_results(query, res)
+        query_manager.print_query_results(query, res)
 
 
 if __name__ == "__main__":
