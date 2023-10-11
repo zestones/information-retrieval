@@ -35,12 +35,6 @@ def main(argv):
     if args.display:
         collection.display_collections_indexes()
 
-    if args.plot:
-        collection.plot_all_statistics()
-
-    if args.indexing_time:
-        collection.plot_indexing_time_by_collection_size()
-
     if args.ltn:
         query_manager = QueryManager(collection)
         while True:

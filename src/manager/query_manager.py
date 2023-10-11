@@ -49,11 +49,6 @@ class QueryManager:
         Evaluates the query using the ltc weighting scheme.
         """
         query_terms, query_weights = self.normalize_query(query)
-        print("Query terms:", query_terms)
-        print("Query weights:", query_weights)
-
-        # print a part of the weighted_index
-        print("Weighted index:", self.weighted_index)
 
         document_scores = {}
         for term in query_terms:
@@ -61,17 +56,16 @@ class QueryManager:
                 for docno, _ in self.weighted_index[term].items():
                     wln = self.weighted_index[term][docno]
 
-                    print("wln(i, d):", wln)
-                    print("qln(i):", query_weights[term])
                     # Calcul du produit wln(i, d) * qln(i)
                     product = wln * query_weights[term]
 
                     # Ajout du produit au score du document
+                    if (docno not in document_scores):
+                        document_scores[docno] = 0
+
                     document_scores[docno] += product
 
-        # Triez les documents en fonction de leur score de similarité cosinus
         sorted_documents = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
-
         return sorted_documents
 
     def print_query_results(self, query, results):
