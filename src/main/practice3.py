@@ -21,21 +21,24 @@ def main(argv):
     parser.add_argument('--ltn', action='store_true', help='Use LTN weighting')
     parser.add_argument('--ltc', action='store_true',
                         help='Use LTC weighting, length normalization and cosine similarity')
+    parser.add_argument('--bm25', action='store_true', help='Use BM25 weighting scheme')
 
     args = parser.parse_args(argv)
 
+    # ../lib/data/practice_03/Practice_03_data.zip
     collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
                             plot_statistics=args.plot,
                             import_collection=args.import_inverted_index,
                             export_collection=args.export_inverted_index,
                             export_statistics=args.statistics,
                             ltn_weighting=args.ltn,
-                            ltc_weighting=args.ltc)
+                            ltc_weighting=args.ltc,
+                            bm25_weighting=args.bm25)
 
     if args.display:
         collection.display_collections_indexes()
 
-    if args.ltn:
+    if args.ltn or args.bm25:
         query_manager = QueryManager(collection)
         while True:
             query = input("Enter a query" + Fore.YELLOW

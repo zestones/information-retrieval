@@ -1,15 +1,13 @@
 import statistics
 import json
 
-import time
-
 
 class Statistics:
-    def __init__(self, collection, export_statistics: bool = False, plot_statistics: bool = False) -> None:
+    def __init__(self, collection, export_statistics: bool = False) -> None:
         self.collection = collection
 
-        self.avg_document_lengths = []
-        self.avg_collection_lengths = []
+        self.documents_lengths = {}  # Length of each document in form of {docno: length}
+        self.avg_collection_lengths = []  # Average document length in the collection
 
         self.avg_term_lengths_in_docs = []  # Average term length in each document
         self.avg_term_lengths_in_collection = []  # Average term length in the collection
@@ -22,8 +20,7 @@ class Statistics:
         # Resources folder to save the stats
         self.RESOURCES_FOLDER = '../docs/resources/'
 
-        if (plot_statistics or export_statistics):
-            self.calculate_statistics()
+        self.calculate_statistics()
         if (export_statistics):
             self.export_stats(f'stats-{self.collection.label}.json')
 
@@ -40,11 +37,11 @@ class Statistics:
             self.avg_term_lengths_in_docs.append(term_length / len(tokens))
 
             self.documents_vocabulary_sizes.append(len(set(tokens)))
-            self.avg_document_lengths.append(len(tokens))
+            self.documents_lengths[list(doc.keys())[0]] = len(tokens)
 
         self.collection_vocabulary_sizes = len(set(self.collection.inverted_index.IDX.keys()))
 
-        self.avg_collection_lengths = statistics.mean(self.avg_document_lengths)
+        self.avg_collection_lengths = statistics.mean(self.documents_lengths.values())
         self.avg_term_lengths_in_collection = statistics.mean(self.avg_term_lengths_in_docs)
 
         self.collection_frequency_of_terms = sum(

@@ -34,7 +34,6 @@ class DocumentParser:
                 parsed_documents = self._parse_document_lines(f.readlines())
         elif self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
-                parsed_documents = []
                 for file_name in zip_file.namelist():
                     with zip_file.open(file_name) as binary_file:
                         with io.TextIOWrapper(binary_file, encoding='utf-8') as f:

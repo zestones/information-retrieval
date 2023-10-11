@@ -52,7 +52,8 @@ class PlotsManager:
         """
         ylabel = 'Average Document Length'
         filename = 'document_length_evolution.png'
-        ydata = [collection.collection_statistics.avg_collection_lengths for collection in self.collections_manager.collections]
+        ydata = [
+            collection.statistics.avg_collection_lengths for collection in self.collections_manager.collections]
         self.plot('Document Length Evolution', self.__xlabel,
                   ylabel, self.collection_sizes, ydata, filename)
 
@@ -62,7 +63,8 @@ class PlotsManager:
         """
         ylabel = 'Average Term Length'
         filename = 'term_length_evolution.png'
-        ydata = [collection.collection_statistics.avg_term_lengths_in_collection for collection in self.collections_manager.collections]
+        ydata = [
+            collection.statistics.avg_term_lengths_in_collection for collection in self.collections_manager.collections]
         self.plot('Term Length Evolution', self.__xlabel,
                   ylabel, self.collection_sizes, ydata, filename)
 
@@ -72,7 +74,8 @@ class PlotsManager:
         """
         ylabel = 'Vocabulary Size'
         filename = 'vocabulary_size_evolution.png'
-        ydata = [collection.collection_statistics.collection_vocabulary_sizes for collection in self.collections_manager.collections]
+        ydata = [
+            collection.statistics.collection_vocabulary_sizes for collection in self.collections_manager.collections]
         self.plot('Vocabulary Size Evolution', self.__xlabel,
                   ylabel, self.collection_sizes, ydata, filename)
 
@@ -81,7 +84,7 @@ class PlotsManager:
         Plot the evolution of collection frequency of terms as the collection size grows.
         """
         collection_frequencies = [
-            collection.collection_statistics.collection_frequency_of_terms for collection in self.collections_manager.collections]
+            collection.statistics.collection_frequency_of_terms for collection in self.collections_manager.collections]
 
         plt.figure(figsize=(50, 20))
         for i in range(len(self.collections_manager.collections)):

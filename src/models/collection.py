@@ -6,6 +6,7 @@ from manager.text_processor import CustomTextProcessor
 
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
+from weighting_strategies.bm25_weighting import BM25Weighting
 
 from models.statistics import Statistics
 from models.document_parser import DocumentParser
@@ -28,7 +29,8 @@ class Collection:
                  export_collection: bool = False,
                  export_statistics: bool = False,
                  ltn_weighting: bool = False,
-                 ltc_weighting: bool = False
+                 ltc_weighting: bool = False,
+                 bm25_weighting: bool = False
                  ):
         self.text_processor = CustomTextProcessor()
         self.filename = filename
@@ -52,6 +54,7 @@ class Collection:
                 self.inverted_index.export_inverted_index(f'../res/{self.label}.json')
 
         self.collection_size = len(self.document_parser.parsed_documents)
+        self.statistics = Statistics(self, export_statistics=export_statistics)
 
         if (ltn_weighting):
             print("LTN WEIGHTING...")
@@ -59,9 +62,9 @@ class Collection:
         elif (ltc_weighting):
             print("LTC WEIGHTING...")
             self.weighted_index = LTCWeighting().calculate_weight(self)
-
-        self.collection_statistics = Statistics(
-            self, export_statistics=export_statistics, plot_statistics=plot_statistics)
+        elif (bm25_weighting):
+            print("BM25 WEIGHTING...")
+            self.weighted_index = BM25Weighting().calculate_weight(self)
 
     def document_frequency(self, term: str) -> int:
         """
@@ -74,6 +77,12 @@ class Collection:
         Returns the term frequency of a term in a document.
         """
         return self.inverted_index.TF.get(term, {}).get(docno, 0)
+
+    def document_length(self, docno: str) -> int:
+        """
+        Returns the length of a document.
+        """
+        return self.statistics.documents_lengths.get(docno, 0)
 
     def calculate_collection_frequencies(self):
         """
