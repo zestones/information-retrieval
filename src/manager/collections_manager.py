@@ -45,7 +45,7 @@ class CollectionsManager:
                 collection = Collection(file_path, plot_statistics=self.plot_statistics,
                                         import_collection=self.import_collection, export_collection=self.export_collection, export_statistics=self.export_statistics)
                 self.collections.append(collection)
-                self.indexing_times.append(collection.indexing_time)
+                self.indexing_times.append(collection.inverted_index.indexing_time)
 
     def calculate_collections_tf(self):
         """

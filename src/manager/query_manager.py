@@ -1,5 +1,6 @@
 from colorama import Fore, Style
 from tabulate import tabulate
+import math
 
 
 class QueryManager:
@@ -30,6 +31,43 @@ class QueryManager:
 
         return sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
 
+    def normalize_query(self, query):
+        """
+        Normalizes the query.
+        """
+        query_terms = self.process_query(query)
+        query_length = math.sqrt(sum([math.pow(1, 2) for _ in query_terms]))
+        query_weights = {}
+
+        for term in query_terms:
+            query_weights[term] = 1 / query_length
+
+        return query_terms, query_weights
+
+    def evaluate_ltc_query(self, query):
+        """
+        Evaluates the query using the ltc weighting scheme.
+        """
+        query_terms, query_weights = self.normalize_query(query)
+
+        document_scores = {}
+        for term in query_terms:
+            if term in self.weighted_index:
+                for docno, _ in self.weighted_index[term].items():
+                    wln = self.weighted_index[term][docno]
+
+                    # Calcul du produit wln(i, d) * qln(i)
+                    product = wln * query_weights[term]
+
+                    # Ajout du produit au score du document
+                    if (docno not in document_scores):
+                        document_scores[docno] = 0
+
+                    document_scores[docno] += product
+
+        sorted_documents = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
+        return sorted_documents
+
     def print_query_results(self, query, results):
         """
         Prints the query results inside a table.
@@ -37,7 +75,7 @@ class QueryManager:
         headers = ["Docno", "Score"]
         table = []
 
-        for docno, score in results[:10]:
+        for docno, score in results[: 10]:
             table.append([docno, score])
 
         print(Fore.GREEN + f'Query: {query}' + Style.RESET_ALL)

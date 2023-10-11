@@ -19,36 +19,38 @@ def main(argv):
                         action='store_true', help='Import collection')
     parser.add_argument('-s', '--statistics', action='store_true', help='Export statistics')
     parser.add_argument('--ltn', action='store_true', help='Use LTN weighting')
+    parser.add_argument('--ltc', action='store_true',
+                        help='Use LTC weighting, length normalization and cosine similarity')
+    parser.add_argument('--bm25', action='store_true', help='Use BM25 weighting scheme')
 
     args = parser.parse_args(argv)
 
+    # ../lib/data/practice_03/Practice_03_data.zip
     collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
                             plot_statistics=args.plot,
                             import_collection=args.import_inverted_index,
                             export_collection=args.export_inverted_index,
                             export_statistics=args.statistics,
-                            ltn_weighting=args.ltn)
+                            ltn_weighting=args.ltn,
+                            ltc_weighting=args.ltc,
+                            bm25_weighting=args.bm25)
 
     if args.display:
         collection.display_collections_indexes()
 
-    if args.plot:
-        collection.plot_all_statistics()
+    query_manager = QueryManager(collection)
 
-    if args.indexing_time:
-        collection.plot_indexing_time_by_collection_size()
+    while True:
+        query = input("Enter a query (q to quit):\n> ").strip(" ")
 
-    if args.ltn:
-        query_manager = QueryManager(collection)
-        while True:
-            query = input("Enter a query" + Fore.YELLOW
-                          + " (q to quit):\n> " + Style.RESET_ALL).strip(" ")
+        if query.lower() == 'q' or query.lower() == 'quit':
+            break
 
-            if query.lower() == 'q' or query.lower() == 'quit':
-                break
-
+        if args.ltn or args.bm25:
             res = query_manager.evaluate_query(query)
-            query_manager.print_query_results(query, res)
+        elif args.ltc:
+            res = query_manager.evaluate_ltc_query(query)
+        query_manager.print_query_results(query, res)
 
 
 if __name__ == "__main__":
