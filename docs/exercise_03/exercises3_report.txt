@@ -1,0 +1,23 @@
+---------------------------------------------
+Exercise 1: Jaccard & Log frequency weighting
+---------------------------------------------
+
+q1 = { information, on, cars }
+d1 = { all, you’ve, ever, wanted, to, know, about, cars }
+
+q1 ∩ d1 = { cars }
+q1 ∪ d1 = { information, on, cars, all, you’ve, ever, wanted, to, know, about }
+Jaccard(q1, d1) = 1/10
+
+===
+
+q2 ∩ d2 = { information, on }
+q2 ∪ d2 = { information, on, cars, trucks, planes, trains }
+Jaccard(q2, d2) = 2/6
+
+===
+
+q3 ∩ d3 = { red, cars }
+q3 ∪ d3 = { red, cars, and, trucks, cops, stop, more, often }
+
+Jaccard(q3, d3) = 2/8

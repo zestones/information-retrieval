@@ -7,11 +7,14 @@ from manager.text_processor import CustomTextProcessor
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
 from weighting_strategies.bm25_weighting import BM25Weighting
+from weighting_strategies.weighting_strategy import WeightingStrategy
 
 from models.statistics import Statistics
 from models.document_parser import DocumentParser
 from models.inverted_index import InvertedIndex
 
+
+import time
 from colorama import Fore, Style
 
 
@@ -30,7 +33,8 @@ class Collection:
                  export_statistics: bool = False,
                  ltn_weighting: bool = False,
                  ltc_weighting: bool = False,
-                 bm25_weighting: bool = False
+                 bm25_weighting: bool = False,
+                 export_weighted_idx: bool = False
                  ):
         self.text_processor = CustomTextProcessor()
         self.filename = filename
@@ -45,32 +49,41 @@ class Collection:
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
         if (import_collection):
-            print(f'Importing {self.label}...')
+            print(Fore.GREEN + f'Importing collection : {self.label}' + Style.RESET_ALL)
             self.inverted_index.import_inverted_index(f'../res/{self.label}.json')
         else:
-            print(f'Indexing {self.label}...')
+            print(Fore.GREEN + f'Indexing collection : {self.label}' + Style.RESET_ALL)
             self.inverted_index.construct_inverted_index()
             if export_collection:
                 self.inverted_index.export_inverted_index(f'../res/{self.label}.json')
+
+        print(Fore.YELLOW + "> Indexing time:",
+              self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
+        print()
 
         self.collection_size = len(self.document_parser.parsed_documents)
         self.statistics = Statistics(self, export_statistics=export_statistics)
 
         if (ltn_weighting):
-            print("LTN WEIGHTING...")
+            self.print_title("LTN weighting")
             self.weighted_index = LTNWeighting().calculate_weight(self)
         elif (ltc_weighting):
-            print("LTC WEIGHTING...")
+            self.print_title("LTC weighting")
             self.weighted_index = LTCWeighting().calculate_weight(self)
         elif (bm25_weighting):
-            print("BM25 WEIGHTING...")
+            self.print_title("BM25 weighting")
             self.weighted_index = BM25Weighting().calculate_weight(self)
+
+        if (export_weighted_idx):
+            WeightingStrategy().export_weighted_index(
+                self.weighted_index, f'../res/{self.label}_weighted.json')
 
     def document_frequency(self, term: str) -> int:
         """
         Returns the document frequency of a term.
+        The document frequency is the sum of the frequencies of the term in all documents.
         """
-        return len(self.inverted_index.IDX.get(term, []))
+        return self.inverted_index.DF.get(term, {})
 
     def term_frequency(self, docno: str, term: str) -> int:
         """

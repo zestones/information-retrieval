@@ -34,7 +34,7 @@ class Statistics:
             tokens = list(doc.values())[0]
 
             term_length = sum(len(token) for token in tokens)
-            self.avg_term_lengths_in_docs.append(term_length / len(tokens))
+            self.avg_term_lengths_in_docs.append(term_length / len(tokens) if len(tokens) > 0 else 0)
 
             self.documents_vocabulary_sizes.append(len(set(tokens)))
             self.documents_lengths[list(doc.keys())[0]] = len(tokens)

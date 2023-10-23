@@ -12,15 +12,19 @@ class LTCWeighting(WeightingStrategy):
         """
         Constructs the weighted index using the LTC weighting scheme.
         """
+        start_time = time.time()
+        
         weighted_index = LTNWeighting().calculate_weight(collection)
-        return self.length_normalization(collection, weighted_index)
+        normalized_index = self.length_normalization(collection, weighted_index)
+        
+        end_time = time.time()
+        self.print_computation_time(start_time, end_time)
+        return normalized_index
 
     def length_normalization(self, collection, weighted_index):
         """
         Normalizes the weights in the weighted index using the length normalization formula.
         """
-        start_time = time.time()
-
         sum_of_squares_dict = self._compute_sum_of_squares(collection, weighted_index)
 
         # Normalize the weights
@@ -35,9 +39,6 @@ class LTCWeighting(WeightingStrategy):
                 # Apply the length normalization to the weight for term 'term' in document 'docno'
                 # w_ln(i, d): Weight of term 'term' in document 'docno' after length normalization
                 weighted_index[term][docno] *= normalization_factor
-
-        end_time = time.time()
-        self.print_normalization_time(start_time, end_time)
         return weighted_index
 
     def _compute_sum_of_squares(self, collection, weighted_index):
@@ -55,7 +56,3 @@ class LTCWeighting(WeightingStrategy):
                 sum_of_squares_dict[docno] += math.pow(weighted_index[term].get(docno, 0), 2)
 
         return sum_of_squares_dict
-
-    def print_normalization_time(self, start_time, end_time):
-        elapsed_time = end_time - start_time
-        print(f"Length Normalization took {elapsed_time} seconds.")

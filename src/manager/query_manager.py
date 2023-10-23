@@ -15,12 +15,12 @@ class QueryManager:
         """
         return self.text_processor.pre_processing(query)
 
-    def evaluate_query(self, query):
-        """
-        Evaluates the query using the weighted index.
-        """
+    def RSV(self, query):
         document_scores = {}
         query_terms = self.process_query(query)
+
+        # lets remove duplicates
+        query_terms = list(set(query_terms))
 
         for term in query_terms:
             if term in self.weighted_index:
@@ -44,7 +44,7 @@ class QueryManager:
 
         return query_terms, query_weights
 
-    def evaluate_ltc_query(self, query):
+    def cosine_similarity(self, query):
         """
         Evaluates the query using the ltc weighting scheme.
         """

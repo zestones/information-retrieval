@@ -22,6 +22,10 @@ def main(argv):
     parser.add_argument('--ltc', action='store_true',
                         help='Use LTC weighting, length normalization and cosine similarity')
     parser.add_argument('--bm25', action='store_true', help='Use BM25 weighting scheme')
+    parser.add_argument('--cos-sim', action='store_true',
+                        help='Use cosine similarity for evaluation')
+    parser.add_argument('--export-weighted-idx', action='store_true',
+                        help='Export weighted index to JSON file')
 
     args = parser.parse_args(argv)
 
@@ -33,24 +37,26 @@ def main(argv):
                             export_statistics=args.statistics,
                             ltn_weighting=args.ltn,
                             ltc_weighting=args.ltc,
-                            bm25_weighting=args.bm25)
+                            bm25_weighting=args.bm25,
+                            export_weighted_idx=args.export_weighted_idx
+                            )
 
     if args.display:
         collection.display_collections_indexes()
 
-    query_manager = QueryManager(collection)
+    if args.ltn or args.bm25 or args.ltc:
+        query_manager = QueryManager(collection)
+        while True:
+            query = input("Enter a query (q to quit):\n> ").strip(" ")
 
-    while True:
-        query = input("Enter a query (q to quit):\n> ").strip(" ")
+            if query.lower() == 'q' or query.lower() == 'quit':
+                break
 
-        if query.lower() == 'q' or query.lower() == 'quit':
-            break
-
-        if args.ltn or args.bm25:
-            res = query_manager.evaluate_query(query)
-        elif args.ltc:
-            res = query_manager.evaluate_ltc_query(query)
-        query_manager.print_query_results(query, res)
+            if args.cos_sim:
+                res = query_manager.cosine_similarity(query)
+            else:
+                res = query_manager.RSV(query)
+            query_manager.print_query_results(query, res)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,14 @@ class InvertedIndex:
         # ex: {'term': ['doc1', 'doc2']}
         self.IDX = {}
 
+        # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
+        # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.TF = {}
+
+        # A dictionary with the term as key and the document frequency as value
+        # ex: {'term': 2}
+        self.DF = {}
+
         self.indexing_time = 0
 
     def construct_inverted_index(self) -> dict:
@@ -18,6 +25,7 @@ class InvertedIndex:
         Constructs the inverted index and computes statistics.
         """
         term_frequencies = {}
+        document_frequencies = {}
         index = {}
 
         self.document_parser.parse_documents()
@@ -31,15 +39,19 @@ class InvertedIndex:
                 if token not in index:
                     index[token] = {docno}
                     term_frequencies[token] = {docno: 1}
+                    document_frequencies[token] = 1
                 else:
                     index[token].add(docno)
                     term_frequencies.setdefault(token, {}).setdefault(docno, 0)
                     term_frequencies[token][docno] += 1
+                    document_frequencies[token] += 1
+
         end_time = time.time()
 
         self.indexing_time = end_time - start_time
         self.IDX = index
         self.TF = term_frequencies
+        self.DF = document_frequencies
 
     def export_inverted_index(self, filename: str) -> None:
         """
@@ -48,6 +60,7 @@ class InvertedIndex:
         inverted_index_data = {
             "inverted_index": self.IDX,
             "term_frequencies": self.TF,
+            "document_frequencies": self.DF,
             "parsed_documents": self.document_parser.parsed_documents,
         }
 
@@ -72,7 +85,9 @@ class InvertedIndex:
             self.IDX = inverted_index_data["inverted_index"]
             end_time = time.time()
 
+            self.DF = inverted_index_data["document_frequencies"]
             self.TF = inverted_index_data["term_frequencies"]
+
             self.document_parser.parsed_documents = inverted_index_data["parsed_documents"]
             self.indexing_time = end_time - start_time
         except FileNotFoundError:

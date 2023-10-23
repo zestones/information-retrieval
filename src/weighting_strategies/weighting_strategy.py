@@ -1,3 +1,4 @@
+from colorama import Fore, Style
 import json
 import math
 
@@ -12,7 +13,7 @@ class WeightingStrategy:
         """
         # Calculate the IDF
         # idf(i): IDF of term 'term'
-        return math.log(collection.collection_size / collection.document_frequency(term))
+        return math.log10(collection.collection_size / collection.document_frequency(term))
 
     def TF(self, collection, docno, term):
         """
@@ -28,7 +29,7 @@ class WeightingStrategy:
         """
         # Calculate the tf-idf weight
         # w(i, d): Weight of term 'term' in document 'docno'
-        return (1 + math.log(self.TF(collection, docno, term))) * self.IDF(collection, term)
+        return (1 + math.log10(self.TF(collection, docno, term))) * self.IDF(collection, term)
 
     def export_weighted_index(self, weighted_index, filename):
         """
@@ -42,3 +43,9 @@ class WeightingStrategy:
 
         with open(filename, "w") as file:
             json.dump(weighted_index_data, file)
+
+    def print_computation_time(self, start_time, end_time):
+        """
+        Prints the computation time.
+        """
+        print(Fore.YELLOW + "> Weighting time: " + str(end_time - start_time) + " seconds" + Style.RESET_ALL, end="\n\n")
