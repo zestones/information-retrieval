@@ -1,0 +1,112 @@
+Suite à notre première version nous avons effectué des tests pour vérifier les resultats obtenus. 
+Nous avons donc créé une petite collection de 10 documents, chaque documents ayant des mots du vocabulaire suivant : a, b, c, d, e.
+
+Nous avons ensuite modifié le tableau excel pour calculer les différents poids des documents pour chaque requête.
+Pour pouvoir faciliter la detection d'erreur nous avons ajouté une option à notre programme pour permettre d'exporter le "weighted_index" dans un fichier json.
+
+En comparant nos résultats avec ceux du tableau excel nous avons pu détecter 3 erreurs dans notre programme :
+- La première erreur (mineur) était que nous utilision math.log au lieu de math.log10 pour le calcul du TF-IDF.
+- La deuxième erreur était que le calcul du DF était faux, nous comptions le nombre de documents contenant le terme au lieu de compter la fréquence du terme dans la collection.
+- La troisième erreur était lors de l'évaluation de la requête (RSV), les doublons de la requête était compté et donc faussait le résultat. 
+    Par exemple pour la requête "a a b" le RSV de "a" était compté deux fois. 
+
+Suite à la correction de ces erreurs nous avons pu vérifier que les résultats de notre programme étaient corrects.
+Ci-dessous les résultats de notre programme corriger pour les différentes fonctions de poids :
+
+Quelque remarques :
+- Notre indexing time est légèrement plus long que lors de notre rendu précédent (~+3sec), ceci peut être du au fait que nous avons ajouté le calcul du DF lors de l'indexation.
+- Nous avons également ajouté la possibilité de sauvegarder l'inverted_index pour permettre de l'importer plus rapidement lors des tests.
+
+--------------------------------------------
+Exercise 5: Ranked Retrieval (ltn weighting)
+--------------------------------------------
+> Indexing time: 11.67695665359497 seconds
+> Weighting time: 4.826836347579956 seconds
+
+Query: web ranking scoring algorithm
+╒═════════╤═════════╕
+│   Docno │   Score │
+╞═════════╪═════════╡
+│   23724 │ 6.96628 │
+├─────────┼─────────┤
+│   70421 │ 6.31616 │
+├─────────┼─────────┤
+│ 1482394 │ 6.16289 │
+├─────────┼─────────┤
+│  448834 │ 6.12885 │
+├─────────┼─────────┤
+│   12431 │ 5.77345 │
+├─────────┼─────────┤
+│  462448 │ 5.52382 │
+├─────────┼─────────┤
+│  207747 │ 5.41467 │
+├─────────┼─────────┤
+│   47293 │ 5.41133 │
+├─────────┼─────────┤
+│ 1793571 │ 5.39395 │
+├─────────┼─────────┤
+│  587642 │ 5.37751 │
+╘═════════╧═════════╛
+
+--------------------------------------------
+Exercise 7: Ranked Retrieval (ltc weighting)
+--------------------------------------------
+
+Query: web ranking scoring algorithm
+╒══════════╤══════════╕
+│    Docno │    Score │
+╞══════════╪══════════╡
+│ 18096221 │ 0.283085 │
+├──────────┼──────────┤
+│  8080270 │ 0.235996 │
+├──────────┼──────────┤
+│  6422823 │ 0.233193 │
+├──────────┼──────────┤
+│  2363262 │ 0.209564 │
+├──────────┼──────────┤
+│  4839372 │ 0.208917 │
+├──────────┼──────────┤
+│ 10416781 │ 0.205664 │
+├──────────┼──────────┤
+│  1395835 │ 0.201464 │
+├──────────┼──────────┤
+│   465576 │ 0.192825 │
+├──────────┼──────────┤
+│ 16186070 │ 0.188933 │
+├──────────┼──────────┤
+│ 18543218 │ 0.18796  │
+╘══════════╧══════════╛
+
+---------------------------------------------
+Exercise 9: Ranked Retrieval (BM25 weighting)
+---------------------------------------------
+> Indexing time: 6.370396375656128 seconds
+> Weighting time: 4.871384620666504 seconds
+
+Pour le calcul de l'IDF nous avons rencontré un problème, en effet si le df est supérieur au N (nombre de documents dans la collection) alors le log est négatif.
+Pour résoudre ce problème nous avons ajouter 1 au resultat de la division : 1 + ((N - df + self.b) / (df + self.b)).
+
+Query: Query: web ranking scoring algorithm
+╒══════════╤═════════╕
+│    Docno │   Score │
+╞══════════╪═════════╡
+│  1793571 │ 5.52323 │
+├──────────┼─────────┤
+│    12431 │ 5.46478 │
+├──────────┼─────────┤
+│ 19542049 │ 5.28692 │
+├──────────┼─────────┤
+│  6422823 │ 5.0338  │
+├──────────┼─────────┤
+│  9511414 │ 4.92813 │
+├──────────┼─────────┤
+│  4880066 │ 4.88498 │
+├──────────┼─────────┤
+│  1009996 │ 4.8339  │
+├──────────┼─────────┤
+│   363695 │ 4.80367 │
+├──────────┼─────────┤
+│  1395835 │ 4.79654 │
+├──────────┼─────────┤
+│ 10219559 │ 4.68789 │
+╘══════════╧═════════╛

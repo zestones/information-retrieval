@@ -5,6 +5,8 @@ from nltk.tokenize import word_tokenize
 from spacy.lang.en import English
 from spacy.lang.en.stop_words import STOP_WORDS
 
+import re
+
 
 """
 This class is responsible for processing the text.
@@ -37,6 +39,18 @@ class TextProcessor:
         """
         return tokens
 
+    def remove_numbers(self, tokens: list) -> list:
+        """
+        Removes numbers and digits from the list of tokens.
+        """
+        return tokens
+
+    def remove_punctuation(self, tokens: list) -> list:
+        """
+        Removes punctuation from the list of tokens.
+        """
+        return tokens
+
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.
@@ -45,6 +59,8 @@ class TextProcessor:
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
         tokens = self.remove_stop_words(tokens)
+        tokens = self.remove_numbers(tokens)
+        tokens = self.remove_punctuation(tokens)
         return tokens
 
 
@@ -114,6 +130,67 @@ class CustomTextProcessor(TextProcessor):
         return [self.stemmer.stem(token) for token in tokens]
 
     def remove_stop_words(self, tokens: list) -> list:
+        """
+        Removes the stop words from the tokens.
+        """
+        return [token for token in tokens if token not in self.stop_words]
+
+    def remove_numbers(self, tokens: list) -> list:
+        """
+        Removes numbers and digits from the list of tokens.
+        """
+        return [token for token in tokens if not re.match(r'^\d+(\.\d+)?$', token)]
+
+    def remove_punctuation(self, tokens: list) -> list:
+        """
+        Removes punctuation from the list of tokens using a regex.
+        """
+        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
+
+
+class RegexTextProcessor(TextProcessor):
+    def __init__(self):
+        self.token_pattern = r'\b\w+\b'  # Default token pattern matches words
+        self.stop_words = set(stopwords.words('english'))
+        self.stemmer = PorterStemmer()
+
+    def stem(self, tokens):
+        """
+        Stems the tokens using SnowballStemmer.
+        """
+        return [self.stemmer.stem(token) for token in tokens]
+
+    def set_token_pattern(self, pattern):
+        """
+        Sets the token pattern.
+        """
+        self.token_pattern = pattern
+
+    def tokenize(self, text):
+        """
+        Tokenizes the text using the token pattern.
+        """
+        return re.findall(self.token_pattern, text)
+
+    def to_lowercase(self, tokens):
+        """
+        Converts the tokens to lowercase.
+        """
+        return [token.lower() for token in tokens]
+
+    def remove_punctuation(self, tokens):
+        """
+        Removes punctuation from the list of tokens using a regex.
+        """
+        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
+
+    def remove_numbers(self, tokens):
+        """
+        Removes numbers and digits from the list of tokens.
+        """
+        return [token for token in tokens if not re.match(r'^\d+(\.\d+)?$', token)]
+
+    def remove_stop_words(self, tokens):
         """
         Removes the stop words from the tokens.
         """

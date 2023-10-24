@@ -30,7 +30,8 @@ def main(argv):
     args = parser.parse_args(argv)
 
     # ../lib/data/practice_03/Practice_03_data.zip
-    collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
+    # ../lib/data/practice_02/01-Text_Only-Ascii-Coll-1-10-NoSem.gz
+    collection = Collection('../lib/data/practice_02/01-Text_Only-Ascii-Coll-1-10-NoSem.gz',
                             plot_statistics=args.plot,
                             import_collection=args.import_inverted_index,
                             export_collection=args.export_inverted_index,

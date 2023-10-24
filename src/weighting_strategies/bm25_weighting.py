@@ -16,12 +16,12 @@ class BM25Weighting(WeightingStrategy):
         weighted_index = {}
         start_time = time.time()
 
-        N = collection.collection_size  # Total number of documents in the collection
+        N = collection.collection_size                       # Total number of documents in the collection
         avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
 
         for term, postings in collection.inverted_index.IDX.items():
-            df = collection.document_frequency(term)  # Document frequency
-            idf = math.log10(1 + ((N - df + self.b) / (df + self.b)))  # Inverse document frequency
+            df = collection.document_frequency(term)             # Document frequency
+            idf = math.log10((N - df + self.b) / (df + self.b))  # Inverse document frequency
 
             for docno in postings:
                 # Document length

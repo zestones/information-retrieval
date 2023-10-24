@@ -1,0 +1,5 @@
+nom des run pour granularity doit être article
+
+ltn ~= 0.10
+ltc ~= 0.05
+bm25 ~= 0.2

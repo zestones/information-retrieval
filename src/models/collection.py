@@ -3,6 +3,7 @@ from manager.text_processor import SnowballTextProcessor
 from manager.text_processor import NltkTextProcessor
 from manager.text_processor import SpacyTextProcessor
 from manager.text_processor import CustomTextProcessor
+from manager.text_processor import RegexTextProcessor
 
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
@@ -83,7 +84,7 @@ class Collection:
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
         """
-        return self.inverted_index.DF.get(term, {})
+        return len(self.inverted_index.IDX.get(term, []))
 
     def term_frequency(self, docno: str, term: str) -> int:
         """

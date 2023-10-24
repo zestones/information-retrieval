@@ -13,10 +13,10 @@ class LTCWeighting(WeightingStrategy):
         Constructs the weighted index using the LTC weighting scheme.
         """
         start_time = time.time()
-        
+
         weighted_index = LTNWeighting().calculate_weight(collection)
         normalized_index = self.length_normalization(collection, weighted_index)
-        
+
         end_time = time.time()
         self.print_computation_time(start_time, end_time)
         return normalized_index
