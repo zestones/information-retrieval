@@ -81,3 +81,16 @@ class QueryManager:
         print(Fore.GREEN + f'Query: {query}' + Style.RESET_ALL)
         print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
         print()
+    
+    # Dans QueryManager
+    def get_query_results(self, query, results,run_id):
+        """
+        Returns the query results as a list.
+        """
+        query_results = []
+        for rank, (docno, score) in enumerate(results[:1500], start=1):
+            article_id = docno  # Ajoutez ici la logique pour obtenir l'article_id à partir de docno
+            xml_path = 'article[1]'    # Ajoutez ici la logique pour obtenir le chemin XML à partir de docno
+            query_results.append((query, 'Q0', article_id, rank, score, run_id, xml_path))
+        return query_results
+
