@@ -14,6 +14,7 @@ help:
 	@echo "  make practice1 - Run practice1.py script"
 	@echo "  make practice2 - Run practice2.py script"
 	@echo "  make practice3 - Run practice3.py script"
+	@echo "  make practice4 - Run practice4.py script"
 
 
 install:
@@ -36,3 +37,7 @@ practice2:
 # run practice3 script
 practice3:
 	$(PYTHON) $(MAIN_DIR)/practice3.py $(ARGS)
+
+# run practice4 script
+practice4:
+	$(PYTHON) $(MAIN_DIR)/practice4.py $(ARGS)
