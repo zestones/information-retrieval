@@ -2,50 +2,62 @@ from models.collection import Collection
 from manager.query_manager import QueryManager
 from manager.text_processor import CustomTextProcessor
 
+from weighting_strategies.bm25_weighting import BM25Weighting
+
 from colorama import Fore, Style
 import argparse
 import sys
 
 import argparse
 import os
+import numpy as np
+
+
 
 def parse_query_file(query_file):
     parsed_queries = []
     with open(query_file, 'r') as file:
         for line in file:
-            if not line.strip(): continue
+            if not line.strip():
+                continue
             parts = line.strip().split(' ', 1)
-            
-            if len(parts) == 2: 
+
+            if len(parts) == 2:
                 query_id, query = parts
                 parsed_queries.append((query_id, query))
+                
     print(parsed_queries)
     return parsed_queries
-              
+
+
 def launch_query(query_id, query, run_id, collection):
     query_manager = QueryManager(collection)
+
     res = query_manager.RSV(query)
-    # TODO : format results remove
-    query_results = query_manager.get_query_results(query_id, res, run_id)
+    query_results = query_manager.format_query_results(query_id, res, run_id)
+
     return query_results
 
-def construct_run_name(run_id,weighting_scheme):
-    return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_"+str(run_id)+"_"+weighting_scheme+"_articles.txt"
 
-def write_results(query_results,run_file_path):
+def construct_run_name(run_id, weighting_scheme, k1=None, b=None):
+    return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter_k" + str(k1) + "_b" + str(b) + ".txt"
+
+
+def write_results(query_results, run_file_path):
     with open(run_file_path, 'a') as output_file:
         for result in query_results:
-            output_file.write(f"{result[0]} {result[1]} {result[2]} {result[3]} {result[4]} {result[5]} {result[6]}\n")
-            
+            output_file.write(
+                f"{result[0]} {result[1]} {result[2]} {result[3]} {result[4]} {result[5]} {result[6]}\n")
+
+
 def get_run_id(folder_path):
     # Compute the number of files in the folder
     # The run id is the number of files + 1
     files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
     return len(files) + 1
 
-def main(argv):
-    
 
+def main(argv):
     parser = argparse.ArgumentParser(description='Process command-line options.')
     parser.add_argument('-d', '--display', action='store_true', help='Display collections indexes')
     parser.add_argument('-p', '--plot', action='store_true', help='Plot statistics')
@@ -68,26 +80,50 @@ def main(argv):
 
     args = parser.parse_args(argv)
 
-    collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
-                            plot_statistics=args.plot,
-                            import_collection=args.import_inverted_index,
-                            export_collection=args.export_inverted_index,
-                            export_statistics=args.statistics,
-                            ltn_weighting=args.ltn,
-                            ltc_weighting=args.ltc,
-                            bm25_weighting=args.bm25,
-                            export_weighted_idx=args.export_weighted_idx
-                            )
+    # collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
+    #                         plot_statistics=args.plot,
+    #                         import_collection=args.import_inverted_index,
+    #                         export_collection=args.export_inverted_index,
+    #                         export_statistics=args.statistics,
+    #                         ltn_weighting=args.ltn,
+    #                         ltc_weighting=args.ltc,
+    #                         bm25_weighting=args.bm25,
+    #                         export_weighted_idx=args.export_weighted_idx
+    #                         )
 
-    if args.query_file:
+    for b in np.arange(0, 1, 0.1):
+        collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
+                                plot_statistics=args.plot,
+                                import_collection=args.import_inverted_index,
+                                export_collection=args.export_inverted_index,
+                                export_statistics=args.statistics,
+                                ltn_weighting=args.ltn,
+                                ltc_weighting=args.ltc,
+                                bm25_weighting=args.bm25,
+                                export_weighted_idx=args.export_weighted_idx
+                                )
+
+        BM25Weighting(k1=1.2, b=b).calculate_weight(collection)
+
         run_id = get_run_id("../docs/resources/runs/")
-        run_file_path = construct_run_name(run_id,'bm25')
+
+        run_file_path = construct_run_name(run_id, 'bm25', k1=1.2, b=b)
         parsed_queries = parse_query_file(args.query_file)
+
         for query_id, query in parsed_queries:
-            query_results = launch_query(query_id, query, run_id,collection)
-            write_results(query_results,run_file_path)
-            
+            query_results = launch_query(query_id, query, run_id, collection)
+            write_results(query_results, run_file_path)
+
+    # if args.query_file:
+    #     run_id = get_run_id("../docs/resources/runs/")
+
+    #     run_file_path = construct_run_name(run_id, 'bm25')
+    #     parsed_queries = parse_query_file(args.query_file)
+
+    #     for query_id, query in parsed_queries:
+    #         query_results = launch_query(query_id, query, run_id, collection)
+    #         write_results(query_results, run_file_path)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
-
