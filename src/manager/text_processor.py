@@ -126,15 +126,15 @@ class SpacyTextProcessor(TextProcessor):
 
 class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
-        self.stemmer = SnowballStemmer('english')
+        self.stemmer = PorterStemmer()
         self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
         print("\nSTOP WORDS IN CUSTOMTEXTPROCESSOR ",len(self.stop_words))
     
-    def stem(self, tokens: list) -> list:
-        """
-        Stems the tokens using SnowballStemmer.
-        """
-        return [self.stemmer.stem(token) for token in tokens]
+    # def stem(self, tokens: list) -> list:
+    #     """
+    #     Stems the tokens using SnowballStemmer.
+    #     """
+    #     return [self.stemmer.stem(token) for token in tokens]
 
     def remove_stop_words(self, tokens: list) -> list:
         """

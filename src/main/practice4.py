@@ -81,7 +81,7 @@ def main(argv):
 
     if args.query_file:
         run_id = get_run_id("../docs/resources/runs/")
-        run_file_path = construct_run_name(run_id,'test')
+        run_file_path = construct_run_name(run_id,'bm25')
         parsed_queries = parse_query_file(args.query_file)
         for query_id, query in parsed_queries:
             query_results = launch_query(query_id, query, run_id,collection)
