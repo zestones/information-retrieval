@@ -12,7 +12,7 @@ import re
 This class is responsible for processing the text.
 The class provides methods to tokenize, normalize, stem, and remove stop words.
 """
-
+STOP_WORDS_FILE = '../lib/data/practice_04/stop-words-english4.txt' 
 
 class TextProcessor:
     def tokenize(self, text: str) -> list:
@@ -62,6 +62,12 @@ class TextProcessor:
         tokens = self.remove_numbers(tokens)
         tokens = self.remove_punctuation(tokens)
         return tokens
+    
+    def load_stopwords_from_file(self, file_path: str):
+        with open(file_path, 'r') as file:
+            stopwords = set(word.strip() for word in file)
+            print("\n\nLOAD STOPWORDS_FROM_FILE: ",len(stopwords))
+        return stopwords
 
 
 class NltkTextProcessor(TextProcessor):
@@ -121,8 +127,9 @@ class SpacyTextProcessor(TextProcessor):
 class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
         self.stemmer = SnowballStemmer('english')
-        self.stop_words = STOP_WORDS
-
+        self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
+        print("\nSTOP WORDS IN CUSTOMTEXTPROCESSOR ",len(self.stop_words))
+    
     def stem(self, tokens: list) -> list:
         """
         Stems the tokens using SnowballStemmer.
