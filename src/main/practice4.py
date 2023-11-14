@@ -1,6 +1,7 @@
 from models.collection import Collection
 from manager.query_manager import QueryManager
 from manager.text_processor import CustomTextProcessor
+from manager.text_processor import NltkTextProcessor
 
 from weighting_strategies.bm25_weighting import BM25Weighting
 
@@ -11,7 +12,6 @@ import sys
 import argparse
 import os
 import numpy as np
-
 
 
 def parse_query_file(query_file):
@@ -25,7 +25,7 @@ def parse_query_file(query_file):
             if len(parts) == 2:
                 query_id, query = parts
                 parsed_queries.append((query_id, query))
-                
+
     print(parsed_queries)
     return parsed_queries
 
@@ -80,18 +80,7 @@ def main(argv):
 
     args = parser.parse_args(argv)
 
-    # collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
-    #                         plot_statistics=args.plot,
-    #                         import_collection=args.import_inverted_index,
-    #                         export_collection=args.export_inverted_index,
-    #                         export_statistics=args.statistics,
-    #                         ltn_weighting=args.ltn,
-    #                         ltc_weighting=args.ltc,
-    #                         bm25_weighting=args.bm25,
-    #                         export_weighted_idx=args.export_weighted_idx
-    #                         )
-
-    for b in np.arange(0, 1, 0.1):
+    for k in np.arange(0, 4.2, 0.2):
         collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
                                 plot_statistics=args.plot,
                                 import_collection=args.import_inverted_index,
@@ -103,7 +92,30 @@ def main(argv):
                                 export_weighted_idx=args.export_weighted_idx
                                 )
 
-        BM25Weighting(k1=1.2, b=b).calculate_weight(collection)
+        collection.weighted_index = BM25Weighting(k1=k, b=0.75).calculate_weight(collection)
+
+        run_id = get_run_id("../docs/resources/runs/")
+
+        run_file_path = construct_run_name(run_id, 'bm25', k1=k, b=0.75)
+        parsed_queries = parse_query_file(args.query_file)
+
+        for query_id, query in parsed_queries:
+            query_results = launch_query(query_id, query, run_id, collection)
+            write_results(query_results, run_file_path)
+
+    for b in np.arange(0.1, 1.1, 0.1):
+        collection = Collection('../lib/data/practice_03/Practice_03_data.zip',
+                                plot_statistics=args.plot,
+                                import_collection=args.import_inverted_index,
+                                export_collection=args.export_inverted_index,
+                                export_statistics=args.statistics,
+                                ltn_weighting=args.ltn,
+                                ltc_weighting=args.ltc,
+                                bm25_weighting=args.bm25,
+                                export_weighted_idx=args.export_weighted_idx
+                                )
+
+        collection.weighted_index = BM25Weighting(k1=1.2, b=b).calculate_weight(collection)
 
         run_id = get_run_id("../docs/resources/runs/")
 
@@ -113,16 +125,6 @@ def main(argv):
         for query_id, query in parsed_queries:
             query_results = launch_query(query_id, query, run_id, collection)
             write_results(query_results, run_file_path)
-
-    # if args.query_file:
-    #     run_id = get_run_id("../docs/resources/runs/")
-
-    #     run_file_path = construct_run_name(run_id, 'bm25')
-    #     parsed_queries = parse_query_file(args.query_file)
-
-    #     for query_id, query in parsed_queries:
-    #         query_results = launch_query(query_id, query, run_id, collection)
-    #         write_results(query_results, run_file_path)
 
 
 if __name__ == "__main__":

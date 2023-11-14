@@ -87,7 +87,7 @@ class QueryManager:
         Returns the query results as a list.
         """
         query_results = []
-        xml_path = 'article[1]'
+        xml_path = '/article[1]'
 
         for rank, (docno, score) in enumerate(results[:1500], start=1):
             article_id = docno
