@@ -1,5 +1,15 @@
-nom des run pour granularity doit être article
+Pour les trois premiers exercices (donc les runs: 1, 2 et 3), nous avons utilisé la liste de stopwords proposé par nltk ainsi que le stemmer snowball.
+Dans la suite du TP nous avons utilisé la liste de stopwords proposé ainsi que le porter stemmer.
 
-ltn ~= 0.10
-ltc ~= 0.05
-bm25 ~= 0.2
+------------------------
+Exercise 5: BM25 tuning
+------------------------
+Dans cette partie il nous est demandé de tester différentes valeurs pour les paramètres k1 et b du modèle BM25.
+Dans un premier temps nous il a été demandé de faire varier b entre 0 et 1 par pas de 0.1 et de fixer k1 à 1.2.
+
+Nous avons rencontré un problème lors de l'exécution de cette partie. En effet, nous avons remarqué que le fait de fixer b à 0.0
+pouvaient entraîner une erreur lors du calcule de l'IDF :
+- idf = math.log10((N - df + b) / (df + b))
+
+Dans le cas ou le nombre de documents N est égal au df, le calcule de l'idf devient impossible car on se retrouve avec un log10(0).
+Pour éviter ce problème nous avons donc décidé de faire varier b entre 0.1 et 1 par pas de 0.1.
