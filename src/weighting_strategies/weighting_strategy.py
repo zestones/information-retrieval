@@ -48,4 +48,5 @@ class WeightingStrategy:
         """
         Prints the computation time.
         """
-        print(Fore.YELLOW + "> Weighting time: " + str(end_time - start_time) + " seconds" + Style.RESET_ALL, end="\n\n")
+        print(Fore.YELLOW + "> Weighting time: " + str(end_time
+              - start_time) + " seconds" + Style.RESET_ALL, end="\n\n")
