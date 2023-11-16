@@ -22,7 +22,7 @@ class BM25Weighting(WeightingStrategy):
         for term, postings in collection.inverted_index.IDX.items():
             df = collection.document_frequency(term)             # Document frequency
 
-            idf = math.log10((N - df + self.b) / (df + self.b))  # Inverse document frequency
+            idf = math.log10((N - df + 0.5) / (df + 0.5))  # Inverse document frequency
 
             for docno in postings:
                 # Document length
