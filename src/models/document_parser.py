@@ -1,6 +1,6 @@
 import zipfile
-import gzip
 import io
+import re
 
 
 class DocumentParser:
@@ -29,35 +29,41 @@ class DocumentParser:
         Parses the document and save the result in a list.
         """
         parsed_documents = []
-        if (self.filename.endswith('.gz')):
-            with gzip.open(self.filename, 'rt', encoding='utf-8') as f:
-                parsed_documents = self._parse_document_lines(f.readlines())
-        elif self.filename.endswith('.zip'):
+        print("Parsing documents...")
+        if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
-                for file_name in zip_file.namelist():
-                    with zip_file.open(file_name) as binary_file:
+                for filename in zip_file.namelist():
+                    with zip_file.open(filename) as binary_file:
                         with io.TextIOWrapper(binary_file, encoding='utf-8') as f:
-                            parsed_documents.extend(self._parse_document_lines(f.readlines()))
+                            parsed_documents.extend(
+                                self._parse_document_lines(filename, f.readlines()))
         else:
             with open(self.filename, 'r', encoding='utf-8') as f:
-                parsed_documents = self._parse_document_lines(f.readlines())
+                parsed_documents = self._parse_document_lines(self.filename, f.readlines())
 
         return parsed_documents
 
-    def _parse_document_lines(self, lines: str) -> list:
+    def _parse_document_lines(self, filename, lines: list) -> list:
         """
         Parses the document lines and returns a list of dictionaries.
         """
-        parsed_dictionary = []
-        current_content = ''
+        parsed_documents = []
+        docno = filename.split('/')[-1].split('.')[0]
 
-        for line in lines:
-            if '<doc><docno>' in line:
-                docno = line.split('<doc><docno>')[1].split('</docno>')[0]
-            elif '</doc>' in line:
-                parsed_dictionary.append({docno: current_content})
-                current_content = ''
-            else:
-                current_content += line
+        content = ' '.join(lines)
 
-        return parsed_dictionary
+        # remove the xml tags with a regex
+        content = re.sub('<[^<]+>', '', content)
+
+        # remove the newlines
+        content = content.replace('\n', ' ')
+
+        # remove the multiple spaces
+        content = re.sub(' +', ' ', content)
+
+        # remove the leading and trailing spaces
+        content = content.strip()
+
+        parsed_documents.append({docno: content})
+
+        return parsed_documents

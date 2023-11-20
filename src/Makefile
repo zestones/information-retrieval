@@ -15,7 +15,7 @@ help:
 	@echo "  make practice2 - Run practice2.py script"
 	@echo "  make practice3 - Run practice3.py script"
 	@echo "  make practice4 - Run practice4.py script"
-
+	@echo "  make practice5 - Run practice5.py script"
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt && \
@@ -41,3 +41,7 @@ practice3:
 # run practice4 script
 practice4:
 	$(PYTHON) $(MAIN_DIR)/practice4.py $(ARGS)
+
+# run practice5 script
+practice5:
+	$(PYTHON) $(MAIN_DIR)/practice5.py $(ARGS)

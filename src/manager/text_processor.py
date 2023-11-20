@@ -67,7 +67,6 @@ class TextProcessor:
     def load_stopwords_from_file(self, file_path: str):
         with open(file_path, 'r') as file:
             stopwords = set(word.strip() for word in file)
-            print("\n\nLOAD STOPWORDS_FROM_FILE: ", len(stopwords))
         return stopwords
 
 
@@ -129,7 +128,6 @@ class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
         self.stemmer = PorterStemmer()
         self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
-        print("\nSTOP WORDS IN CUSTOMTEXTPROCESSOR ", len(self.stop_words))
 
     def stem(self, tokens: list) -> list:
         """
