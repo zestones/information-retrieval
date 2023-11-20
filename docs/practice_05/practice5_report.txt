@@ -1,0 +1,72 @@
+----------------------------------
+Exercise 1: Indexing XML documents
+----------------------------------
+
+Stats with no stop words and no stemmer 
+***********
+- indexing_time: 8.540054559707642,
+- avg_collection_lengths: 1424.5014788373278,
+- avg_term_lengths_in_collection: 4.3034541993368265,
+- collection_vocabulary_sizes: 374837,
+- collection_frequency_of_terms: 13967237
+
+> BM25 Weighting time: 2.91021466255188 seconds
+
+Stats with stop words and stemmer 
+***********
+
+- indexing_time: 6.096012115478516,
+- avg_collection_lengths: 1040.3125956144825,
+- avg_term_lengths_in_collection: 4.104918716444168,
+- collection_vocabulary_sizes: 337483,
+- collection_frequency_of_terms: 10200265
+
+> BM25 Weighting time: 2.266448974609375 seconds
+
+
+--------------------------
+Quelques temps d'execution 
+--------------------------
+
+LTN weighting
+-------------
+Indexing collection : Practice_05_data
+> Indexing time: 6.7181220054626465 seconds
+> Weighting time: 2.382563352584839 seconds
+
+LTC weighting
+-------------
+Importing collection : Practice_05_data
+> Indexing time: 1.9904592037200928 seconds
+> Weighting time: 4.025522470474243 seconds
+
+BM25 weighting
+--------------
+Importing collection : Practice_05_data
+> Indexing time: 1.991419792175293 seconds
+> Weighting time: 2.2474124431610107 seconds
+
+Nous sommes allés jusqu'à l'exo 4 en utilant les tags article. 
+Nous avons 12 run avec toutes les combinaisons possibles (comme pour le practice 4).
+
+Quelques output des run : 
+
+BengezzouIdrissMezianeGhilas_1_ltn_articles_nostop_nostem.txt
+--------------------------------------------------------------
+2009011 Q0 22478 1 9.4284408914594 BengezzouIdrissMezianeGhilas /article[1]
+2009011 Q0 3951433 2 8.065500237699963 BengezzouIdrissMezianeGhilas /article[1]
+
+BengezzouIdrissMezianeGhilas_2_ltc_articles_nostop_nostem.txt
+--------------------------------------------------------------
+2009011 Q0 1493776 1 0.23156234274794968 BengezzouIdrissMezianeGhilas /article[1]
+2009011 Q0 2315207 2 0.22452143803695546 BengezzouIdrissMezianeGhilas /article[1]
+
+BengezzouIdrissMezianeGhilas_3_bm25_articles_nostop_nostem_k1.2_b0.75.txt
+-------------------------------------------------------------------------
+2009011 Q0 460499 1 5.878208730884846 BengezzouIdrissMezianeGhilas /article[1]
+2009011 Q0 22478 2 5.819458071539879 BengezzouIdrissMezianeGhilas /article[1]
+
+BengezzouIdrissMezianeGhilas_4_ltn_articles_stop671_nostem.txt
+-------------------------------------------------------------------------
+2009011 Q0 22478 1 9.4284408914594 BengezzouIdrissMezianeGhilas /article[1]
+2009011 Q0 3951433 2 8.065500237699965 BengezzouIdrissMezianeGhilas /article[1]
