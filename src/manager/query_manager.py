@@ -91,6 +91,6 @@ class QueryManager:
 
         for rank, (docno, score) in enumerate(results[:1500], start=1):
             article_id = docno
-            query_results.append((query, 'Q0', article_id, rank, score, run_id, xml_path))
+            query_results.append((query, 'Q0', article_id, rank, score, "BengezzouIdrissMezianeGhilas", xml_path))
 
         return query_results

@@ -73,7 +73,7 @@ class Collection:
             self.weighted_index = LTCWeighting().calculate_weight(self)
         elif (bm25_weighting):
             self.print_title("BM25 weighting")
-            self.weighted_index = BM25Weighting().calculate_weight(self)
+            self.weighted_index = BM25Weighting(k1=1.2, b=0.75).calculate_weight(self)
 
         if (export_weighted_idx):
             WeightingStrategy().export_weighted_index(

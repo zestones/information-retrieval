@@ -40,7 +40,8 @@ def launch_query(query_id, query, run_id, collection):
 
 
 def construct_run_name(run_id, weighting_scheme, k1=None, b=None):
-    return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter_k" + str(k1) + "_b" + str(b) + ".txt"
+    return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter.txt"
+    # return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter_k" + str(k1) + "_b" + str(b) + ".txt"
 
 
 def write_results(query_results, run_file_path):
@@ -55,6 +56,16 @@ def get_run_id(folder_path):
     # The run id is the number of files + 1
     files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
     return len(files) + 1
+
+def get_weighting_scheme(ltn, ltc, bm25):
+    if ltn:
+        return "ltn"
+    elif ltc:
+        return "ltc"
+    elif bm25:
+        return "bm25"
+    else:
+        raise ValueError("No weighting scheme selected")
 
 
 def main(argv):
@@ -90,17 +101,16 @@ def main(argv):
                             bm25_weighting=args.bm25,
                             export_weighted_idx=args.export_weighted_idx
                             )
+    
+    run_id = get_run_id("../docs/resources/runs/")
 
-    query_manager = QueryManager(collection)
+    scheme = get_weighting_scheme(args.ltn, args.ltc, args.bm25)
+    run_file_path = construct_run_name(run_id, scheme, k1=1.2, b=0.75)
+    parsed_queries = parse_query_file(args.query_file)
 
-    while True:
-        query = input("Enter a query (q to quit):\n> ").strip(" ")
-
-        if query.lower() == 'q' or query.lower() == 'quit':
-            break
-
-        res = query_manager.RSV(query)
-        query_manager.print_query_results(query, res)
+    for query_id, query in parsed_queries:
+        query_results = launch_query(query_id, query, run_id, collection)
+        write_results(query_results, run_file_path)
 
 
 if __name__ == "__main__":

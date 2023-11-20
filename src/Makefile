@@ -45,3 +45,8 @@ practice4:
 # run practice5 script
 practice5:
 	$(PYTHON) $(MAIN_DIR)/practice5.py $(ARGS)
+
+custom:
+	$(PYTHON) $(MAIN_DIR)/practice5.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
+	$(PYTHON) $(MAIN_DIR)/practice5.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
+	$(PYTHON) $(MAIN_DIR)/practice5.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt

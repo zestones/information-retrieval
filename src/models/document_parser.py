@@ -29,7 +29,6 @@ class DocumentParser:
         Parses the document and save the result in a list.
         """
         parsed_documents = []
-        print("Parsing documents...")
         if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
                 for filename in zip_file.namelist():
