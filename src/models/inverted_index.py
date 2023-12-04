@@ -32,18 +32,32 @@ class InvertedIndex:
         start_time = time.time()
         for doc in self.document_parser.parsed_documents:
             docno = list(doc.keys())[0]
-            tokens = list(doc.values())[0]
+            tokens = doc[docno]['terms']
+            x_path = doc[docno]['XPath']
 
-            for token in tokens:
+            for token in tokens:  # Assuming tokens is a string separated by spaces
                 if token not in index:
-                    index[token] = {docno}
+                    index[token] = [{"XPath": x_path, "docno": [docno]}]
                     term_frequencies[token] = {docno: 1}
                     document_frequencies[token] = 1
                 else:
-                    index[token].add(docno)
-                    term_frequencies.setdefault(token, {}).setdefault(docno, 0)
-                    term_frequencies[token][docno] += 1
-                    document_frequencies[token] += 1
+                    found = False
+                    for entry in index[token]:
+                        if entry["XPath"] == x_path:
+                            if docno not in entry["docno"]:
+                                entry["docno"].append(docno) 
+                            
+                            term_frequencies.setdefault(token, {}).setdefault(docno, 0)
+                            term_frequencies[token][docno] += 1
+                            document_frequencies[token] += 1
+                            found = True
+                            break
+
+                    if not found:
+                        index[token].append({"XPath": x_path, "docno": [docno]})
+                        term_frequencies.setdefault(token, {}).setdefault(docno, 0)
+                        term_frequencies[token][docno] += 1
+                        document_frequencies[token] += 1
 
         end_time = time.time()
 

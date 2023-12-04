@@ -36,11 +36,7 @@ class WeightingStrategy:
         Exports the weighted index to a JSON file.
         """
         weighted_index_data = {"weighted_index": weighted_index}
-
-        # Convert sets to lists for serialization
-        weighted_index_data["weighted_index"] = {
-            k: {k2: v2 for k2, v2 in v.items()} for k, v in weighted_index_data["weighted_index"].items()}
-
+        
         with open(filename, "w") as file:
             json.dump(weighted_index_data, file)
 

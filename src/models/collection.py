@@ -35,13 +35,15 @@ class Collection:
                  ltn_weighting: bool = False,
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
-                 export_weighted_idx: bool = False
-                 ):
+                 export_weighted_idx: bool = False,
+                 parser_granularity: list = ['.//sec']
+                ):
+        
         self.text_processor = CustomTextProcessor()
         self.filename = filename
 
         # Init the DocumentParser with the filename and the text processor
-        self.document_parser = DocumentParser(filename, self.text_processor)
+        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity)
         self.inverted_index = InvertedIndex(self.document_parser)
 
         self.label = filename.split('/')[-1].split('.')[0]
@@ -103,7 +105,10 @@ class Collection:
         Calculate collection frequency of terms.
         """
         for term, postings in self.inverted_index.IDX.items():
-            frequency = sum(self.term_frequency(docno, term) for docno in postings)
+            frequency = 0
+            for entry in postings:
+                docno_list = entry.get('docno', [])
+                frequency += sum(self.term_frequency(docno, term) for docno in docno_list)
             self.collection_frequencies[term] = frequency
 
     # -------------------------------------------------

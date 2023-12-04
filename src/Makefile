@@ -46,7 +46,19 @@ practice4:
 practice5:
 	$(PYTHON) $(MAIN_DIR)/practice5.py $(ARGS)
 
-custom:
+# run practice5v2 script
+practice5v2:
+	$(PYTHON) $(MAIN_DIR)/practice5v2.py $(ARGS)
+
+
+# run practice5 script with custom parameters 
+custom_practice5:
 	$(PYTHON) $(MAIN_DIR)/practice5.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
 	$(PYTHON) $(MAIN_DIR)/practice5.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
 	$(PYTHON) $(MAIN_DIR)/practice5.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt
+
+# run practice5v2 script with custom parameters
+custom:
+	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g .//sec && \
+	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g .//sec && \
+	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g .//sec

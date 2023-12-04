@@ -31,7 +31,8 @@ class Statistics:
         self.collection.calculate_collection_frequencies()
 
         for doc in self.collection.document_parser.parsed_documents:
-            tokens = list(doc.values())[0]
+            docno = list(doc.keys())[0]
+            tokens = doc[docno]['terms']
 
             term_length = sum(len(token) for token in tokens)
             self.avg_term_lengths_in_docs.append(term_length / len(tokens) if len(tokens) > 0 else 0)
@@ -44,8 +45,7 @@ class Statistics:
         self.avg_collection_lengths = statistics.mean(self.documents_lengths.values())
         self.avg_term_lengths_in_collection = statistics.mean(self.avg_term_lengths_in_docs)
 
-        self.collection_frequency_of_terms = sum(
-            list(self.collection.collection_frequencies.values()))
+        self.collection_frequency_of_terms = sum(list(self.collection.collection_frequencies.values()))
 
     def export_stats(self, filename):
         """

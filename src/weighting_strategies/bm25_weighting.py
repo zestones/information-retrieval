@@ -21,23 +21,25 @@ class BM25Weighting(WeightingStrategy):
 
         for term, postings in collection.inverted_index.IDX.items():
             df = collection.document_frequency(term)             # Document frequency
+            idf = math.log10((N - df + 0.5) / (df + 0.5))        # Inverse document frequency
 
-            idf = math.log10((N - df + 0.5) / (df + 0.5))  # Inverse document frequency
+            for entry in postings:
+                for docno in entry.get('docno', []):
+                    # Document length
+                    dl = collection.document_length(docno)
+                    tf = collection.term_frequency(docno, term)
 
-            for docno in postings:
-                # Document length
-                dl = collection.document_length(docno)
-                tf = collection.term_frequency(docno, term)
+                    # Calculate BM25 weight for the term in the document
+                    weight = (tf * (self.k1 + 1)) / \
+                        (self.k1 * ((1 - self.b) + self.b * (dl / avdl)) + tf)
+                    weight *= idf
 
-                # Calculate BM25 weight for the term in the document
-                weight = (tf * (self.k1 + 1)) / \
-                    (self.k1 * ((1 - self.b) + self.b * (dl / avdl)) + tf)
-                weight *= idf
-
-                # Update the weighted index
-                if term not in weighted_index:
-                    weighted_index[term] = {}
-                weighted_index[term][docno] = weight
+                    # Update the weighted index
+                    if term not in weighted_index:
+                        weighted_index[term] = []
+                        
+                    weighted_index[term].append(
+                        {"XPath": entry['XPath'], "docno": docno, "weight": weight})
 
         end_time = time.time()
         self.print_computation_time(start_time, end_time)
