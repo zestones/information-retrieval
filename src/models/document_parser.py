@@ -87,7 +87,7 @@ class DocumentParser:
         content = ' '.join(lines)
 
         content = re.sub('&[^;]+;', '', content)
-
+        
         # Parse XML after handling entities
         root = ET.ElementTree(ET.fromstring(content))
         # Create a dictionary to map child elements to their parents
