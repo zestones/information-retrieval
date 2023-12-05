@@ -41,10 +41,15 @@ class InvertedIndex:
                 term_count[term] += 1
 
             for term, count in term_count.items():
-                if docno not in term_frequencies[term]:
-                    document_frequencies[term] += 1
-                term_frequencies[term][docno] += count
+                if x_path not in term_frequencies[term]:
+                    term_frequencies[term][x_path] = {docno: count}
+                else:
+                    if docno not in term_frequencies[term][x_path]:
+                        term_frequencies[term][x_path][docno] = count
+                    else:
+                        term_frequencies[term][x_path][docno] += count
 
+                # Mettre à jour l'index si nécessaire
                 entry_exists = any(entry["XPath"] == x_path for entry in index[term])
                 if not entry_exists:
                     index[term].append({"XPath": x_path, "docno": [docno]})
