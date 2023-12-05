@@ -26,7 +26,6 @@ def parse_query_file(query_file):
                 query_id, query = parts
                 parsed_queries.append((query_id, query))
 
-    print(parsed_queries)
     return parsed_queries
 
 
@@ -41,7 +40,8 @@ def launch_query(query_id, query, run_id, collection):
 
 def construct_run_name(run_id, weighting_scheme, k1=None, b=None, granularity=None):
     if granularity:
-        granularity_str = '_'.join(granularity)
+        # join the list of strings with a _ and replace each './/' with ''
+        granularity_str = '_'.join(granularity).replace('.//', '')
         return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_" + granularity_str + "_articles_stop671_porter.txt"
     else:
         return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter.txt"
@@ -95,10 +95,11 @@ def main(argv):
     parser.add_argument('--export-weighted-idx', action='store_true',
                         help='Export weighted index to JSON file')
     parser.add_argument('--query-file', type=str, help='File containing queries')
-    parser.add_argument('-g', '--granularity', type=str, help='Granularity of the XPath query')
+    parser.add_argument('-g', '--granularity', type=str, nargs='+', help='Granularity of the XPath query')
 
     args = parser.parse_args(argv)
 
+    # xml/10013.xml
     collection = Collection('../lib/data/practice_05/XML-Coll-withSem.zip',
                             plot_statistics=args.plot,
                             import_collection=args.import_inverted_index,
@@ -107,7 +108,8 @@ def main(argv):
                             ltn_weighting=args.ltn,
                             ltc_weighting=args.ltc,
                             bm25_weighting=args.bm25,
-                            export_weighted_idx=args.export_weighted_idx
+                            export_weighted_idx=args.export_weighted_idx,
+                            parser_granularity=args.granularity
                             )
 
     run_id = get_run_id("../docs/resources/runs/")

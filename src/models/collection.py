@@ -36,7 +36,7 @@ class Collection:
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
                  export_weighted_idx: bool = False,
-                 parser_granularity: list = ['.//sec']
+                 parser_granularity: list = ['.//article']
                 ):
         
         self.text_processor = CustomTextProcessor()

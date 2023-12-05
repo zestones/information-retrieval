@@ -15,7 +15,7 @@ class DocumentParser:
         
         # A dictionary with the document number as key and the content as value
         # ex: {'doc1': [This, is, the, content, of, the, document]}
-        self.parsed_documents = []
+        self.parsed_documents = {}
 
     def parse_documents(self) -> None:
         """
@@ -29,7 +29,7 @@ class DocumentParser:
             xpath = doc[docno]['XPath']
 
             tokens = self.text_processor.pre_processing(content)
-            self.parsed_documents.append({docno: {'XPath': xpath, 'terms': tokens}})
+            self.parsed_documents[docno] = {'XPath': xpath, 'terms': tokens}
             
     def _parse_documents(self) -> list:
         """
@@ -55,7 +55,6 @@ class DocumentParser:
         """
         Parses the document lines and returns a list of dictionaries.
         """
-        
         return self.parse_xml_to_json(filename, lines)
     
     def basic_clean(self, text: str):
@@ -94,12 +93,22 @@ class DocumentParser:
         parent_map = {c: p for p in root.iter() for c in p}
     
         parsed_documents = []
+        root_tag_text = self.extract_text(root.getroot())  # Extract text from the root tag
+        if root_tag_text is not None and './/article' in self.parser_granularity:
+            root_tag_text = self.basic_clean(root_tag_text)
+            xpath = self.get_xpath(root.getroot(), parent_map)
+            parsed_documents.append({docno: {'XPath': xpath, 'terms': root_tag_text}})
+        
+        # Loop through other granularities/tags
         for granularity in self.parser_granularity:
+            if granularity == root.getroot().tag:  # Skip the root tag (already processed)
+                continue
+            
             for balise in root.findall(granularity):
                 text = self.extract_text(balise)
                 if text is not None:
                     text = self.basic_clean(text)
-                    xpath = self.get_xpath(balise, parent_map)  # Get XPath of the <p> element
+                    xpath = self.get_xpath(balise, parent_map)  # Get XPath of the element
                     parsed_documents.append({docno: {'XPath': xpath, 'terms': text}})
 
         return parsed_documents

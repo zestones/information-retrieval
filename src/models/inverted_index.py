@@ -1,6 +1,8 @@
 import json
 import time
 
+from collections import defaultdict
+
 
 class InvertedIndex:
     def __init__(self, document_parser):
@@ -19,9 +21,9 @@ class InvertedIndex:
         """
         Constructs the inverted index and computes statistics.
         """
-        term_frequencies = {}
-        document_frequencies = {}
-        index = {}
+        term_frequencies = defaultdict(lambda: defaultdict(int))
+        document_frequencies = defaultdict(int)
+        index = defaultdict(list)
 
         parse_time = time.time()
         self.document_parser.parse_documents()
@@ -30,36 +32,34 @@ class InvertedIndex:
         print(f"> Parsing time: {parse_time} seconds")
 
         start_time = time.time()
-        for doc in self.document_parser.parsed_documents:
-            docno = list(doc.keys())[0]
-            tokens = doc[docno]['terms']
-            x_path = doc[docno]['XPath']
+        for docno, data in self.document_parser.parsed_documents.items():
+            terms = data['terms']
+            x_path = data['XPath']
 
-            for token in tokens:  # Assuming tokens is a string separated by spaces
-                if token not in index:
-                    index[token] = [{"XPath": x_path, "docno": [docno]}]
-                    term_frequencies[token] = {docno: 1}
-                    document_frequencies[token] = 1
+            term_count = defaultdict(int)
+            for term in terms:
+                term_count[term] += 1
+
+            for term, count in term_count.items():
+                if docno not in term_frequencies[term]:
+                    document_frequencies[term] += 1
+                term_frequencies[term][docno] += count
+
+                entry_exists = any(entry["XPath"] == x_path for entry in index[term])
+                if not entry_exists:
+                    index[term].append({"XPath": x_path, "docno": [docno]})
                 else:
-                    found = False
-                    for entry in index[token]:
+                    for entry in index[term]:
                         if entry["XPath"] == x_path:
                             if docno not in entry["docno"]:
-                                entry["docno"].append(docno) 
-                            
-                            term_frequencies.setdefault(token, {}).setdefault(docno, 0)
-                            term_frequencies[token][docno] += 1
-                            document_frequencies[token] += 1
-                            found = True
+                                entry["docno"].append(docno)
                             break
 
-                    if not found:
-                        index[token].append({"XPath": x_path, "docno": [docno]})
-                        term_frequencies.setdefault(token, {}).setdefault(docno, 0)
-                        term_frequencies[token][docno] += 1
-                        document_frequencies[token] += 1
-
         end_time = time.time()
+
+        # Filter out the None entries added for duplicate XPaths
+        for term in index:
+            index[term] = [entry for entry in index[term] if entry]
 
         self.indexing_time = end_time - start_time
         self.IDX = index

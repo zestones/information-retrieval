@@ -1,6 +1,6 @@
 from weighting_strategies.weighting_strategy import WeightingStrategy
-
 import time
+
 
 class LTNWeighting(WeightingStrategy):
     def calculate_weight(self, collection):
