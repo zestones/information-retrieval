@@ -11,7 +11,10 @@ class DocumentParser:
         self.filename = filename
         self.text_processor = text_processor
 
-        self.parser_granularity = parser_granularity
+        if (parser_granularity is None):
+            self.parser_granularity = ['.//article']
+        else :
+            self.parser_granularity = parser_granularity
         
         # A dictionary with the document number as key and the content as value
         # ex: {'doc1': [This, is, the, content, of, the, document]}
@@ -85,7 +88,8 @@ class DocumentParser:
         docno = filename.split('/')[-1].split('.')[0]
         content = ' '.join(lines)
 
-        content = re.sub('&[^;]+;', '', content)
+        # TOFIX: can't remove &nbsp; with this regex (replace with a space ?)
+        content = re.sub('&[^;]+;', ' ', content)
         
         # Parse XML after handling entities
         root = ET.ElementTree(ET.fromstring(content))
@@ -111,30 +115,4 @@ class DocumentParser:
                     xpath = self.get_xpath(balise, parent_map)  # Get XPath of the element
                     parsed_documents.append({docno: {'XPath': xpath, 'terms': text}})
 
-        return parsed_documents
-
-    def remove_tags(self, filename, lines: list) -> list:
-        """
-        Removes the tags from the document lines and returns a list of dictionaries.
-        """
-        parsed_documents = []
-        docno = filename.split('/')[-1].split('.')[0]
-
-        content = ' '.join(lines)
-        content = self.basic_clean(content)
-
-        # remove the xml tags with a regex
-        content = re.sub('<[^<]+>', '', content)
-
-        # remove the newlines
-        content = content.replace('\n', ' ')
-
-        # remove the multiple spaces
-        content = re.sub(' +', ' ', content)
-
-        # remove the leading and trailing spaces
-        content = content.strip()
-
-        parsed_documents.append({docno: {'XPath': '/article', 'terms': content}})
-        
         return parsed_documents

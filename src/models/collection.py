@@ -86,7 +86,7 @@ class Collection:
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
         """
-        return len(self.inverted_index.IDX.get(term, []))
+        return len(self.inverted_index.IDX.get(term, [])[0].get('docno', []))
 
     def term_frequency(self, docno: str, term: str) -> int:
         """
