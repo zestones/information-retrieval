@@ -59,6 +59,6 @@ custom_practice5:
 
 # run practice5v2 script with custom parameters
 custom:
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt --export-weighted-idx -g './/article' && \
 	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
 	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article'
