@@ -100,7 +100,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     # xml/10013.xml
-    collection = Collection('../lib/data/practice_05/small.zip',
+    collection = Collection('../lib/data/practice_05/XML-Coll-withSem.zip',
                             plot_statistics=args.plot,
                             import_collection=args.import_inverted_index,
                             export_collection=args.export_inverted_index,
