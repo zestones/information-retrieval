@@ -33,32 +33,34 @@ class InvertedIndex:
 
         start_time = time.time()
         for docno, data in self.document_parser.parsed_documents.items():
-            terms = data['terms']
-            x_path = data['XPath']
 
-            term_count = defaultdict(int)
-            for term in terms:
-                term_count[term] += 1
+            for entry in data:
+                x_path = entry["XPath"]
+                terms = entry["terms"]
 
-            for term, count in term_count.items():
-                if x_path not in term_frequencies[term]:
-                    term_frequencies[term][x_path] = {docno: count}
-                else:
-                    if docno not in term_frequencies[term][x_path]:
-                        term_frequencies[term][x_path][docno] = count
+                term_count = defaultdict(int)
+                for term in terms:
+                    term_count[term] += 1
+
+                for term, count in term_count.items():
+                    if x_path not in term_frequencies[term]:
+                        term_frequencies[term][x_path] = {docno: count}
                     else:
-                        term_frequencies[term][x_path][docno] += count
+                        if docno not in term_frequencies[term][x_path]:
+                            term_frequencies[term][x_path][docno] = count
+                        else:
+                            term_frequencies[term][x_path][docno] += count
 
-                # Mettre à jour l'index si nécessaire
-                entry_exists = any(entry["XPath"] == x_path for entry in index[term])
-                if not entry_exists:
-                    index[term].append({"XPath": x_path, "docno": [docno]})
-                else:
-                    for entry in index[term]:
-                        if entry["XPath"] == x_path:
-                            if docno not in entry["docno"]:
-                                entry["docno"].append(docno)
-                            break
+                    # Mettre à jour l'index si nécessaire
+                    entry_exists = any(entry["XPath"] == x_path for entry in index[term])
+                    if not entry_exists:
+                        index[term].append({"XPath": x_path, "docno": [docno]})
+                    else:
+                        for entry in index[term]:
+                            if entry["XPath"] == x_path:
+                                if docno not in entry["docno"]:
+                                    entry["docno"].append(docno)
+                                break
 
         end_time = time.time()
 

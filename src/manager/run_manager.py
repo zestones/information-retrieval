@@ -266,10 +266,14 @@ class RunManager:
         run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
 
         scheme = self.get_weighting_scheme(self.args.ltn, self.args.ltc, self.args.bm25)
-        run_file_path = self.construct_run_name(
-            run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity)
-        query_manager = QueryManager(collection)
+        if self.args.bm25:
+            run_file_path = self.construct_run_name(
+                run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter")
+        else:
+            run_file_path = self.construct_run_name(
+                run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter")
 
+        query_manager = QueryManager(collection)
         parsed_queries = query_manager.parse_query_file(self.args.query_file)
 
         for query_id, query in parsed_queries:

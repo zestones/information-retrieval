@@ -32,7 +32,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     RunManager(args).run()
-    
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
