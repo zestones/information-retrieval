@@ -88,11 +88,17 @@ class Collection:
         """
         return len(self.inverted_index.IDX.get(term, [])[0].get('docno', []))
 
-    def term_frequency(self, docno: str, term: str) -> int:
+    def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
-        Returns the term frequency of a term in a document.
+        Returns the term frequency of a term in a document at a specific XPath.
         """
-        return self.inverted_index.TF.get(term, {}).get(docno, 0)
+        term_frequencies = self.inverted_index.TF
+
+        if term in term_frequencies and x_path in term_frequencies[term]:
+            doc_freqs = term_frequencies[term][x_path]
+            return doc_freqs.get(docno, 0)
+        else:
+            return 0
 
     def document_length(self, docno: str) -> int:
         """
@@ -108,7 +114,7 @@ class Collection:
             frequency = 0
             for entry in postings:
                 docno_list = entry.get('docno', [])
-                frequency += sum(self.term_frequency(docno, term) for docno in docno_list)
+                frequency += sum(self.term_frequency(docno, term, entry['XPath']) for docno in docno_list)
             self.collection_frequencies[term] = frequency
 
     # -------------------------------------------------

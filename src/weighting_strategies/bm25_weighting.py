@@ -27,7 +27,7 @@ class BM25Weighting(WeightingStrategy):
                 for docno in entry.get('docno', []):
                     # Document length
                     dl = collection.document_length(docno)
-                    tf = collection.term_frequency(docno, term)
+                    tf = collection.term_frequency(docno, term, entry['XPath'])
 
                     # Calculate BM25 weight for the term in the document
                     weight = (tf * (self.k1 + 1)) / \

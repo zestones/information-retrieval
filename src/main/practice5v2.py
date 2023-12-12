@@ -42,9 +42,9 @@ def construct_run_name(run_id, weighting_scheme, k1=None, b=None, granularity=No
     if granularity:
         # join the list of strings with a _ and replace each './/' with ''
         granularity_str = '_'.join(granularity).replace('.//', '')
-        return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_" + granularity_str + "_articles_stop671_porter.txt"
+        return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_" + granularity_str + "_stop671_porter.txt"
     else:
-        return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter.txt"
+        return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_stop671_porter.txt"
 
     # return "../docs/resources/runs/BengezzouIdrissMezianeGhilas_" + str(run_id) + "_" + weighting_scheme + "_articles_stop671_porter_k" + str(k1) + "_b" + str(b) + ".txt"
 

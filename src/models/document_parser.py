@@ -114,5 +114,5 @@ class DocumentParser:
                     text = self.basic_clean(text)
                     xpath = self.get_xpath(balise, parent_map)  # Get XPath of the element
                     parsed_documents.append({docno: {'XPath': xpath, 'terms': text}})
-
+                    
         return parsed_documents
