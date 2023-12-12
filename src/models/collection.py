@@ -36,10 +36,11 @@ class Collection:
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
                  export_weighted_idx: bool = False,
-                 parser_granularity: list = ['.//article']
-                ):
-        
-        self.text_processor = CustomTextProcessor()
+                 parser_granularity: list = ['.//article'],
+                 text_processor: TextProcessor = CustomTextProcessor()
+                 ):
+
+        self.text_processor = text_processor
         self.filename = filename
 
         # Init the DocumentParser with the filename and the text processor
@@ -114,7 +115,8 @@ class Collection:
             frequency = 0
             for entry in postings:
                 docno_list = entry.get('docno', [])
-                frequency += sum(self.term_frequency(docno, term, entry['XPath']) for docno in docno_list)
+                frequency += sum(self.term_frequency(docno, term,
+                                 entry['XPath']) for docno in docno_list)
             self.collection_frequencies[term] = frequency
 
     # -------------------------------------------------

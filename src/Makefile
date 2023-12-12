@@ -50,6 +50,9 @@ practice5:
 practice5v2:
 	$(PYTHON) $(MAIN_DIR)/practice5v2.py $(ARGS)
 
+# practice5v3 script
+practice5v3:
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py $(ARGS)
 
 # run practice5 script with custom parameters 
 custom_practice5:

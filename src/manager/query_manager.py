@@ -9,6 +9,31 @@ class QueryManager:
         self.weighted_index = collection.weighted_index
         self.text_processor = collection.text_processor
 
+        self.QUERY_FILE = '../lib/data/practice_04/topics_M2DSC_7Q.txt'
+
+    def parse_query_file(self, query_file):
+        if (query_file is None):
+            query_file = self.QUERY_FILE
+
+        parsed_queries = []
+        with open(query_file, 'r') as file:
+            for line in file:
+                if not line.strip():
+                    continue
+                parts = line.strip().split(' ', 1)
+
+                if len(parts) == 2:
+                    query_id, query = parts
+                    parsed_queries.append((query_id, query))
+
+        return parsed_queries
+
+    def launch_query(self, query_id, query):
+        res = self.RSV(query)
+        query_results = self.format_query_results(query_id, res, "BengezzouIdrissMezianeGhilas")
+
+        return query_results
+
     def process_query(self, query):
         """
         Processes the query.
