@@ -53,13 +53,17 @@ class Collection:
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
         if (import_collection):
-            print(Fore.GREEN + f'Importing collection : {self.label}' + Style.RESET_ALL)
+            granularity_str = '_'.join(parser_granularity).replace('.//', '')
+            print(Fore.GREEN
+                  + f'Importing collection : {self.label}_{granularity_str}' + Style.RESET_ALL)
             self.inverted_index.import_inverted_index(f'../res/{self.label}.json')
         else:
             print(Fore.GREEN + f'Indexing collection : {self.label}' + Style.RESET_ALL)
             self.inverted_index.construct_inverted_index()
             if export_collection:
-                self.inverted_index.export_inverted_index(f'../res/{self.label}.json')
+                granularity_str = '_'.join(parser_granularity).replace('.//', '')
+                self.inverted_index.export_inverted_index(
+                    f'../res/{self.label}_{granularity_str}.json')
 
         print(Fore.YELLOW + "> Indexing time:",
               self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)

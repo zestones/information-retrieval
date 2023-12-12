@@ -251,7 +251,7 @@ class RunManager:
         self.run_baseline_with_no_stop_and_no_stem()
 
     def run_custom(self):
-        collection = Collection('../lib/data/practice_05/small.zip',
+        collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
                                 import_collection=self.args.import_inverted_index,
                                 export_collection=self.args.export_inverted_index,
