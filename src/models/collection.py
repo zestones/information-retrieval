@@ -35,13 +35,15 @@ class Collection:
                  ltn_weighting: bool = False,
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
-                 export_weighted_idx: bool = False
-                 ):
+                 export_weighted_idx: bool = False,
+                 parser_granularity: list = ['.//article']
+                ):
+        
         self.text_processor = CustomTextProcessor()
         self.filename = filename
 
         # Init the DocumentParser with the filename and the text processor
-        self.document_parser = DocumentParser(filename, self.text_processor)
+        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity)
         self.inverted_index = InvertedIndex(self.document_parser)
 
         self.label = filename.split('/')[-1].split('.')[0]
@@ -84,13 +86,19 @@ class Collection:
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
         """
-        return len(self.inverted_index.IDX.get(term, []))
+        return len(self.inverted_index.IDX.get(term, [])[0].get('docno', []))
 
-    def term_frequency(self, docno: str, term: str) -> int:
+    def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
-        Returns the term frequency of a term in a document.
+        Returns the term frequency of a term in a document at a specific XPath.
         """
-        return self.inverted_index.TF.get(term, {}).get(docno, 0)
+        term_frequencies = self.inverted_index.TF
+
+        if term in term_frequencies and x_path in term_frequencies[term]:
+            doc_freqs = term_frequencies[term][x_path]
+            return doc_freqs.get(docno, 0)
+        else:
+            return 0
 
     def document_length(self, docno: str) -> int:
         """
@@ -103,7 +111,10 @@ class Collection:
         Calculate collection frequency of terms.
         """
         for term, postings in self.inverted_index.IDX.items():
-            frequency = sum(self.term_frequency(docno, term) for docno in postings)
+            frequency = 0
+            for entry in postings:
+                docno_list = entry.get('docno', [])
+                frequency += sum(self.term_frequency(docno, term, entry['XPath']) for docno in docno_list)
             self.collection_frequencies[term] = frequency
 
     # -------------------------------------------------

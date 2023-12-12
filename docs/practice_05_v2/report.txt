@@ -1,0 +1,47 @@
+Pour ce rendu nous avons fait pas mal de modification. Nous avons revus dans un premier temps notre pre-processing, car lors de test, en parcourant nos "inverted index" nous avons remarqué
+qu'il y avait encore des chiffres, des caractères spéciaux (unicode) ainsi que les mots vide ("") qui n'avaient pas été supprimé. Nous avons donc revus notre pre-processing pour supprimer ces caractères et améliorer
+la qualité de notre index. 
+
+voici les nouvelles stats :
+- indexing_time: 9.25250506401062
+- avg_collection_lengths: 641.9440024479804
+- avg_term_lengths_in_collection: 5.864744380891288
+- collection_vocabulary_sizes: 207965
+- collection_frequency_of_terms: 6293619
+
+en comparaison les anciennes stats :
+- indexing_time: 6.096012115478516
+- avg_collection_lengths: 1040.3125956144825
+- avg_term_lengths_in_collection: 4.104918716444168
+- collection_vocabulary_sizes: 337483
+- collection_frequency_of_terms: 10200265
+
+Nous avons également remarqué que les resultats de nos requêtes etait globalement meilleurs mais que le classement ne changeait pas énormément, il y a quelque permutation globalement.
+
+---
+
+Ensuite, commencer à travailler sur le parsing xml en prenant en compte les balises qui nous intéressent à l'aide de la librairie lxml. 
+Cette étape nous à fait revoir notre code car il a fallu stocker les chemins XPath dans notre inverted index.
+
+Notre inverted index est donc composé de la manière suivante :
+"fat": [
+    {
+        "XPath": "/article[1]/bite[1]/edible_nut[1]/bdy[1]/sec[13]/p[2]",
+        "docno": ["1064", "612"]
+    }
+],
+"oil": [
+    {
+        "XPath": "/article[1]/bite[1]/edible_nut[1]/bdy[1]/sec[13]/p[2]",
+        "docno": ["1064"]
+    }
+]
+
+Une des difficultés a été d'ajouter ces infos dans notre inverted index, sans perdre en performance et en temps d'execution. Car il a fallu parcourir le fichier xml pour récupérer les XPath et les stocker dans notre inverted index. 
+
+Ensuite une question que l'on s'est posé, est pour le calcul du tf-idf, est-ce que l'on doit prendre en compte le nombre de fois que le mot apparait dans le document ou le nombre de fois que le mot apparait dans le XPath.
+Nous avons donc fait les deux et nous avons remarqué que les résultats était légèrement meilleur en prenant en compte le nombre de fois que le mot apparait dans le XPath.
+
+
+On moyenne le temps d'execution est de 9 secondes pour indexer les documents et de 2-3 secondes pour faire une requête.
+En réalité, nous ne generons pas l'index à chaque fois, nous le stockons dans un fichier json et nous le chargeons à chaque fois que nous en avons besoin. Cela nous permet de gagner du temps et de ne pas avoir à générer l'index à chaque fois.

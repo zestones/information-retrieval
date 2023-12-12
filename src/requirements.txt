@@ -6,3 +6,5 @@ flake8-import-order
 spacy
 gensim
 tabulate
+lxml
+ftfy

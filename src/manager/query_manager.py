@@ -19,17 +19,26 @@ class QueryManager:
         document_scores = {}
         query_terms = self.process_query(query)
 
-        # lets remove duplicates
+        # Remove duplicates from query_terms
         query_terms = list(set(query_terms))
 
         for term in query_terms:
             if term in self.weighted_index:
-                for docno, score in self.weighted_index[term].items():
-                    if docno not in document_scores:
-                        document_scores[docno] = 0
-                    document_scores[docno] += score
+                for entry in self.weighted_index[term]:
+                    docno = entry['docno']
+                    xpath = entry['XPath']
+                    score = entry['weight']
 
-        return sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
+                    # Accumulate scores only if term occurs in the same document and XPath
+                    doc_xpath_key = (docno, xpath)
+                    if doc_xpath_key not in document_scores:
+                        document_scores[doc_xpath_key] = 0
+                    document_scores[doc_xpath_key] += score
+
+        # Transform the dictionary into a list of tuples and sort by score
+        sorted_document_scores = sorted(document_scores.items(), key=lambda x: x[1], reverse=True)
+
+        return sorted_document_scores
 
     def normalize_query(self, query):
         """
@@ -72,11 +81,12 @@ class QueryManager:
         """
         Prints the query results inside a table.
         """
-        headers = ["Docno", "Score"]
+        headers = ["Docno", "Score", "XPath"]
         table = []
 
-        for docno, score in results[: 10]:
-            table.append([docno, score])
+        for entry, score in results[: 10]:
+            docno, xpath = entry
+            table.append([docno, xpath, score])
 
         print(Fore.GREEN + f'Query: {query}' + Style.RESET_ALL)
         print(tabulate(table, headers=headers, tablefmt="fancy_grid"))
@@ -87,10 +97,8 @@ class QueryManager:
         Returns the query results as a list.
         """
         query_results = []
-        xml_path = '/article[1]'
-
         for rank, (docno, score) in enumerate(results[:1500], start=1):
-            article_id = docno
-            query_results.append((query, 'Q0', article_id, rank, score, run_id, xml_path))
+            article_id, xpath = docno
+            query_results.append((query, 'Q0', article_id, rank, score, run_id, xpath))
 
         return query_results

@@ -4,8 +4,6 @@ from weighting_strategies.ltn_weighting import LTNWeighting
 import math
 import time
 
-import numpy as np
-
 
 class LTCWeighting(WeightingStrategy):
     def calculate_weight(self, collection):
@@ -28,8 +26,9 @@ class LTCWeighting(WeightingStrategy):
         sum_of_squares_dict = self._compute_sum_of_squares(collection, weighted_index)
 
         # Normalize the weights
-        for term, postings in collection.inverted_index.IDX.items():
-            for docno in postings:
+        for _, entries in weighted_index.items():
+            for entry in entries:
+                docno = entry['docno']
                 sum_of_squares = sum_of_squares_dict[docno]
 
                 # Calculate the normalization factor
@@ -38,7 +37,7 @@ class LTCWeighting(WeightingStrategy):
 
                 # Apply the length normalization to the weight for term 'term' in document 'docno'
                 # w_ln(i, d): Weight of term 'term' in document 'docno' after length normalization
-                weighted_index[term][docno] *= normalization_factor
+                entry['weight'] *= normalization_factor
         return weighted_index
 
     def _compute_sum_of_squares(self, collection, weighted_index):
@@ -46,13 +45,13 @@ class LTCWeighting(WeightingStrategy):
         Computes the sum of squares for each document in the collection.
         """
         sum_of_squares_dict = {}
-        for term, postings in collection.inverted_index.IDX.items():
-            docnos = set(postings)
-            for docno in docnos.intersection(weighted_index[term]):
+        for term, entries in weighted_index.items():
+            for entry in entries:
+                docno = entry['docno']
                 sum_of_squares_dict.setdefault(docno, 0)
 
                 # Calculate the square of the weight for term 'term' in document 'docno' and add it to the sum of squares
                 # w_ln(i, d): Weight of term 'term' in document 'docno' after length normalization
-                sum_of_squares_dict[docno] += math.pow(weighted_index[term].get(docno, 0), 2)
+                sum_of_squares_dict[docno] += math.pow(entry['weight'], 2)
 
         return sum_of_squares_dict

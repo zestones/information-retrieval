@@ -51,6 +51,24 @@ class TextProcessor:
         Removes punctuation from the list of tokens.
         """
         return tokens
+    
+    def remove_uni_chars(self, tokens: list) -> list:
+        """
+        Removes single characters from the list of tokens.
+        """
+        return tokens
+    
+    def remove_unicode(self, tokens: list) -> list:
+        """
+        Removes unicode characters from the list of tokens.
+        """
+        return tokens
+    
+    def remove_empty(self, tokens: list) -> list:
+        """
+        Removes empty strings from the list of tokens.
+        """
+        return [token for token in tokens if token != '']
 
     def pre_processing(self, text: str) -> list:
         """
@@ -59,15 +77,20 @@ class TextProcessor:
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
+        
         tokens = self.remove_stop_words(tokens)
-        tokens = self.remove_numbers(tokens)
         tokens = self.remove_punctuation(tokens)
+        tokens = self.remove_numbers(tokens)
+        
+        tokens = self.remove_uni_chars(tokens)
+        tokens = self.remove_unicode(tokens)
+        tokens = self.remove_empty(tokens)
+        
         return tokens
 
     def load_stopwords_from_file(self, file_path: str):
         with open(file_path, 'r') as file:
             stopwords = set(word.strip() for word in file)
-            print("\n\nLOAD STOPWORDS_FROM_FILE: ", len(stopwords))
         return stopwords
 
 
@@ -129,7 +152,6 @@ class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
         self.stemmer = PorterStemmer()
         self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
-        print("\nSTOP WORDS IN CUSTOMTEXTPROCESSOR ", len(self.stop_words))
 
     def stem(self, tokens: list) -> list:
         """
@@ -145,15 +167,27 @@ class CustomTextProcessor(TextProcessor):
 
     def remove_numbers(self, tokens: list) -> list:
         """
-        Removes numbers and digits from the list of tokens.
+        Removes tokens containing numbers from the list of tokens.
         """
-        return [token for token in tokens if not re.match(r'^\d+(\.\d+)?$', token)]
+        return [token for token in tokens if not re.search(r'\d', token)]
 
     def remove_punctuation(self, tokens: list) -> list:
         """
         Removes punctuation from the list of tokens using a regex.
         """
         return [re.sub(r'[^\w\s]', '', token) for token in tokens]
+    
+    def remove_uni_chars(self, tokens: list) -> list:
+        """
+        Removes single characters from the list of tokens using a regex.
+        """
+        return [re.sub(r'\b\w\b', '', token) for token in tokens]
+    
+    def remove_unicode(self, tokens: list) -> list:
+        """
+        Removes unicode characters from the list of tokens using a regex.
+        """
+        return [re.sub(r'[^\x00-\x7F]+', '', token) for token in tokens]
 
 
 class RegexTextProcessor(TextProcessor):
