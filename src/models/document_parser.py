@@ -55,9 +55,6 @@ class DocumentParser:
                 parsed_doc = self.parse_xml_to_json(self.filename, file.readlines())
                 all_parsed_documents.update(parsed_doc)
 
-        with open('parsed_documents.json', 'w') as f:
-            json.dump(all_parsed_documents, f)
-
         return all_parsed_documents
 
     def basic_clean(self, text: str):

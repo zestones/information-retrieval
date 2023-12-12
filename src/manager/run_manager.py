@@ -16,7 +16,7 @@ class RunManager:
     def __init__(self, args):
         self.RUN_OUTPUT_FOLDER = "../docs/resources/runs/"
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
         self.args = args
 
     def run(self):
@@ -57,7 +57,7 @@ class RunManager:
         else:
             raise ValueError("No weighting scheme selected")
 
-    def evaluate_baseline(self, collection, ltn, ltc, bm25, k1=None, b=None, text_processor="stop671_porter"):
+    def evaluate_baseline(self, collection, ltn, ltc, bm25, k1=None, b=None, text_processor="None"):
         """
         Runs the baseline. The baseline generates 12 runs : 3 (weighting schemes) * 2 (stop-list) * 2 (stemmer)
         """
@@ -86,7 +86,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=self.args.granularity
                                 )
-        self.evaluate_baseline(collection, True, False, False, "stop671_porter")
+        self.evaluate_baseline(collection, True, False, False, text_processor="stop671_porter")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -99,7 +99,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=self.args.granularity
                                 )
-        self.evaluate_baseline(collection, False, True, False, "stop671_porter")
+        self.evaluate_baseline(collection, False, True, False, text_processor="stop671_porter")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -128,7 +128,7 @@ class RunManager:
                                 parser_granularity=self.args.granularity,
                                 text_processor=CustomTextProcessorNoStem()
                                 )
-        self.evaluate_baseline(collection, True, False, False, "stop671_nostem")
+        self.evaluate_baseline(collection, True, False, False, text_processor="stop671_nostem")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -141,7 +141,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=self.args.granularity
                                 )
-        self.evaluate_baseline(collection, False, True, False, "stop671_nostem")
+        self.evaluate_baseline(collection, False, True, False, text_processor="stop671_nostem")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -170,7 +170,7 @@ class RunManager:
                                 parser_granularity=self.args.granularity,
                                 text_processor=CustomTextProcessorNoStop()
                                 )
-        self.evaluate_baseline(collection, True, False, False, "nostop_porter")
+        self.evaluate_baseline(collection, True, False, False, text_processor="nostop_porter")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -183,7 +183,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=self.args.granularity
                                 )
-        self.evaluate_baseline(collection, False, True, False, "nostop_porter")
+        self.evaluate_baseline(collection, False, True, False, text_processor="nostop_porter")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -212,7 +212,7 @@ class RunManager:
                                 parser_granularity=self.args.granularity,
                                 text_processor=CustomTextProcessorNoStopNoStem()
                                 )
-        self.evaluate_baseline(collection, True, False, False, "nostop_nostem")
+        self.evaluate_baseline(collection, True, False, False, text_processor="nostop_nostem")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,
@@ -225,7 +225,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=self.args.granularity
                                 )
-        self.evaluate_baseline(collection, False, True, False, "nostop_nostem")
+        self.evaluate_baseline(collection, False, True, False, text_processor="nostop_nostem")
 
         collection = Collection(self.COLLECTION_FILE,
                                 plot_statistics=self.args.plot,

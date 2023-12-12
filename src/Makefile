@@ -54,26 +54,39 @@ practice5v2:
 practice5v3:
 	$(PYTHON) $(MAIN_DIR)/practice5v3.py $(ARGS)
 
-# run practice5 script with custom parameters 
-custom_practice5:
-	$(PYTHON) $(MAIN_DIR)/practice5.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
-	$(PYTHON) $(MAIN_DIR)/practice5.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
-	$(PYTHON) $(MAIN_DIR)/practice5.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt
 
-# run practice5v2 script with custom parameters
+# ------------------------------------- #
+# ---------- Custom commands ---------- #
+# ------------------------------------- #
+
+
+baseline:
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/bdy' './/p' './/sec' './/entry' './/row' './/category' './/list' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/p' './/sec' './/entry' './/row' './/category' './/list'
+
 custom:
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy'
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' './/table' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' './/table' './/header'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' './/table' './/header' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' './/table' './/header' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' './/table' './/category'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' './/table' './/category' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' './/table' './/category' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' './/row' './/category'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' './/row' './/category' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' './/row' './/category' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' './/row' './/category' './/list'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' './/row' './/category' './/list' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' './/row' './/category' './/list' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/bdy' './/p' './/sec' './/entry' './/row' './/category' './/list'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/bdy' './/p' './/sec' './/entry' './/row' './/category' './/list' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/bdy' './/p' './/sec' './/entry' './/row' './/category' './/list'
