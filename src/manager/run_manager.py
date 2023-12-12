@@ -16,7 +16,7 @@ class RunManager:
     def __init__(self, args):
         self.RUN_OUTPUT_FOLDER = "../docs/resources/runs/"
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
         self.args = args
 
     def run(self):

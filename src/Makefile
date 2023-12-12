@@ -66,9 +66,6 @@ baseline:
 	$(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/p' './/sec' './/entry' './/row' './/category' './/list'
 
 custom:
-	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/article' './/bdy' './/sec' './/p' './/table' './/header' './/entry' && \
 	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/table' && \
 	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/table' && \
 	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/table' && \

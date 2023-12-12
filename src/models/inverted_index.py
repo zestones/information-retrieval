@@ -18,10 +18,7 @@ class InvertedIndex:
         self.indexing_time = 0
 
     def construct_inverted_index(self) -> dict:
-        """
-        Constructs the inverted index and computes statistics.
-        """
-        term_frequencies = defaultdict(lambda: defaultdict(int))
+        term_frequencies = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         document_frequencies = defaultdict(int)
         index = defaultdict(list)
 
@@ -33,38 +30,32 @@ class InvertedIndex:
 
         start_time = time.time()
         for docno, data in self.document_parser.parsed_documents.items():
+            unique_x_paths = set()  # Store unique XPaths per document for faster checks
 
             for entry in data:
                 x_path = entry["XPath"]
                 terms = entry["terms"]
 
-                term_count = defaultdict(int)
-                for term in terms:
-                    term_count[term] += 1
+                if x_path not in unique_x_paths:
+                    unique_x_paths.add(x_path)
+                    document_frequencies[x_path] += 1
 
-                for term, count in term_count.items():
-                    if x_path not in term_frequencies[term]:
-                        term_frequencies[term][x_path] = {docno: count}
-                    else:
-                        if docno not in term_frequencies[term][x_path]:
-                            term_frequencies[term][x_path][docno] = count
+                    term_count = defaultdict(int)
+                    for term in terms:
+                        term_count[term] += 1
+
+                    for term, count in term_count.items():
+                        term_frequencies[term][x_path][docno] += count
+
+                        # Update index if necessary
+                        index_entry = next((e for e in index[term] if e["XPath"] == x_path), None)
+                        if index_entry:
+                            if docno not in index_entry["docno"]:
+                                index_entry["docno"].append(docno)
                         else:
-                            term_frequencies[term][x_path][docno] += count
-
-                    # Mettre à jour l'index si nécessaire
-                    entry_exists = any(entry["XPath"] == x_path for entry in index[term])
-                    if not entry_exists:
-                        index[term].append({"XPath": x_path, "docno": [docno]})
-                    else:
-                        for entry in index[term]:
-                            if entry["XPath"] == x_path:
-                                if docno not in entry["docno"]:
-                                    entry["docno"].append(docno)
-                                break
+                            index[term].append({"XPath": x_path, "docno": [docno]})
 
         end_time = time.time()
-
-        # Filter out the None entries added for duplicate XPaths
         for term in index:
             index[term] = [entry for entry in index[term] if entry]
 
