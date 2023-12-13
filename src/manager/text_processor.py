@@ -5,6 +5,8 @@ from nltk.tokenize import word_tokenize
 from spacy.lang.en import English
 from spacy.lang.en.stop_words import STOP_WORDS
 
+from colorama import Fore 
+
 import re
 
 
@@ -73,7 +75,7 @@ class TextProcessor:
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.
-        """
+        """        
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
@@ -220,12 +222,6 @@ class CustomTextProcessorNoStopNoStem(TextProcessor):
         tokens = self.remove_empty(tokens)
 
         return tokens
-
-    def stem(self, tokens: list) -> list:
-        """
-        Stems the tokens using PorterStemmer.
-        """
-        return [self.stemmer.stem(token) for token in tokens]
 
 
 class RegexTextProcessor(TextProcessor):

@@ -11,14 +11,14 @@ class LTNWeighting(WeightingStrategy):
         weighted_index = {}
 
         for term, postings in collection.inverted_index.IDX.items():
-            for entry in postings:
+            for xpath, entry in postings.items():
                 for docno in entry.get('docno', []):
-                    weight = self.TF_IDF_weight(collection, docno, term, entry['XPath'])
+                    weight = self.TF_IDF_weight(collection, docno, term, xpath)
                     
                     if term not in weighted_index:
                         weighted_index[term] = []
                     
-                    weighted_index[term].append({"XPath": entry['XPath'], "docno": docno, "weight": weight})
+                    weighted_index[term].append({"XPath": xpath, "docno": docno, "weight": weight})
         
         end_time = time.time()
         self.print_computation_time(start_time, end_time)

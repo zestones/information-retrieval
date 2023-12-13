@@ -1,22 +1,21 @@
 from models.collection import Collection
 from manager.query_manager import QueryManager
 
-from weighting_strategies.bm25_weighting import BM25Weighting
-
 from manager.text_processor import CustomTextProcessorNoStopNoStem
 from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
-from manager.text_processor import CustomTextProcessor
 
 import os
-import numpy as np
 
 
 class RunManager:
     def __init__(self, args):
         self.RUN_OUTPUT_FOLDER = "../docs/resources/runs/"
+        if not os.path.exists(self.RUN_OUTPUT_FOLDER):
+            os.makedirs(self.RUN_OUTPUT_FOLDER)
+        
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
         self.args = args
 
     def run(self):
