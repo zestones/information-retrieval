@@ -91,14 +91,14 @@ class Collection:
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
         """
-        docno_set = set()
-        for _, inner_dict in self.inverted_index.IDX.get(term, {}).items():
-            docno_list = inner_dict.get('docno', [])
-            docno_set.update(docno_list)
+        # docno_set = set()
+        # for _, inner_dict in self.inverted_index.IDX.get(term, {}).items():
+        #     docno_list = inner_dict.get('docno', [])
+        #     docno_set.update(docno_list)
         
-        return len(docno_set)
+        # return len(docno_set)
         # ! To compute the df based on the x_path and not on the entire document
-        # return len(self.inverted_index.IDX.get(term, {}).get(x_path, {}).get('docno', []))
+        return len(self.inverted_index.IDX.get(term, {}).get(x_path, {}).get('docno', []))
 
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
