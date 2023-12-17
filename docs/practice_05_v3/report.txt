@@ -1,0 +1,37 @@
+
+Quelque précision sur les runs :
+--------------------------------
+
+Nous avons voulu tester plusieurs formules pour le calcul du df, nous avons donc généré plusieurs runs avec des formules différentes.
+
+Les run id de 1 à 3 sont généré en utilisant une formule du df sur l'ensemble des docs sans tenir comptes des XPath,
+tandis que les runs de 4 à 6 sont générés en utilisant une formule du df sur l'ensemble des docs en tenant comptes des XPath.
+Ces 6 runs sont des runs avec une granularité 'article' (uniquement les articles).
+
+Toutes les autres runs ont été générées en utilisant la formule du df sur l'ensemble des docs en tenant comptes des XPath.
+Nous avons voulus expérimenter plusieurs granularités, nous avons donc généré des runs avec les granularités suivantes : 
+- article
+- article + sec
+- article + p 
+- p + sec + entry
+- entry + header 
+- entry + category + row
+- entry + category + row
+- p + sec + table
+
+Nous avons commencé par générer des runs article + p, notre idée était d'observer les résultats retournés par les runs en observant les chemin XPath des documents retournés, et d'affiner la granularité
+en fonction des résultats obtenus. Si par exemple nous obtenions des résultats trop généraux (ex: baslise article) nous essayions d'affiner la granularité en ajoutant des éléments XPath (ex: baslise article + section). ect...
+Nous avons également essayer de parcourir les fichiers xml pour essayer de trouver des éléments qui pourraient être intéressant à ajouter à notre granularité.
+Nous avons relevé les balises category, row, table, entry, ect... qui nous semblaient intéressantes à ajouter à notre granularité pour expérimenter.  
+
+Enfin, les runs dont l'id est entre 25 et 31 sont des run baseline avec une granularité (p & sec) et les run ayant un id entre 32 et 46 sont des run baseline avec une granularité (article). 
+
+Explication du rendu en retard :
+--------------------------------
+Nous avons eu pas mal de soucis, en effets nous avions réussie à générer des runs éléments lors de la v2 cependant, on ne pouvais séléctionner qu'un seul éléments et dans cette v2 l'overlapping,
+n'était évidement pas gérer. La première chose que nous avons fait à été de changer notre parsing pour pouvoir créer un inverted index sur une selection de différent élements (ex: .//p .//sec .//article ...),
+nous avions également réussie à gérer l'overlapping cependant le temps création de notre inverted avait "explosé". Le temps d'éxécution était passé de quelques secondes à plusieurs minutes voir heurs pour les runs 
+avec beaucoup d'éléments séléctionné. 
+C'est la que nous avons pris du retard en essayant d'optimiser la création de notre index pour essayer de revenir à des temps d'éxécution que l'on pouvais avoir sur nos version précédentes.
+Avec pas mal de difficulté nous avons réussie à réduire la compléxiter de notre inverted index de O(n^2) à O(n) ce qui nous à permis de revenir a des temps similaire à nos rendu précédent (~10sec pour une run article).
+Les temps d'éxécutions varient cependant en fonction de la granularité choisis.

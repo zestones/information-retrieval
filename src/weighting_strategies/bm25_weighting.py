@@ -20,14 +20,15 @@ class BM25Weighting(WeightingStrategy):
         avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
 
         for term, postings in collection.inverted_index.IDX.items():
-            df = collection.document_frequency(term)             # Document frequency
-            idf = math.log10((N - df + 0.5) / (df + 0.5))        # Inverse document frequency
-
-            for entry in postings:
+            for x_path, entry in postings.items():
+                
+                df = collection.document_frequency(term, x_path)             # Document frequency
+                idf = math.log10((N - df + 0.5) / (df + 0.5))                # Inverse document frequency
+                
                 for docno in entry.get('docno', []):
                     # Document length
                     dl = collection.document_length(docno)
-                    tf = collection.term_frequency(docno, term, entry['XPath'])
+                    tf = collection.term_frequency(docno, term, x_path)
 
                     # Calculate BM25 weight for the term in the document
                     weight = (tf * (self.k1 + 1)) / \
@@ -39,7 +40,7 @@ class BM25Weighting(WeightingStrategy):
                         weighted_index[term] = []
                         
                     weighted_index[term].append(
-                        {"XPath": entry['XPath'], "docno": docno, "weight": weight})
+                        {"XPath": x_path, "docno": docno, "weight": weight})
 
         end_time = time.time()
         self.print_computation_time(start_time, end_time)

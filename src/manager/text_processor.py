@@ -5,6 +5,8 @@ from nltk.tokenize import word_tokenize
 from spacy.lang.en import English
 from spacy.lang.en.stop_words import STOP_WORDS
 
+from colorama import Fore 
+
 import re
 
 
@@ -38,32 +40,32 @@ class TextProcessor:
         """
         Removes the stop words from the tokens.
         """
-        return tokens
+        return [token for token in tokens if token not in self.stop_words]
 
     def remove_numbers(self, tokens: list) -> list:
         """
-        Removes numbers and digits from the list of tokens.
+        Removes tokens containing numbers from the list of tokens.
         """
-        return tokens
+        return [token for token in tokens if not re.search(r'\d', token)]
 
     def remove_punctuation(self, tokens: list) -> list:
         """
-        Removes punctuation from the list of tokens.
+        Removes punctuation from the list of tokens using a regex.
         """
-        return tokens
-    
+        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
+
     def remove_uni_chars(self, tokens: list) -> list:
         """
-        Removes single characters from the list of tokens.
+        Removes single characters from the list of tokens using a regex.
         """
-        return tokens
-    
+        return [re.sub(r'\b\w\b', '', token) for token in tokens]
+
     def remove_unicode(self, tokens: list) -> list:
         """
-        Removes unicode characters from the list of tokens.
+        Removes unicode characters from the list of tokens using a regex.
         """
-        return tokens
-    
+        return [re.sub(r'[^\x00-\x7F]+', '', token) for token in tokens]
+
     def remove_empty(self, tokens: list) -> list:
         """
         Removes empty strings from the list of tokens.
@@ -73,19 +75,19 @@ class TextProcessor:
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.
-        """
+        """        
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
-        
+
         tokens = self.remove_stop_words(tokens)
         tokens = self.remove_punctuation(tokens)
         tokens = self.remove_numbers(tokens)
-        
+
         tokens = self.remove_uni_chars(tokens)
         tokens = self.remove_unicode(tokens)
         tokens = self.remove_empty(tokens)
-        
+
         return tokens
 
     def load_stopwords_from_file(self, file_path: str):
@@ -105,12 +107,6 @@ class NltkTextProcessor(TextProcessor):
         """
         return [self.stemmer.stem(token) for token in tokens]
 
-    def remove_stop_words(self, tokens: list) -> list:
-        """
-        Removes the stop words from the tokens.
-        """
-        return [token for token in tokens if token not in self.stop_words]
-
 
 class SnowballTextProcessor(TextProcessor):
     def __init__(self) -> None:
@@ -122,12 +118,6 @@ class SnowballTextProcessor(TextProcessor):
         Stems the tokens using SnowballStemmer.
         """
         return [self.stemmer.stem(token) for token in tokens]
-
-    def remove_stop_words(self, tokens: list) -> list:
-        """
-        Removes the stop words from the tokens.
-        """
-        return [token for token in tokens if token not in self.stop_words]
 
 
 class SpacyTextProcessor(TextProcessor):
@@ -141,12 +131,6 @@ class SpacyTextProcessor(TextProcessor):
         """
         return [token.lemma_ for token in self.nlp(' '.join(tokens)) if not token.is_stop]
 
-    def remove_stop_words(self, tokens: list) -> list:
-        """
-        Removes the stop words from the tokens.
-        """
-        return [token for token in tokens if token not in self.stop_words]
-
 
 class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
@@ -159,35 +143,85 @@ class CustomTextProcessor(TextProcessor):
         """
         return [self.stemmer.stem(token) for token in tokens]
 
-    def remove_stop_words(self, tokens: list) -> list:
-        """
-        Removes the stop words from the tokens.
-        """
-        return [token for token in tokens if token not in self.stop_words]
 
-    def remove_numbers(self, tokens: list) -> list:
-        """
-        Removes tokens containing numbers from the list of tokens.
-        """
-        return [token for token in tokens if not re.search(r'\d', token)]
+class CustomTextProcessorNoStem(TextProcessor):
+    def __init__(self) -> None:
+        self.stemmer = PorterStemmer()
+        self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
 
-    def remove_punctuation(self, tokens: list) -> list:
+    def pre_processing(self, text: str) -> list:
         """
-        Removes punctuation from the list of tokens using a regex.
+        Performs pre-processing on the text.
         """
-        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
-    
-    def remove_uni_chars(self, tokens: list) -> list:
+        tokens = self.tokenize(text)
+        tokens = self.normalize(tokens)
+
+        tokens = self.remove_stop_words(tokens)
+        tokens = self.remove_punctuation(tokens)
+        tokens = self.remove_numbers(tokens)
+
+        tokens = self.remove_uni_chars(tokens)
+        tokens = self.remove_unicode(tokens)
+        tokens = self.remove_empty(tokens)
+
+        return tokens
+
+    def stem(self, tokens: list) -> list:
         """
-        Removes single characters from the list of tokens using a regex.
+        Stems the tokens using PorterStemmer.
         """
-        return [re.sub(r'\b\w\b', '', token) for token in tokens]
-    
-    def remove_unicode(self, tokens: list) -> list:
+        return [self.stemmer.stem(token) for token in tokens]
+
+
+class CustomTextProcessorNoStop(TextProcessor):
+    def __init__(self) -> None:
+        self.stemmer = PorterStemmer()
+        self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
+
+    def pre_processing(self, text: str) -> list:
         """
-        Removes unicode characters from the list of tokens using a regex.
+        Performs pre-processing on the text.
         """
-        return [re.sub(r'[^\x00-\x7F]+', '', token) for token in tokens]
+        tokens = self.tokenize(text)
+        tokens = self.normalize(tokens)
+        tokens = self.stem(tokens)
+
+        tokens = self.remove_punctuation(tokens)
+        tokens = self.remove_numbers(tokens)
+
+        tokens = self.remove_uni_chars(tokens)
+        tokens = self.remove_unicode(tokens)
+        tokens = self.remove_empty(tokens)
+
+        return tokens
+
+    def stem(self, tokens: list) -> list:
+        """
+        Stems the tokens using PorterStemmer.
+        """
+        return [self.stemmer.stem(token) for token in tokens]
+
+
+class CustomTextProcessorNoStopNoStem(TextProcessor):
+    def __init__(self) -> None:
+        self.stemmer = PorterStemmer()
+        self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
+
+    def pre_processing(self, text: str) -> list:
+        """
+        Performs pre-processing on the text.
+        """
+        tokens = self.tokenize(text)
+        tokens = self.normalize(tokens)
+
+        tokens = self.remove_punctuation(tokens)
+        tokens = self.remove_numbers(tokens)
+
+        tokens = self.remove_uni_chars(tokens)
+        tokens = self.remove_unicode(tokens)
+        tokens = self.remove_empty(tokens)
+
+        return tokens
 
 
 class RegexTextProcessor(TextProcessor):
@@ -219,21 +253,3 @@ class RegexTextProcessor(TextProcessor):
         Converts the tokens to lowercase.
         """
         return [token.lower() for token in tokens]
-
-    def remove_punctuation(self, tokens):
-        """
-        Removes punctuation from the list of tokens using a regex.
-        """
-        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
-
-    def remove_numbers(self, tokens):
-        """
-        Removes numbers and digits from the list of tokens.
-        """
-        return [token for token in tokens if not re.match(r'^\d+(\.\d+)?$', token)]
-
-    def remove_stop_words(self, tokens):
-        """
-        Removes the stop words from the tokens.
-        """
-        return [token for token in tokens if token not in self.stop_words]

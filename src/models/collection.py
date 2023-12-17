@@ -14,8 +14,8 @@ from models.statistics import Statistics
 from models.document_parser import DocumentParser
 from models.inverted_index import InvertedIndex
 
+import json
 
-import time
 from colorama import Fore, Style
 
 
@@ -36,10 +36,11 @@ class Collection:
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
                  export_weighted_idx: bool = False,
-                 parser_granularity: list = ['.//article']
-                ):
-        
-        self.text_processor = CustomTextProcessor()
+                 parser_granularity: list = ['.//article'],
+                 text_processor: TextProcessor = CustomTextProcessor()
+                 ):
+
+        self.text_processor = text_processor
         self.filename = filename
 
         # Init the DocumentParser with the filename and the text processor
@@ -52,13 +53,17 @@ class Collection:
         # ex: {'term': {'doc1': 2, 'doc2': 1}}
         self.collection_frequencies = {}
         if (import_collection):
-            print(Fore.GREEN + f'Importing collection : {self.label}' + Style.RESET_ALL)
-            self.inverted_index.import_inverted_index(f'../res/{self.label}.json')
+            granularity_str = '_'.join(parser_granularity).replace('.//', '')
+            print(Fore.GREEN
+                  + f'Importing collection : {self.label}_{granularity_str}' + Style.RESET_ALL)
+            self.inverted_index.import_inverted_index(f'../res/{self.label}_{granularity_str}.json')
         else:
             print(Fore.GREEN + f'Indexing collection : {self.label}' + Style.RESET_ALL)
             self.inverted_index.construct_inverted_index()
             if export_collection:
-                self.inverted_index.export_inverted_index(f'../res/{self.label}.json')
+                granularity_str = '_'.join(parser_granularity).replace('.//', '')
+                self.inverted_index.export_inverted_index(
+                    f'../res/{self.label}_{granularity_str}.json')
 
         print(Fore.YELLOW + "> Indexing time:",
               self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
@@ -81,21 +86,26 @@ class Collection:
             WeightingStrategy().export_weighted_index(
                 self.weighted_index, f'../res/{self.label}_weighted.json')
 
-    def document_frequency(self, term: str) -> int:
+    def document_frequency(self, term: str, x_path: str) -> int:
         """
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
         """
-        return len(self.inverted_index.IDX.get(term, [])[0].get('docno', []))
+        # docno_set = set()
+        # for _, inner_dict in self.inverted_index.IDX.get(term, {}).items():
+        #     docno_list = inner_dict.get('docno', [])
+        #     docno_set.update(docno_list)
+        
+        # return len(docno_set)
+        # ! To compute the df based on the x_path and not on the entire document
+        return len(self.inverted_index.IDX.get(term, {}).get(x_path, {}).get('docno', []))
 
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
         Returns the term frequency of a term in a document at a specific XPath.
         """
-        term_frequencies = self.inverted_index.TF
-
-        if term in term_frequencies and x_path in term_frequencies[term]:
-            doc_freqs = term_frequencies[term][x_path]
+        if term in self.inverted_index.TF and x_path in self.inverted_index.TF[term]:
+            doc_freqs = self.inverted_index.TF[term][x_path]
             return doc_freqs.get(docno, 0)
         else:
             return 0
@@ -110,12 +120,12 @@ class Collection:
         """
         Calculate collection frequency of terms.
         """
-        for term, postings in self.inverted_index.IDX.items():
+        for term, entries in self.inverted_index.IDX.items():
             frequency = 0
-            for entry in postings:
-                docno_list = entry.get('docno', [])
-                frequency += sum(self.term_frequency(docno, term, entry['XPath']) for docno in docno_list)
-            self.collection_frequencies[term] = frequency
+            for xpath, entry in entries.items():
+                frequency += sum(self.term_frequency(docno, term, xpath) for docno in entry['docno'])
+                
+        self.collection_frequencies[term] = frequency
 
     # -------------------------------------------------
     # ----------------- DISPLAY -----------------------

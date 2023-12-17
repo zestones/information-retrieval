@@ -50,27 +50,35 @@ practice5:
 practice5v2:
 	$(PYTHON) $(MAIN_DIR)/practice5v2.py $(ARGS)
 
+# practice5v3 script
+practice5v3:
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py $(ARGS)
 
-# run practice5 script with custom parameters 
-custom_practice5:
-	$(PYTHON) $(MAIN_DIR)/practice5.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
-	$(PYTHON) $(MAIN_DIR)/practice5.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt && \
-	$(PYTHON) $(MAIN_DIR)/practice5.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt
 
-# run practice5v2 script with custom parameters
+# ------------------------------------- #
+# ---------- Custom commands ---------- #
+# ------------------------------------- #
+
+
+baseline:
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/p' './/sec'  
+# $(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/article' && \
+# $(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/bdy' './/p' './/sec' './/entry' './/row' './/category' './/list' && \
+# $(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/p' './/sec' './/entry' './/row' './/category' './/list'
+
 custom:
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/article' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/p' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/header' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -e --ltn --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --ltc --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v2.py -i --bm25 --query-file ../lib/data/practice_04/topics_M2DSC_7Q.txt -g './/bdy'
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/sec' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/sec' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/sec' './/entry' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/entry' './/header'  && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/entry' './/header' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/entry' './/header' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/entry' './/category' './/row' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/entry' './/category' './/row' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/entry' './/category' './/row' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/p' './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/p' './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/p' './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -e --ltn -g './/sec' './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --ltc -g './/sec' './/article' && \
+	$(PYTHON) $(MAIN_DIR)/practice5v3.py -i --bm25 -g './/sec' './/article'

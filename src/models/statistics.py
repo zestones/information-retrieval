@@ -31,20 +31,25 @@ class Statistics:
         self.collection.calculate_collection_frequencies()
 
         for docno, data in self.collection.document_parser.parsed_documents.items():
-            terms = data['terms']
+            for entry in data:
+                terms = entry["terms"]
 
-            term_length = sum(len(term) for term in terms)
-            self.avg_term_lengths_in_docs.append(term_length / len(terms) if len(terms) > 0 else 0)
+                term_length = sum(len(term) for term in terms)
+                self.avg_term_lengths_in_docs.append(
+                    term_length / len(terms) if len(terms) > 0 else 0)
 
-            self.documents_vocabulary_sizes.append(len(set(terms)))
-            self.documents_lengths[docno] = len(terms)
+                self.documents_vocabulary_sizes.append(len(set(terms)))
+                self.documents_lengths[docno] = len(terms)
 
         self.collection_vocabulary_sizes = len(set(self.collection.inverted_index.IDX.keys()))
 
-        self.avg_collection_lengths = statistics.mean(self.documents_lengths.values()) if self.documents_lengths else 0
-        self.avg_term_lengths_in_collection = statistics.mean(self.avg_term_lengths_in_docs) if self.avg_term_lengths_in_docs else 0
+        self.avg_collection_lengths = statistics.mean(
+            self.documents_lengths.values()) if self.documents_lengths else 0
+        self.avg_term_lengths_in_collection = statistics.mean(
+            self.avg_term_lengths_in_docs) if self.avg_term_lengths_in_docs else 0
 
-        self.collection_frequency_of_terms = sum(list(self.collection.collection_frequencies.values()))
+        self.collection_frequency_of_terms = sum(
+            list(self.collection.collection_frequencies.values()))
 
     def export_stats(self, filename):
         """
