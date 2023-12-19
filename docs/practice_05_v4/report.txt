@@ -1,0 +1,31 @@
+
+Les Nouvelles choses mise en place:
+------------------------------------
+Mise en place d'un notebook pour permettre de vérifier la pertinence de nos propre runs.
+Nous avons créer un notebook qui nous permet de comparer deux runs. L'idée étant de pouvoir comparer un run baseline dont nous
+connaissons les résultats avec nos nouvelles cela nous permet de vérifier que nos tests restent cohérents. Pour comparer deux runs 
+nous calculons différents statistiques :
+- Sur l'ensemble du fichier de run : 
+    - Le nombre de documents retournés par les deux runs
+    - La différence entre les deux runs en pourcentage
+- Sur les 1000 premiers documents retournés par les deux runs :
+Nous effectuons quelques opérations : 
+    - Union des deux runs
+    - Intersection des deux runs
+    - Différence entre les deux runs
+    - Différence symétrique entre les deux runs
+    - Calcul de la corrélations entre les deux runs
+    - Calcul de la stabilité entre les deux runs
+    ect...
+
+
+
+Pour le calcule du tf pour le bm25fr on a remarqué que dans certains article
+le body est présent très "bas" dans l'arbre ce qui fait que lors de nos test avec un alpha(title), beta(body) et gamma(category) 
+a 1, on a des résultats légèrement différents de ceux du bm25 baseline. Globalement nous avons observer que des permutations
+au niveau du ranking des documents mais pas de changement au niveau des documents retournés. Nous avons donc décidé de ne pas
+traiter ce cas particulier et de ne pas modifier notre code pour le prendre en compte. 
+
+Exemple d'un article avec un body "bas" dans l'arbre :
+/article[1]/event[1]/rule[1]/act[1]/psychological_feature[1]/procedure[1]/activity[1]/algorithm[1]/bdy[1]
+
