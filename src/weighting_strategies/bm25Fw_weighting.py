@@ -3,11 +3,10 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 import math
 import time
 import re
-import json
 
 
 class BM25FwWeighting(WeightingStrategy):
-    def __init__(self, k1=1, b=0.5, alpha=1, beta=1, gamma=1):
+    def __init__(self, k1=1, b=0.5, alpha=3, beta=1, gamma=2):
         self.k1 = k1
         self.b = b
         self.alpha = alpha
@@ -84,10 +83,10 @@ class BM25FwWeighting(WeightingStrategy):
                     if field == "title":
                         article_weights[term][-1]["weight"] += self.alpha * weight
 
-                    elif field == "body":
+                    elif field == "abstract":
                         article_weights[term][-1]["weight"] += self.beta * weight
 
-                    elif field == "abstract":
+                    elif field == "body":
                         article_weights[term][-1]["weight"] += self.gamma * weight
 
         return article_weights

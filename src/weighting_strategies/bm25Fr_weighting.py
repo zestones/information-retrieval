@@ -6,7 +6,7 @@ import re
 
 
 class BM25FrWeighting(WeightingStrategy):
-    def __init__(self, k1=1, b=0.5, alpha=1, beta=1, gamma=1):
+    def __init__(self, k1=1, b=0.5, alpha=3, beta=1, gamma=2):
         self.k1 = k1
         self.b = b
 

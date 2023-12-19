@@ -5,6 +5,12 @@ from manager.text_processor import CustomTextProcessorNoStopNoStem
 from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
 
+from weighting_strategies.bm25_weighting import BM25Weighting
+from weighting_strategies.bm25Fr_weighting import BM25FrWeighting
+from weighting_strategies.bm25Fw_weighting import BM25FwWeighting
+
+import itertools
+import numpy as np
 import os
 
 
@@ -21,20 +27,27 @@ class RunManager:
     def run(self):
         if self.args.baseline:
             self.run_baseline()
+        elif self.args.bm25_optimization:
+            self.run_bm25_optimization()
         else:
             self.run_custom()
 
-    def construct_run_name(self, run_id, weighting_scheme, k1=None, b=None, granularity=None, text_processor=None):
+    def construct_run_name(self, run_id, weighting_scheme, k1=None, b=None, granularity=None, text_processor=None, alpha=None, beta=None, gamma=None):
+        print("granularity", granularity)
         if granularity:
             granularity_str = '_'.join(granularity).replace('.//', '')
             base_filename = f"../docs/resources/runs/BengezzouIdrissMezianeGhilas_{run_id}_{weighting_scheme}_{granularity_str}_{text_processor}"
         else:
-            base_filename = f"../docs/resources/runs/BengezzouIdrissMezianeGhilas_{run_id}_{weighting_scheme}_{text_processor}"
+            base_filename = f"../docs/resources/runs/BengezzouIdrissMezianeGhilas_{run_id}_{weighting_scheme}_article_{text_processor}"
 
         if k1 is not None and b is not None:
-            return f"{base_filename}_k{k1}_b{b}.txt"
+            base_filename = f"{base_filename}_k{k1}_b{b}"
+        if alpha is not None and beta is not None and gamma is not None:
+            base_filename = f"{base_filename}_alpha{alpha}_beta{beta}_gamma{gamma}.txt"
         else:
-            return f"{base_filename}.txt"
+            base_filename = f"{base_filename}.txt"
+            
+        return base_filename
 
     def write_results(self, query_results, run_file_path):
         with open(run_file_path, 'a') as output_file:
@@ -275,6 +288,15 @@ class RunManager:
         if self.args.bm25:
             run_file_path = self.construct_run_name(
                 run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter")
+            
+        elif self.args.bm25fw:
+            run_file_path = self.construct_run_name(
+                run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter", alpha=3, beta=1, gamma=2)
+        
+        elif self.args.bm25fr:
+            run_file_path = self.construct_run_name(
+                run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter", alpha=3, beta=1, gamma=2)
+        
         else:
             run_file_path = self.construct_run_name(
                 run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter")
@@ -285,3 +307,196 @@ class RunManager:
         for query_id, query in parsed_queries:
             query_results = query_manager.launch_query(query_id, query)
             self.write_results(query_results, run_file_path)
+
+    def bm25_grid_search(self):
+        """
+        Runs the baseline. The baseline generates 12 runs : 3 (weighting schemes) * 2 (stop-list) * 2 (stemmer)
+        """
+        import_collection = False
+        exort_collection = True
+                
+        for k1 in np.arange(0, 4.2, 0.2):
+            k1 = round(k1, 2)
+            collection = Collection(self.COLLECTION_FILE,
+                            plot_statistics=self.args.plot,
+                            import_collection=import_collection,
+                            export_collection=exort_collection,
+                            export_statistics=self.args.statistics,
+                            ltn_weighting=False,
+                            ltc_weighting=False,
+                            bm25_weighting=True,
+                            export_weighted_idx=self.args.export_weighted_idx,
+                            parser_granularity=[".//article"]
+                    )
+            import_collection = True
+            exort_collection = False
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+    
+            collection.weighted_index = BM25Weighting(k1=k1, b=0.75).calculate_weight(collection)
+
+            run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
+            scheme = self.get_weighting_scheme(bm25=True)
+            run_file_path = self.construct_run_name(
+                run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter", k1=k1, b=0.75)
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+
+            for query_id, query in parsed_queries:
+                query_results = query_manager.launch_query(query_id, query)
+                self.write_results(query_results, run_file_path)
+                
+        for b in np.arange(0, 1.1, 0.1):
+            b = round(b, 2)
+            collection = Collection(self.COLLECTION_FILE,
+                                plot_statistics=self.args.plot,
+                                import_collection=import_collection,
+                                export_collection=exort_collection,
+                                export_statistics=self.args.statistics,
+                                ltn_weighting=False,
+                                ltc_weighting=False,
+                                bm25_weighting=True,
+                                export_weighted_idx=self.args.export_weighted_idx,
+                                parser_granularity=[".//article"]
+                        )
+            import_collection = True
+            exort_collection = False
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+    
+            collection.weighted_index = BM25Weighting(k1=1.2, b=b).calculate_weight(collection)
+
+            run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
+            scheme = self.get_weighting_scheme(bm25=True)
+            run_file_path = self.construct_run_name(
+                run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter", k1=1.2, b=b)
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+
+            for query_id, query in parsed_queries:
+                query_results = query_manager.launch_query(query_id, query)
+                self.write_results(query_results, run_file_path)
+    
+    
+    def bm25fw_grid_search(self):
+        """
+        We want to find the best values for alpha, beta and gamma.
+        BM25F variant: optimizing bi for each field [Zaragoza04]:
+        - Optimizing k1 and bi for each field (K optimizations 2 Dim).
+        - With these b(i) and alpha(i) = 1: optimizing k1 (1 optimization 1 Dim).
+        - With these b(i) and k1 : optimizing alpha(i) (1 optimization (K-1) Dim).
+        alpha(i) refers to the different fields (title, abstract, body), so alpha, beta and gamma values
+        """
+        # Loop for optimizing k1 with fixed b(i) and alpha(i) = 1
+        import_collection = False
+        exort_collection = True
+        
+        # Loop for optimizing alpha(i) with fixed b=0.75 and k1=1.2
+        alphas = np.arange(1, 4)
+        betas = np.arange(1, 4)
+        gammas = np.arange(1, 4)
+
+        combinations = itertools.product(alphas, betas, gammas)
+        for alpha, beta, gamma in combinations:
+            alpha = round(alpha, 2)
+            beta = round(beta, 2)
+            gamma = round(gamma, 2)
+                
+            collection = Collection(self.COLLECTION_FILE,
+                                    plot_statistics=self.args.plot,
+                                    import_collection=import_collection,
+                                    export_collection=exort_collection,
+                                    export_statistics=self.args.statistics,
+                                    ltn_weighting=False,
+                                    ltc_weighting=False,
+                                    bm25fw_weighting=True,
+                                    export_weighted_idx=self.args.export_weighted_idx,
+                                    parser_granularity=[".//bdy", ".//title", ".//categories"]
+                            )
+
+            import_collection = True
+            exort_collection = False
+            
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+    
+            collection.weighted_index = BM25FwWeighting(k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
+
+            run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
+            scheme = self.get_weighting_scheme(bm25fw=True)
+            run_file_path = self.construct_run_name(
+                run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter", k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma)
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+
+            for query_id, query in parsed_queries:
+                query_results = query_manager.launch_query(query_id, query)
+                self.write_results(query_results, run_file_path)
+                
+                
+    def bm25fr_grid_search(self):
+        """
+        We want to find the best values for alpha, beta and gamma.
+        BM25F variant: optimizing bi for each field [Zaragoza04]:
+        - Optimizing k1 and bi for each field (K optimizations 2 Dim).
+        - With these b(i) and alpha(i) = 1: optimizing k1 (1 optimization 1 Dim).
+        - With these b(i) and k1 : optimizing alpha(i) (1 optimization (K-1) Dim).
+        alpha(i) refers to the different fields (title, abstract, body), so alpha, beta and gamma values
+        """
+        # Loop for optimizing k1 with fixed b(i) and alpha(i) = 1
+        import_collection = False
+        exort_collection = True
+        
+        # Loop for optimizing alpha(i) with fixed b=0.75 and k1=1.2
+        alphas = np.arange(1, 4)
+        betas = np.arange(1, 4)
+        gammas = np.arange(1, 4)
+
+        combinations = itertools.product(alphas, betas, gammas)
+        for alpha, beta, gamma in combinations:
+            alpha = round(alpha, 2)
+            beta = round(beta, 2)
+            gamma = round(gamma, 2)
+            
+            collection = Collection(self.COLLECTION_FILE,
+                                    plot_statistics=self.args.plot,
+                                    import_collection=import_collection,
+                                    export_collection=exort_collection,
+                                    export_statistics=self.args.statistics,
+                                    ltn_weighting=False,
+                                    ltc_weighting=False,
+                                    bm25fr_weighting=True,
+                                    export_weighted_idx=self.args.export_weighted_idx,
+                                    parser_granularity=[".//bdy", ".//title", ".//categories"]
+                            )
+
+            import_collection = True
+            exort_collection = False
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+    
+            collection.weighted_index = BM25FrWeighting(k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
+
+            run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
+            scheme = self.get_weighting_scheme(bm25fr=True)
+            run_file_path = self.construct_run_name(
+                run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter", k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma)
+
+            query_manager = QueryManager(collection)
+            parsed_queries = query_manager.parse_query_file(self.args.query_file)
+
+            for query_id, query in parsed_queries:
+                query_results = query_manager.launch_query(query_id, query)
+                self.write_results(query_results, run_file_path)
+        
+    
+    def run_bm25_optimization(self):
+        self.bm25_grid_search()
+        self.bm25fw_grid_search()
+        self.bm25fr_grid_search()

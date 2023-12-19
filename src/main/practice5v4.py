@@ -29,6 +29,8 @@ def main(argv):
     
     parser.add_argument('-g', '--granularity', type=str, nargs='+', help='Granularity of the XPath query')
     parser.add_argument('--baseline', action='store_true', help='Run baseline')
+    parser.add_argument('-o', '--bm25_optimization', action='store_true', help='Run BM25 parameter optimization experiment')
+    
     args = parser.parse_args(argv)
 
     RunManager(args).run()
