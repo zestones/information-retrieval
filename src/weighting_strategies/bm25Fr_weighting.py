@@ -3,7 +3,6 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 import math
 import time
 import re
-import json
 
 
 class BM25FrWeighting(WeightingStrategy):
@@ -100,12 +99,6 @@ class BM25FrWeighting(WeightingStrategy):
         weighted_index = {}
         term_frequencies = self.compute_combined_tf(collection)
         collection.transform_index()
-
-        with open("transformed_index.json", "w") as f:
-            f.write(json.dumps(collection.inverted_index.IDX, indent=4))
-
-        with open("bm25fr_article_term_frequencies.json", "w") as f:
-            f.write(json.dumps(term_frequencies, indent=4))
 
         weighted_index = self.calculate_bm25_weight_with_combined_tf(collection, term_frequencies)
 

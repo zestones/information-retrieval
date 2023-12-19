@@ -15,7 +15,7 @@ class RunManager:
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
         self.args = args
 
     def run(self):
