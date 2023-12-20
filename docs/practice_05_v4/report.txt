@@ -9,17 +9,30 @@ nous calculons différents statistiques :
 - Sur l'ensemble du fichier de run : 
     - Le nombre de documents retournés par les deux runs
     - La différence entre les deux runs en pourcentage
-- Sur les 1000 premiers documents retournés par les deux runs :
-Nous effectuons quelques opérations : 
+
+Le problème de cette méthode est que cette comparaison de différence ne prend pas en compte les permutations au niveau du ranking.
+Donc une seul permutation fait que la différence entre les deux runs est très grande, alors qu'il est possible que les deux runs ont un ranking très proche.
+
+Pour pouvoir comparer deux run nous avons décidé de calculer d'autres statistiques tel que :
     - Union des deux runs
     - Intersection des deux runs
     - Différence entre les deux runs
     - Différence symétrique entre les deux runs
-    - Calcul de la corrélations entre les deux runs
-    - Calcul de la stabilité entre les deux runs
-    ect...
+  
+Mais encore une fois ces statistiques ne prennent pas en compte les permutations au niveau du ranking.
+Nous avons donc décidé de calculer la corrélation entre les deux runs. Pour cela nous avons utilisé la méthode de Spearman et de Kendall 
+qui sont des méthodes de corrélation qui permettent de comparer deux classements sans avoir le problème des permutations.
+
+Nous avons donc comparé notre run baseline avec une run élements rendu la semaine passée. Et nous nous pouvons remarquer que les deux runs ne sont pas corréler (ce qui confirme les résultats MAGP obtenu très faible). 
+
+Donc a partir de maintenant, pour voir l'incidence de l'ajout d'une granularité à nos run élements, nous les comparerons avec notre run baseline et essayerons
+de faire converger les deux runs.
+
+(Nous metons quelques exemples de plots dans le dossier resources/plots ; Le notebook avec le calculs des stats est dans le dossier /notebook).
+
 
 2. Implémentation du BM25FR & BM25FW
+------------------------------------
 Nous avons également implémenté les deux variantes du BM25.
 
 Pour le calcule du tf pour le bm25fr on a remarqué que dans certains article le body est présent très "bas" dans l'arbre ce qui
@@ -31,6 +44,6 @@ Exemple d'un article avec un body "bas" dans l'arbre :
 /article[1]/event[1]/rule[1]/act[1]/psychological_feature[1]/procedure[1]/activity[1]/algorithm[1]/bdy[1]
 
 3. Amélioration des performances :
+----------------------------------
 Comme énoncé durant le derniner cours, il n'est pas nécessaire de garder en mémoire l'ensembles des termes de la collection.
 Nous avons donc modifié notre code pour ne plus garder que les termes présent dans la requête (soit 25 termes).
-
