@@ -2,6 +2,7 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 
 import math
 import time
+import json
 
 
 class BM25Weighting(WeightingStrategy):
@@ -20,13 +21,13 @@ class BM25Weighting(WeightingStrategy):
         avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
 
         for term, postings in collection.inverted_index.IDX.items():
-            for x_path, entry in postings.items():
-                df = collection.document_frequency(term, x_path)    # Document frequency
-                idf = math.log10((N - df + 0.5) / (df + 0.5))       # Inverse document frequency
+            for granularity, entry in postings.items():
+                df = collection.document_frequency(term, granularity)  # Document frequency
+                idf = math.log10((N - df + 0.5) / (df + 0.5))          # Inverse document frequency
 
-                for docno in entry.get('docno', []):
+                for docno, x_path in entry.items():
                     dl = collection.document_length(docno)          # Document length
-                    tf = collection.term_frequency(docno, term, x_path)
+                    tf = collection.term_frequency(docno, term, granularity)
 
                     # Calculate BM25 weight for the term in the document
                     weight = (tf * (self.k1 + 1)) / \

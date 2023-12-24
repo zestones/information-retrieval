@@ -23,7 +23,7 @@ from colorama import Fore, Style
 
 """
     This class represents a collection of documents.
-    The class provides methods to read the documents from a file, 
+    The class provides methods to read the documents from a file,
     construct the inverted index, and calculate term frequencies.
 """
 
@@ -96,19 +96,13 @@ class Collection:
             WeightingStrategy().export_weighted_index(
                 self.weighted_index, f'../res/{self.label}_weighted.json')
 
-    def document_frequency(self, term: str, x_path: str) -> int:
+    def document_frequency(self, term: str, granularity: str) -> int:
         """
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
+        # ! We compute the df based on the granularity and not on the entire document
         """
-        # docno_set = set()
-        # for _, inner_dict in self.inverted_index.IDX.get(term, {}).items():
-        #     docno_list = inner_dict.get('docno', [])
-        #     docno_set.update(docno_list)
-
-        # return len(docno_set)
-        # ! To compute the df based on the x_path and not on the entire document
-        return len(self.inverted_index.IDX.get(term, {}).get(x_path, {}).get('docno', []))
+        return len(self.inverted_index.IDX.get(term, {}).get(granularity, {}).keys())
 
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
@@ -134,7 +128,7 @@ class Collection:
             frequency = 0
             for xpath, entry in entries.items():
                 frequency += sum(self.term_frequency(docno, term, xpath)
-                                 for docno in entry['docno'])
+                                 for docno, _ in entry.items())
 
         self.collection_frequencies[term] = frequency
 

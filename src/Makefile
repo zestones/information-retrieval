@@ -58,6 +58,9 @@ practice5v3:
 practice5v4:
 	$(PYTHON) $(MAIN_DIR)/practice5v4.py $(ARGS)
 
+# practice5v5 script
+practice5v5:
+	$(PYTHON) $(MAIN_DIR)/practice5v5.py $(ARGS)
 
 # ------------------------------------- #
 # ---------- Custom commands ---------- #

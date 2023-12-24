@@ -21,7 +21,7 @@ class RunManager:
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
         self.args = args
 
     def run(self):
@@ -46,7 +46,7 @@ class RunManager:
             base_filename = f"{base_filename}_alpha{alpha}_beta{beta}_gamma{gamma}.txt"
         else:
             base_filename = f"{base_filename}.txt"
-            
+
         return base_filename
 
     def write_results(self, query_results, run_file_path):
@@ -288,15 +288,15 @@ class RunManager:
         if self.args.bm25:
             run_file_path = self.construct_run_name(
                 run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter")
-            
+
         elif self.args.bm25fw:
             run_file_path = self.construct_run_name(
                 run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter", alpha=3, beta=1, gamma=2)
-        
+
         elif self.args.bm25fr:
             run_file_path = self.construct_run_name(
                 run_id, scheme, k1=1, b=0.5, granularity=self.args.granularity, text_processor="stop671_porter", alpha=3, beta=1, gamma=2)
-        
+
         else:
             run_file_path = self.construct_run_name(
                 run_id, scheme, granularity=self.args.granularity, text_processor="stop671_porter")
@@ -314,26 +314,26 @@ class RunManager:
         """
         import_collection = False
         exort_collection = True
-                
+
         for k1 in np.arange(0, 4.2, 0.2):
             k1 = round(k1, 2)
             collection = Collection(self.COLLECTION_FILE,
-                            plot_statistics=self.args.plot,
-                            import_collection=import_collection,
-                            export_collection=exort_collection,
-                            export_statistics=self.args.statistics,
-                            ltn_weighting=False,
-                            ltc_weighting=False,
-                            bm25_weighting=True,
-                            export_weighted_idx=self.args.export_weighted_idx,
-                            parser_granularity=[".//article"]
-                    )
+                                    plot_statistics=self.args.plot,
+                                    import_collection=import_collection,
+                                    export_collection=exort_collection,
+                                    export_statistics=self.args.statistics,
+                                    ltn_weighting=False,
+                                    ltc_weighting=False,
+                                    bm25_weighting=True,
+                                    export_weighted_idx=self.args.export_weighted_idx,
+                                    parser_granularity=[".//article"]
+                                    )
             import_collection = True
             exort_collection = False
 
             query_manager = QueryManager(collection)
             parsed_queries = query_manager.parse_query_file(self.args.query_file)
-    
+
             collection.weighted_index = BM25Weighting(k1=k1, b=0.75).calculate_weight(collection)
 
             run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
@@ -347,26 +347,26 @@ class RunManager:
             for query_id, query in parsed_queries:
                 query_results = query_manager.launch_query(query_id, query)
                 self.write_results(query_results, run_file_path)
-                
+
         for b in np.arange(0, 1.1, 0.1):
             b = round(b, 2)
             collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
-                                import_collection=import_collection,
-                                export_collection=exort_collection,
-                                export_statistics=self.args.statistics,
-                                ltn_weighting=False,
-                                ltc_weighting=False,
-                                bm25_weighting=True,
-                                export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=[".//article"]
-                        )
+                                    plot_statistics=self.args.plot,
+                                    import_collection=import_collection,
+                                    export_collection=exort_collection,
+                                    export_statistics=self.args.statistics,
+                                    ltn_weighting=False,
+                                    ltc_weighting=False,
+                                    bm25_weighting=True,
+                                    export_weighted_idx=self.args.export_weighted_idx,
+                                    parser_granularity=[".//article"]
+                                    )
             import_collection = True
             exort_collection = False
 
             query_manager = QueryManager(collection)
             parsed_queries = query_manager.parse_query_file(self.args.query_file)
-    
+
             collection.weighted_index = BM25Weighting(k1=1.2, b=b).calculate_weight(collection)
 
             run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
@@ -380,8 +380,7 @@ class RunManager:
             for query_id, query in parsed_queries:
                 query_results = query_manager.launch_query(query_id, query)
                 self.write_results(query_results, run_file_path)
-    
-    
+
     def bm25fw_grid_search(self):
         """
         We want to find the best values for alpha, beta and gamma.
@@ -394,7 +393,7 @@ class RunManager:
         # Loop for optimizing k1 with fixed b(i) and alpha(i) = 1
         import_collection = False
         exort_collection = True
-        
+
         # Loop for optimizing alpha(i) with fixed b=0.75 and k1=1.2
         alphas = np.arange(1, 4)
         betas = np.arange(1, 4)
@@ -405,7 +404,7 @@ class RunManager:
             alpha = round(alpha, 2)
             beta = round(beta, 2)
             gamma = round(gamma, 2)
-                
+
             collection = Collection(self.COLLECTION_FILE,
                                     plot_statistics=self.args.plot,
                                     import_collection=import_collection,
@@ -416,15 +415,16 @@ class RunManager:
                                     bm25fw_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
                                     parser_granularity=[".//bdy", ".//title", ".//categories"]
-                            )
+                                    )
 
             import_collection = True
             exort_collection = False
-            
+
             query_manager = QueryManager(collection)
             parsed_queries = query_manager.parse_query_file(self.args.query_file)
-    
-            collection.weighted_index = BM25FwWeighting(k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
+
+            collection.weighted_index = BM25FwWeighting(
+                k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
 
             run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
             scheme = self.get_weighting_scheme(bm25fw=True)
@@ -437,8 +437,7 @@ class RunManager:
             for query_id, query in parsed_queries:
                 query_results = query_manager.launch_query(query_id, query)
                 self.write_results(query_results, run_file_path)
-                
-                
+
     def bm25fr_grid_search(self):
         """
         We want to find the best values for alpha, beta and gamma.
@@ -451,7 +450,7 @@ class RunManager:
         # Loop for optimizing k1 with fixed b(i) and alpha(i) = 1
         import_collection = False
         exort_collection = True
-        
+
         # Loop for optimizing alpha(i) with fixed b=0.75 and k1=1.2
         alphas = np.arange(1, 4)
         betas = np.arange(1, 4)
@@ -462,7 +461,7 @@ class RunManager:
             alpha = round(alpha, 2)
             beta = round(beta, 2)
             gamma = round(gamma, 2)
-            
+
             collection = Collection(self.COLLECTION_FILE,
                                     plot_statistics=self.args.plot,
                                     import_collection=import_collection,
@@ -473,15 +472,16 @@ class RunManager:
                                     bm25fr_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
                                     parser_granularity=[".//bdy", ".//title", ".//categories"]
-                            )
+                                    )
 
             import_collection = True
             exort_collection = False
 
             query_manager = QueryManager(collection)
             parsed_queries = query_manager.parse_query_file(self.args.query_file)
-    
-            collection.weighted_index = BM25FrWeighting(k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
+
+            collection.weighted_index = BM25FrWeighting(
+                k1=1.2, b=0.75, alpha=alpha, beta=beta, gamma=gamma).calculate_weight(collection)
 
             run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
             scheme = self.get_weighting_scheme(bm25fr=True)
@@ -494,8 +494,7 @@ class RunManager:
             for query_id, query in parsed_queries:
                 query_results = query_manager.launch_query(query_id, query)
                 self.write_results(query_results, run_file_path)
-        
-    
+
     def run_bm25_optimization(self):
         self.bm25_grid_search()
         self.bm25fw_grid_search()

@@ -90,7 +90,7 @@ class DocumentParser:
             xpath = self.get_xpath(root.getroot(), parent_map)
             tokens = self.text_processor.pre_processing(root_tag_text)
             self.parsed_documents.setdefault(docno, []).append({'XPath': xpath, 'terms': tokens})
-            self.update_inverted_index(tokens, docno, xpath)
+            self.update_inverted_index(tokens, docno, xpath, self.ARTICLE)
 
         for parser_granularity in self.parser_granularity:
             if parser_granularity == self.ARTICLE:
@@ -104,25 +104,24 @@ class DocumentParser:
 
                     self.parsed_documents.setdefault(docno, []).append(
                         {'XPath': xpath, 'terms': tokens})
-                    self.update_inverted_index(tokens, docno, xpath)
+                    self.update_inverted_index(tokens, docno, xpath, parser_granularity)
 
-    def update_term_frequencies(self, term, last_xpath, docno):
+    def update_term_frequencies(self, term, docno, granularity):
         self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[
-            last_xpath][docno] += 1
+            granularity][docno] += 1
 
-    def update_inverted_index(self, tokens, docno, last_xpath):
+    def update_inverted_index(self, tokens, docno, last_xpath, granularity):
         for term in tokens:
             if term in self.query_vocabulary:
                 if term in self.inverted_index:
                     entries = self.inverted_index[term]
-                    if last_xpath in entries:
-                        if docno not in entries[last_xpath]["docno"]:
-                            entries[last_xpath]["docno"].append(docno)
+                    if granularity in entries:
+                        entries[granularity][docno] = last_xpath
                     else:
-                        entry = {"docno": [docno]}
-                        entries[last_xpath] = entry
+                        entry = {docno: last_xpath}
+                        entries[granularity] = entry
                 else:
-                    entry = {"docno": [docno]}
-                    self.inverted_index[term] = {last_xpath: entry}
+                    entry = {docno: last_xpath}
+                    self.inverted_index[term] = {granularity: entry}
 
-            self.update_term_frequencies(term, last_xpath, docno)
+            self.update_term_frequencies(term, docno, granularity)
