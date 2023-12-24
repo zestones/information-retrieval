@@ -8,6 +8,8 @@ from manager.text_processor import RegexTextProcessor
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
 from weighting_strategies.bm25_weighting import BM25Weighting
+from weighting_strategies.bm25Fw_weighting import BM25FwWeighting
+from weighting_strategies.bm25Fr_weighting import BM25FrWeighting
 from weighting_strategies.weighting_strategy import WeightingStrategy
 
 from models.statistics import Statistics
@@ -35,6 +37,8 @@ class Collection:
                  ltn_weighting: bool = False,
                  ltc_weighting: bool = False,
                  bm25_weighting: bool = False,
+                 bm25fw_weighting: bool = False,
+                 bm25fr_weighting: bool = False,
                  export_weighted_idx: bool = False,
                  parser_granularity: list = ['.//article'],
                  text_processor: TextProcessor = CustomTextProcessor()
@@ -81,6 +85,12 @@ class Collection:
         elif (bm25_weighting):
             self.print_title("BM25 weighting")
             self.weighted_index = BM25Weighting().calculate_weight(self)
+        elif (bm25fw_weighting):
+            self.print_title("BM25Fw weighting")
+            self.weighted_index = BM25FwWeighting().calculate_weight(self)
+        elif (bm25fr_weighting):
+            self.print_title("BM25Fr weighting")
+            self.weighted_index = BM25FrWeighting().calculate_weight(self)
 
         if (export_weighted_idx):
             WeightingStrategy().export_weighted_index(
@@ -95,7 +105,7 @@ class Collection:
         # for _, inner_dict in self.inverted_index.IDX.get(term, {}).items():
         #     docno_list = inner_dict.get('docno', [])
         #     docno_set.update(docno_list)
-        
+
         # return len(docno_set)
         # ! To compute the df based on the x_path and not on the entire document
         return len(self.inverted_index.IDX.get(term, {}).get(x_path, {}).get('docno', []))
@@ -123,9 +133,27 @@ class Collection:
         for term, entries in self.inverted_index.IDX.items():
             frequency = 0
             for xpath, entry in entries.items():
-                frequency += sum(self.term_frequency(docno, term, xpath) for docno in entry['docno'])
-                
+                frequency += sum(self.term_frequency(docno, term, xpath)
+                                 for docno in entry['docno'])
+
         self.collection_frequencies[term] = frequency
+
+    def transform_index(self, ):
+        """
+        We transform the index to only contain the article node.
+        """
+        transformed_index = {}
+        for term, postings in self.inverted_index.IDX.items():
+            transformed_index[term] = {}
+            for x_path, entry in postings.items():
+                if '/article[1]' not in transformed_index[term]:
+                    transformed_index[term]['/article[1]'] = {'docno': []}
+
+                for docno in entry.get('docno', []):
+                    if docno not in transformed_index[term]['/article[1]']['docno']:
+                        transformed_index[term]['/article[1]']['docno'].append(docno)
+
+        self.inverted_index.IDX = transformed_index
 
     # -------------------------------------------------
     # ----------------- DISPLAY -----------------------

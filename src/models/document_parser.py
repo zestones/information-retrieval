@@ -14,6 +14,9 @@ class DocumentParser:
         self.text_processor = text_processor
 
         self.ARTICLE = './/article'
+        self.QUERY_FILE = '../lib/data/practice_04/topics_M2DSC_7Q.txt'
+
+        self.query_vocabulary = set()
 
         if (parser_granularity is None):
             self.parser_granularity = [self.ARTICLE]
@@ -27,10 +30,18 @@ class DocumentParser:
         self.term_frequencies = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         self.already_processed = set()
 
+    def parse_query_vocabulary(self):
+        with open(self.QUERY_FILE, 'r') as file:
+            for line in file.readlines():
+                query = self.text_processor.pre_processing(line)
+                self.query_vocabulary.update(query)
+
     def parse_documents(self) -> None:
         """
         Pre-processes the documents.
         """
+        self.parse_query_vocabulary()
+
         if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
                 for filename in zip_file.namelist():
@@ -40,7 +51,7 @@ class DocumentParser:
         else:
             with open(self.filename, 'r') as file:
                 self.parse_xml_to_json(self.filename, file.readlines())
-                
+
     def basic_clean(self, text: str):
         text = ftfy.fix_text(text)
         text = html.unescape(html.unescape(text))
@@ -72,7 +83,7 @@ class DocumentParser:
 
         root = ET.ElementTree(ET.fromstring(content))
         parent_map = {c: p for p in root.iter() for c in p}
-        
+
         root_tag_text = self.extract_text(root.getroot())
         if root_tag_text is not None and self.ARTICLE in self.parser_granularity:
             root_tag_text = self.basic_clean(root_tag_text)
@@ -90,26 +101,28 @@ class DocumentParser:
                     xpath = self.get_xpath(balise, parent_map)
                     text = self.basic_clean(text)
                     tokens = self.text_processor.pre_processing(text)
-                    
-                    self.parsed_documents.setdefault(docno, []).append({'XPath': xpath, 'terms': tokens})
+
+                    self.parsed_documents.setdefault(docno, []).append(
+                        {'XPath': xpath, 'terms': tokens})
                     self.update_inverted_index(tokens, docno, xpath)
-                    
-                
+
     def update_term_frequencies(self, term, last_xpath, docno):
-        self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[last_xpath][docno] += 1
-                
+        self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[
+            last_xpath][docno] += 1
+
     def update_inverted_index(self, tokens, docno, last_xpath):
         for term in tokens:
-            if term in self.inverted_index:
-                entries = self.inverted_index[term]
-                if last_xpath in entries:
-                    if docno not in entries[last_xpath]["docno"]:
-                        entries[last_xpath]["docno"].append(docno)
+            if term in self.query_vocabulary:
+                if term in self.inverted_index:
+                    entries = self.inverted_index[term]
+                    if last_xpath in entries:
+                        if docno not in entries[last_xpath]["docno"]:
+                            entries[last_xpath]["docno"].append(docno)
+                    else:
+                        entry = {"docno": [docno]}
+                        entries[last_xpath] = entry
                 else:
                     entry = {"docno": [docno]}
-                    entries[last_xpath] = entry
-            else:
-                entry = {"docno": [docno]}
-                self.inverted_index[term] = {last_xpath: entry}
+                    self.inverted_index[term] = {last_xpath: entry}
 
             self.update_term_frequencies(term, last_xpath, docno)
