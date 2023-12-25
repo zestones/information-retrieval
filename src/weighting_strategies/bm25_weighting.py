@@ -17,16 +17,16 @@ class BM25Weighting(WeightingStrategy):
         weighted_index = {}
         start_time = time.time()
 
-        N = collection.collection_size                       # Total number of documents in the collection
-        avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
-
         for term, postings in collection.inverted_index.IDX.items():
             for granularity, entry in postings.items():
+                N = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == granularity]['N'].values[0]
+                avdl = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == granularity]['avdl'].values[0]
+
                 df = collection.document_frequency(term, granularity)  # Document frequency
                 idf = math.log10((N - df + 0.5) / (df + 0.5))          # Inverse document frequency
 
                 for docno, x_path in entry.items():
-                    dl = collection.document_length(docno)          # Document length
+                    dl = collection.document_length(docno, granularity)  # Document length
                     tf = collection.term_frequency(docno, term, granularity)
 
                     # Calculate BM25 weight for the term in the document

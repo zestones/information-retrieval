@@ -114,11 +114,13 @@ class Collection:
         else:
             return 0
 
-    def document_length(self, docno: str) -> int:
+    def document_length(self, docno: str, granularity: str) -> int:
         """
         Returns the length of a document.
+        The length of a document is the sum of the frequencies of all terms in the document
+        based on the granularity.
         """
-        return self.statistics.documents_lengths.get(docno, 0)
+        return sum(self.term_frequency(docno, term, granularity) for term in self.inverted_index.IDX.keys())
 
     def calculate_collection_frequencies(self):
         """
@@ -131,21 +133,30 @@ class Collection:
                                  for docno, _ in entry.items())
 
         self.collection_frequencies[term] = frequency
+        with open('../res/collection_frequencies.json', 'w') as f:
+            json.dump(self.collection_frequencies, f)
+        exit()
 
-    def transform_index(self, ):
+    def transform_index(self):
         """
         We transform the index to only contain the article node.
         """
         transformed_index = {}
+        new_granularity = './/article'
+
         for term, postings in self.inverted_index.IDX.items():
             transformed_index[term] = {}
-            for x_path, entry in postings.items():
-                if '/article[1]' not in transformed_index[term]:
-                    transformed_index[term]['/article[1]'] = {'docno': []}
 
-                for docno in entry.get('docno', []):
-                    if docno not in transformed_index[term]['/article[1]']['docno']:
-                        transformed_index[term]['/article[1]']['docno'].append(docno)
+            for granularity, entry in postings.items():
+                if new_granularity == granularity:
+                    transformed_index[term][new_granularity] = entry
+                else:
+                    # If the new_granularity doesn't exist, create an empty dict for it
+                    if new_granularity not in transformed_index[term]:
+                        transformed_index[term][new_granularity] = {}
+
+                    for docno, _ in entry.items():
+                        transformed_index[term][new_granularity][docno] = '/article[1]'
 
         self.inverted_index.IDX = transformed_index
 

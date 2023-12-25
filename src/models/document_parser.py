@@ -1,14 +1,13 @@
 from collections import defaultdict
 import xml.etree.ElementTree as ET
 import zipfile
-import html
-import ftfy
 import json
 import io
 import re
+from models.xml_parser.xml_parser import XmlParser
 
 
-class DocumentParser:
+class DocumentParser (XmlParser):
     def __init__(self, filename: str, text_processor, parser_granularity: list):
         self.filename = filename
         self.text_processor = text_processor
@@ -28,7 +27,6 @@ class DocumentParser:
         self.parsed_documents = {}
         self.inverted_index = defaultdict(list)
         self.term_frequencies = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        self.already_processed = set()
 
     def parse_query_vocabulary(self):
         with open(self.QUERY_FILE, 'r') as file:
@@ -37,11 +35,8 @@ class DocumentParser:
                 self.query_vocabulary.update(query)
 
     def parse_documents(self) -> None:
-        """
-        Pre-processes the documents.
-        """
-        self.parse_query_vocabulary()
 
+        self.parse_query_vocabulary()
         if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
                 for filename in zip_file.namelist():
@@ -52,59 +47,58 @@ class DocumentParser:
             with open(self.filename, 'r') as file:
                 self.parse_xml_to_json(self.filename, file.readlines())
 
-    def basic_clean(self, text: str):
-        text = ftfy.fix_text(text)
-        text = html.unescape(html.unescape(text))
-        return text.strip()
+        with open('parsed_documents.json', 'w') as outfile:
+            json.dump(self.parsed_documents, outfile, indent=4)
 
-    def get_xpath(self, element, parent_map):
-        path = []
-        while element is not None:
-            index = 1
-            siblings = parent_map.get(element)
-            if siblings is not None:
-                for sibling in siblings:
-                    if sibling is element:
-                        break
-                    if sibling.tag == element.tag:
-                        index += 1
-            path.insert(0, f"{element.tag}[{index}]")
-            element = parent_map.get(element)
-        return '/' + '/'.join(path)
+        with open('inverted_index.json', 'w') as outfile:
+            json.dump(self.inverted_index, outfile, indent=4)
 
-    def extract_text(self, element):
-        clean_text = re.sub(r'<[^>]+>', '', ET.tostring(element, encoding='unicode'))
-        return clean_text
+        with open('term_frequencies.json', 'w') as outfile:
+            json.dump(self.term_frequencies, outfile, indent=4)
+
+    def parse_article(self, tree, docno, parent_map):
+        root_tag_text = self.extract_text(tree.getroot())
+        if root_tag_text is not None and self.ARTICLE in self.parser_granularity:
+            self.process_and_update(tree.getroot(), docno, parent_map, self.ARTICLE, root_tag_text)
+
+    def process_and_update(self, element, docno, parent_map, parser_granularity, text):
+        text = self.clean_and_unescape_text(text)
+        xpath = self.get_xpath(element, parent_map)
+        tokens = self.text_processor.pre_processing(text)
+
+        self.update_parsed_documents(docno, parser_granularity, tokens)
+        self.update_inverted_index(tokens, docno, xpath, parser_granularity)
 
     def parse_xml_to_json(self, filename: str, lines: list) -> None:
         docno = filename.split('/')[-1].split('.')[0]
         content = ' '.join(lines)
         content = re.sub('&[^;]+;', ' ', content)
 
-        root = ET.ElementTree(ET.fromstring(content))
-        parent_map = {c: p for p in root.iter() for c in p}
+        tree = ET.ElementTree(ET.fromstring(content))
+        parent_map = self.parent_map(tree)
 
-        root_tag_text = self.extract_text(root.getroot())
-        if root_tag_text is not None and self.ARTICLE in self.parser_granularity:
-            root_tag_text = self.basic_clean(root_tag_text)
-            xpath = self.get_xpath(root.getroot(), parent_map)
-            tokens = self.text_processor.pre_processing(root_tag_text)
-            self.parsed_documents.setdefault(docno, []).append({'XPath': xpath, 'terms': tokens})
-            self.update_inverted_index(tokens, docno, xpath, self.ARTICLE)
+        self.parse_article(tree, docno, parent_map)
 
         for parser_granularity in self.parser_granularity:
             if parser_granularity == self.ARTICLE:
                 continue
-            for balise in root.findall(parser_granularity):
-                text = self.extract_text(balise)
-                if text is not None:
-                    xpath = self.get_xpath(balise, parent_map)
-                    text = self.basic_clean(text)
-                    tokens = self.text_processor.pre_processing(text)
+            for balise in tree.findall(parser_granularity):
+                self.process_tag(balise, docno, parent_map, parser_granularity)
 
-                    self.parsed_documents.setdefault(docno, []).append(
-                        {'XPath': xpath, 'terms': tokens})
-                    self.update_inverted_index(tokens, docno, xpath, parser_granularity)
+    def process_tag(self, balise, docno, parent_map, parser_granularity):
+        text = self.extract_text(balise)
+        if text is not None:
+            self.process_and_update(balise, docno, parent_map, parser_granularity, text)
+
+    def update_parsed_documents(self, docno, parser_granularity, tokens):
+        if docno not in self.parsed_documents:
+            self.parsed_documents[docno] = {parser_granularity: {'terms': tokens, 'N': 1}}
+        else:
+            if parser_granularity not in self.parsed_documents[docno]:
+                self.parsed_documents[docno][parser_granularity] = {'terms': tokens, 'N': 1}
+            else:
+                self.parsed_documents[docno][parser_granularity]['N'] += 1
+                self.parsed_documents[docno][parser_granularity]['terms'].extend(tokens)
 
     def update_term_frequencies(self, term, docno, granularity):
         self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[
@@ -124,4 +118,4 @@ class DocumentParser:
                     entry = {docno: last_xpath}
                     self.inverted_index[term] = {granularity: entry}
 
-            self.update_term_frequencies(term, docno, granularity)
+                self.update_term_frequencies(term, docno, granularity)
