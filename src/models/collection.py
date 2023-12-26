@@ -48,7 +48,7 @@ class Collection:
         self.filename = filename
 
         # Init the DocumentParser with the filename and the text processor
-        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity)
+        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity, is_bm25fr=bm25fr_weighting)
         self.inverted_index = InvertedIndex(self.document_parser)
 
         self.label = filename.split('/')[-1].split('.')[0]
@@ -120,7 +120,7 @@ class Collection:
         The length of a document is the sum of the frequencies of all terms in the document
         based on the granularity.
         """
-        return sum(self.term_frequency(docno, term, granularity) for term in self.inverted_index.IDX.keys())
+        return self.statistics.dl_df.loc[(self.statistics.dl_df['docno'] == docno) & (self.statistics.dl_df['XPath'] == granularity)]['dl'].values[0]
 
     def calculate_collection_frequencies(self):
         """
@@ -133,9 +133,6 @@ class Collection:
                                  for docno, _ in entry.items())
 
         self.collection_frequencies[term] = frequency
-        with open('../res/collection_frequencies.json', 'w') as f:
-            json.dump(self.collection_frequencies, f)
-        exit()
 
     def transform_index(self):
         """

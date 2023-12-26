@@ -1,0 +1,12 @@
+Ce qui à changé :
+----------------
+- Correction de bugs concernant la différence entre une run "article" et une run "bdy"
+    Nos run "bdy" était très différente de nos run "article" car les documents était groupé par xpath dans notre indexation.
+    Nous avons donc changé notre indexation pour que les documents soit groupé par "balise" et non plus par "xpath".
+
+- Correction de bugs concernant le calcul des stats de la collection
+    Nous avons remarqué que les stats de la collection n'était pas correcte, en effet après avoir fait pas mal de modification
+    sur la structure de notre indexation, nous avons remarqué que les stats de la collection n'était plus correcte.
+    Cela était du au fait que nous n'indexions plus tout les termes de la collection, mais seulement les termes des requêtes.
+
+- Correction de bugs concernant bm25fr, en effet nous ne recalculions pas le dl pour chaque document après avoir combiné les tf

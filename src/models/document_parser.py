@@ -5,10 +5,12 @@ import json
 import io
 import re
 from models.xml_parser.xml_parser import XmlParser
+from colorama import Fore, Style
 
 
 class DocumentParser (XmlParser):
-    def __init__(self, filename: str, text_processor, parser_granularity: list):
+    def __init__(self, filename: str, text_processor, parser_granularity: list, is_bm25fr: bool = False):
+        self.is_bm25fr = is_bm25fr
         self.filename = filename
         self.text_processor = text_processor
 
@@ -47,18 +49,9 @@ class DocumentParser (XmlParser):
             with open(self.filename, 'r') as file:
                 self.parse_xml_to_json(self.filename, file.readlines())
 
-        with open('parsed_documents.json', 'w') as outfile:
-            json.dump(self.parsed_documents, outfile, indent=4)
-
-        with open('inverted_index.json', 'w') as outfile:
-            json.dump(self.inverted_index, outfile, indent=4)
-
-        with open('term_frequencies.json', 'w') as outfile:
-            json.dump(self.term_frequencies, outfile, indent=4)
-
     def parse_article(self, tree, docno, parent_map):
         root_tag_text = self.extract_text(tree.getroot())
-        if root_tag_text is not None and self.ARTICLE in self.parser_granularity:
+        if root_tag_text is not None and (self.ARTICLE in self.parser_granularity or self.is_bm25fr):
             self.process_and_update(tree.getroot(), docno, parent_map, self.ARTICLE, root_tag_text)
 
     def process_and_update(self, element, docno, parent_map, parser_granularity, text):
@@ -67,6 +60,10 @@ class DocumentParser (XmlParser):
         tokens = self.text_processor.pre_processing(text)
 
         self.update_parsed_documents(docno, parser_granularity, tokens)
+        # TODO : find a better way to do this
+        if self.is_bm25fr and parser_granularity == self.ARTICLE:
+            return
+
         self.update_inverted_index(tokens, docno, xpath, parser_granularity)
 
     def parse_xml_to_json(self, filename: str, lines: list) -> None:
@@ -101,8 +98,7 @@ class DocumentParser (XmlParser):
                 self.parsed_documents[docno][parser_granularity]['terms'].extend(tokens)
 
     def update_term_frequencies(self, term, docno, granularity):
-        self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[
-            granularity][docno] += 1
+        self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[granularity][docno] += 1
 
     def update_inverted_index(self, tokens, docno, last_xpath, granularity):
         for term in tokens:
@@ -118,4 +114,4 @@ class DocumentParser (XmlParser):
                     entry = {docno: last_xpath}
                     self.inverted_index[term] = {granularity: entry}
 
-                self.update_term_frequencies(term, docno, granularity)
+            self.update_term_frequencies(term, docno, granularity)
