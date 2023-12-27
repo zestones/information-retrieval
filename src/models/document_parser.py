@@ -5,7 +5,6 @@ import json
 import io
 import re
 from models.xml_parser.xml_parser import XmlParser
-from colorama import Fore, Style
 
 
 class DocumentParser (XmlParser):

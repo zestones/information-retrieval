@@ -14,11 +14,35 @@ class Statistics:
 
         # Dataframe to store the average document length and document length of each XPath and document
         self.avdl_df = pd.DataFrame(columns=['XPath', 'N', 'avdl', 'number_of_words'])
-        self.dl_df = pd.DataFrame(columns=['XPath', 'docno', 'dl'])
+        self.document_lengths = {}          # {docno: {XPath: dl}}
 
         self.calculate_statistics()
         if (export_statistics):
             self.export_stats(f'stats-{self.collection.label}.json')
+
+    def compute_document_length(self, docno, x_path, number_of_words):
+        """
+        Computes the document length of the document.
+        """
+        if docno not in self.document_lengths:
+            self.document_lengths[docno] = {x_path: number_of_words}
+        else:
+            if x_path not in self.document_lengths[docno]:
+                self.document_lengths[docno][x_path] = number_of_words
+
+            self.document_lengths[docno][x_path] += number_of_words
+
+    def compute_average_document_length(self, x_path, n, number_of_words):
+        if x_path in self.avdl_df['XPath'].values:
+            self.avdl_df.loc[self.avdl_df['XPath'] == x_path, 'N'] += n
+            self.avdl_df.loc[
+                self.avdl_df['XPath'] == x_path, 'number_of_words'] += number_of_words
+        else:
+            self.avdl_df = pd.concat([self.avdl_df, pd.DataFrame({
+                'XPath': [x_path],
+                'N': [n],
+                'number_of_words': [number_of_words]
+            })], ignore_index=True)
 
     def calculate_statistics(self):
         """
@@ -32,25 +56,8 @@ class Statistics:
                 N = data[x_path]["N"]
                 vocabulary.update(data[x_path]["terms"])
 
-                # Check if docno is in the dataframe and update the values
-                mask = (self.dl_df['docno'] == docno) & (self.dl_df['XPath'] == x_path)
-                if not mask.any():
-                    new_rows.append({'XPath': x_path, 'docno': docno, 'dl': number_of_words})
-                else:
-                    self.dl_df.loc[mask, 'dl'] += number_of_words
-
-                # check if x_path is in the dataframe and update the values
-                if x_path in self.avdl_df['XPath'].values:
-                    self.avdl_df.loc[self.avdl_df['XPath'] == x_path, 'N'] += N
-                    self.avdl_df.loc[
-                        self.avdl_df['XPath'] == x_path, 'number_of_words'] += number_of_words
-                else:
-                    # add the x_path to the dataframe
-                    self.avdl_df = pd.concat([self.avdl_df, pd.DataFrame({
-                        'XPath': [x_path],
-                        'N': [N],
-                        'number_of_words': [number_of_words]
-                    })], ignore_index=True)
+                self.compute_document_length(docno, x_path, number_of_words)
+                self.compute_average_document_length(x_path, N, number_of_words)
 
         if new_rows:
             new_data = pd.DataFrame(new_rows)
@@ -81,6 +88,8 @@ class Statistics:
         with open(self.RESOURCES_FOLDER + filename, 'w') as outfile:
             json.dump(stats, outfile, indent=4)
 
+        with open(self.RESOURCES_FOLDER + 'dl.json', 'w') as outfile:
+            json.dump(self.document_lengths, outfile, indent=4)
+
         # write the dataframe to a file
         self.avdl_df.to_csv(self.RESOURCES_FOLDER + 'avdl.csv', index=False)
-        self.dl_df.to_csv(self.RESOURCES_FOLDER + 'dl.csv', index=False)

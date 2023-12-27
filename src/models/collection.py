@@ -120,7 +120,7 @@ class Collection:
         The length of a document is the sum of the frequencies of all terms in the document
         based on the granularity.
         """
-        return self.statistics.dl_df.loc[(self.statistics.dl_df['docno'] == docno) & (self.statistics.dl_df['XPath'] == granularity)]['dl'].values[0]
+        return self.statistics.document_lengths[docno][granularity]
 
     def calculate_collection_frequencies(self):
         """

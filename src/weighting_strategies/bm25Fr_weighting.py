@@ -1,9 +1,7 @@
 from weighting_strategies.weighting_strategy import WeightingStrategy
 
-import pandas as pd
 import math
 import time
-import re
 import json
 
 
@@ -23,10 +21,6 @@ class BM25FrWeighting(WeightingStrategy):
         Constructs the weighted inverted index using the BM25 weighting scheme.
         """
         weighted_index = {}
-        start_time = time.time()
-
-        # write the avdl_df to a csv file
-        collection.statistics.avdl_df.to_csv('ici.csv', index=False)
 
         for term, postings in collection.inverted_index.IDX.items():
             for _, entry in postings.items():
@@ -51,9 +45,6 @@ class BM25FrWeighting(WeightingStrategy):
 
                     weighted_index[term].append(
                         {"XPath": self.ARTICLE, "docno": docno, "weight": weight})
-
-        end_time = time.time()
-        self.print_computation_time(start_time, end_time)
 
         return weighted_index
 
@@ -117,15 +108,16 @@ class BM25FrWeighting(WeightingStrategy):
         We need to compute the document length for each document based on 
         the combined term frequency.
         """
-        # set all the rows dl to 0 and keep only the rows with XPath == article
-        collection.statistics.dl_df['dl'] = 0
-        collection.statistics.dl_df = collection.statistics.dl_df[collection.statistics.dl_df['XPath'] == self.ARTICLE]
-
-        for term, postings in term_frequencies.items():
+        updated_dl = {}
+        for _, postings in term_frequencies.items():
             for granularity, entry in postings.items():
-                for docno, freq in entry.items():
-                    if granularity == self.ARTICLE:
-                        collection.statistics.dl_df.loc[(collection.statistics.dl_df['docno'] == docno) & (collection.statistics.dl_df['XPath'] == granularity), 'dl'] += freq
+                if granularity == './/article':
+                    for docno, freq in entry.items():
+                        if docno not in updated_dl:
+                            updated_dl[docno] = {self.ARTICLE: 0}
+                        updated_dl[docno][self.ARTICLE] += freq
+
+        collection.statistics.document_lengths = updated_dl
 
     def calculate_weight(self, collection):
         """
@@ -147,8 +139,6 @@ class BM25FrWeighting(WeightingStrategy):
         collection.transform_index()
 
         weighted_index = self.calculate_bm25_weight_with_combined_tf(collection, term_frequencies)
-
-        end_time = time.time()
-        self.print_computation_time(start_time, end_time)
+        self.print_computation_time(start_time, time.time())
 
         return weighted_index
