@@ -2,6 +2,7 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 
 import math
 import time
+import re
 import json
 
 
@@ -14,7 +15,8 @@ class BM25FrWeighting(WeightingStrategy):
         self.beta = beta
         self.gamma = gamma
 
-        self.ARTICLE = './/article'
+        self.ARTICLE = 'article'
+        self.ARTICLE_PATH = '/article[1]'
 
     def calculate_bm25_weight_with_combined_tf(self, collection, term_frequencies):
         """
@@ -23,16 +25,17 @@ class BM25FrWeighting(WeightingStrategy):
         weighted_index = {}
 
         for term, postings in collection.inverted_index.IDX.items():
-            for _, entry in postings.items():
-                N = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == self.ARTICLE]['N'].values[0]
-                avdl = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == self.ARTICLE]['avdl'].values[0]
+            for x_path, docno_list in postings.items():
+                tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+                N = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == tag]['N'].values[0]
+                avdl = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == tag]['avdl'].values[0]
 
-                df = collection.document_frequency(term, self.ARTICLE)  # Document frequency
+                df = collection.document_frequency(term, tag)  # Document frequency
                 idf = math.log10((N - df + 0.5) / (df + 0.5))           # Inverse document frequency
 
-                for docno, _ in entry.items():
-                    dl = collection.document_length(docno, self.ARTICLE)     # Document length
-                    tf = term_frequencies[term][self.ARTICLE].get(docno, 0)  # Term frequency
+                for docno in docno_list:
+                    dl = collection.document_length(docno, tag)     # Document length
+                    tf = term_frequencies[term][x_path].get(docno, 0)  # Term frequency
 
                     # Calculate BM25 weight for the term in the document
                     weight = (tf * (self.k1 + 1)) / \
@@ -44,7 +47,7 @@ class BM25FrWeighting(WeightingStrategy):
                         weighted_index[term] = []
 
                     weighted_index[term].append(
-                        {"XPath": self.ARTICLE, "docno": docno, "weight": weight})
+                        {"XPath": self.ARTICLE_PATH, "docno": docno, "weight": weight})
 
         return weighted_index
 
@@ -63,23 +66,25 @@ class BM25FrWeighting(WeightingStrategy):
         Computes the combined term frequency for a specific term in different granularities.
         """
         term_freq_for_term = {}
-        for granularity, entry in postings.items():
-            term_freq_for_term[granularity] = self.compute_tf_for_granularity(term, granularity, entry, collection)
+        for x_path, entry in postings.items():
+            tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+            term_freq_for_term[x_path] = self.compute_tf_for_granularity(tag, entry)
 
         combined_term_frequency = self.combine_term_frequency(term_freq_for_term)
         return combined_term_frequency
 
-    def compute_tf_for_granularity(self, term, granularity, entry, collection):
+    def compute_tf_for_granularity(self, granularity, entry):
         """
         Computes the term frequency for a term in a specific granularity.
         """
+        tf = 0
         term_freq = {}
         for docno, freq in entry.items():
-            if granularity == './/title':
+            if granularity == 'title':
                 tf = self.alpha * freq
-            elif granularity == './/categories':
+            elif granularity == 'categories':
                 tf = self.beta * freq
-            elif granularity == './/bdy':
+            elif granularity == 'bdy':
                 tf = self.gamma * freq
 
             term_freq[docno] = tf
@@ -93,13 +98,13 @@ class BM25FrWeighting(WeightingStrategy):
         combined_tf = {}
         for _, term_freq in term_freq_for_term.items():
             for docno, tf in term_freq.items():
-                if self.ARTICLE not in combined_tf:
-                    combined_tf[self.ARTICLE] = {}
+                if self.ARTICLE_PATH not in combined_tf:
+                    combined_tf[self.ARTICLE_PATH] = {}
 
-                if docno not in combined_tf[self.ARTICLE]:
-                    combined_tf[self.ARTICLE][docno] = tf
+                if docno not in combined_tf[self.ARTICLE_PATH]:
+                    combined_tf[self.ARTICLE_PATH][docno] = tf
                 else:
-                    combined_tf[self.ARTICLE][docno] += tf
+                    combined_tf[self.ARTICLE_PATH][docno] += tf
 
         return combined_tf
 
@@ -111,13 +116,16 @@ class BM25FrWeighting(WeightingStrategy):
         updated_dl = {}
         for _, postings in term_frequencies.items():
             for granularity, entry in postings.items():
-                if granularity == './/article':
+                if granularity == self.ARTICLE_PATH:
                     for docno, freq in entry.items():
                         if docno not in updated_dl:
                             updated_dl[docno] = {self.ARTICLE: 0}
                         updated_dl[docno][self.ARTICLE] += freq
 
         collection.statistics.document_lengths = updated_dl
+
+        with open('updated_document_lengths.json', 'w') as f:
+            json.dump(updated_dl, f)
 
     def calculate_weight(self, collection):
         """
@@ -135,8 +143,15 @@ class BM25FrWeighting(WeightingStrategy):
         weighted_index = {}
 
         term_frequencies = self.compute_combined_tf(collection)
+
+        with open('term_frequencies.json', 'w') as f:
+            json.dump(term_frequencies, f)
+
         self.update_dl(collection, term_frequencies)
         collection.transform_index()
+
+        with open('transformed_index.json', 'w') as f:
+            json.dump(collection.inverted_index.IDX, f)
 
         weighted_index = self.calculate_bm25_weight_with_combined_tf(collection, term_frequencies)
         self.print_computation_time(start_time, time.time())

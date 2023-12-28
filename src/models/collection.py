@@ -148,21 +148,18 @@ class Collection:
         We transform the index to only contain the article node.
         """
         transformed_index = {}
-        new_granularity = './/article'
+        new_granularity = '/article[1]'
 
+        transformed_index = {}
         for term, postings in self.inverted_index.IDX.items():
             transformed_index[term] = {}
+            for _, docno_list in postings.items():
+                if new_granularity not in transformed_index[term]:
+                    transformed_index[term][new_granularity] = []
 
-            for granularity, entry in postings.items():
-                if new_granularity == granularity:
-                    transformed_index[term][new_granularity] = entry
-                else:
-                    # If the new_granularity doesn't exist, create an empty dict for it
-                    if new_granularity not in transformed_index[term]:
-                        transformed_index[term][new_granularity] = {}
-
-                    for docno, _ in entry.items():
-                        transformed_index[term][new_granularity][docno] = '/article[1]'
+                for docno in docno_list:
+                    if docno not in transformed_index[term][new_granularity]:
+                        transformed_index[term][new_granularity].append(docno)
 
         self.inverted_index.IDX = transformed_index
 
