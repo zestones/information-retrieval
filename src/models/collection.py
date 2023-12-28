@@ -17,6 +17,7 @@ from models.document_parser import DocumentParser
 from models.inverted_index import InvertedIndex
 
 import json
+import re
 
 from colorama import Fore, Style
 
@@ -96,13 +97,21 @@ class Collection:
             WeightingStrategy().export_weighted_index(
                 self.weighted_index, f'../res/{self.label}_weighted.json')
 
-    def document_frequency(self, term: str, granularity: str) -> int:
+    def document_frequency(self, term: str, tag_cibled: str) -> int:
         """
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
-        # ! We compute the df based on the granularity and not on the entire document
+        # ! We compute the df based on the xpath and not on the entire document
+        # - TO COMPUTE THE df based on the xpath use this formula:
+        # - df = len(self.inverted_index.IDX.get(term, {}).get(xpath, {}))
         """
-        return len(self.inverted_index.IDX.get(term, {}).get(granularity, {}).keys())
+        docno_set = set()
+        for x_path, docno_list in self.inverted_index.IDX.get(term, {}).items():
+            tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+            if tag == tag_cibled:
+                docno_set.update(docno_list)
+
+        return len(docno_set)
 
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """

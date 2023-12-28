@@ -3,38 +3,38 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 import math
 import time
 import re
+import json
 
 
 class BM25FwWeighting(WeightingStrategy):
-    def __init__(self, k1=1, b=0.5, alpha=3, beta=1, gamma=2):
+    def __init__(self, k1=1, b=0.5, alpha=1, beta=1, gamma=1):
         self.k1 = k1
         self.b = b
+
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
 
-    def compute_bm25_weight_on_field(self, collection, field):
+        self.granularity = [".//title", ".//body", ".//categories"]
+
+    def compute_bm25_weight_on_fields(self, collection):
         """
         Constructs the weighted inverted index using the BM25 weighting scheme.
         """
         weighted_index = {}
 
-        N = collection.collection_size                       # Total number of documents in the collection
-        avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
-
         for term, postings in collection.inverted_index.IDX.items():
-            for x_path, entry in postings.items():
+            for granularity, entry in postings.items():
+                N = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == granularity]['N'].values[0]
+                avdl = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == granularity]['avdl'].values[0]
 
-                df = collection.document_frequency(term, x_path)    # Document frequency
-                idf = math.log10((N - df + 0.5) / (df + 0.5))       # Inverse document frequency
+                df = collection.document_frequency(term, granularity)    # Document frequency
+                idf = math.log10((N - df + 0.5) / (df + 0.5))            # Inverse document frequency
 
-                # Get the last element of the XPath
-                element = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
-                weight = 0
-                if element == field:
-                    for docno in entry.get('docno', []):
-                        dl = collection.document_length(docno)              # Document length
-                        tf = collection.term_frequency(docno, term, x_path)  # Term frequency
+                if granularity in self.granularity:
+                    for docno, x_path in entry.items():
+                        dl = collection.document_length(docno, granularity)       # Document length
+                        tf = collection.term_frequency(docno, term, granularity)  # Term frequency
 
                         # Calculate BM25 weight for the term in the document
                         weight = (tf * (self.k1 + 1)) / \
@@ -45,8 +45,7 @@ class BM25FwWeighting(WeightingStrategy):
                         if term not in weighted_index:
                             weighted_index[term] = []
 
-                        weighted_index[term].append(
-                            {"XPath": x_path, "docno": docno, "weight": weight})
+                        weighted_index[term].append({"XPath": x_path, "docno": docno, "weight": weight})
 
         return weighted_index
 
@@ -105,10 +104,13 @@ class BM25FwWeighting(WeightingStrategy):
         start_time = time.time()
 
         weighted_index = {}
-        weighted_index["title"] = self.compute_bm25_weight_on_field(collection, "title")
-        weighted_index["body"] = self.compute_bm25_weight_on_field(collection, "bdy")
-        weighted_index["abstract"] = self.compute_bm25_weight_on_field(collection, "categories")
-        
+        weighted_index = self.compute_bm25_weight_on_fields(collection)
+
+        with open("weighted_index.json", "w") as f:
+            json.dump(weighted_index, f)
+
+        exit()
+
         weighted_index = self.combine_weights(weighted_index)
         weighted_index = self.remove_duplicates(weighted_index)
 

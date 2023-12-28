@@ -51,19 +51,22 @@ class DocumentParser (XmlParser):
     def parse_article(self, tree, docno, parent_map):
         root_tag_text = self.extract_text(tree.getroot())
         if root_tag_text is not None and (self.ARTICLE in self.parser_granularity or self.is_bm25fr):
-            self.process_and_update(tree.getroot(), docno, parent_map, self.ARTICLE, root_tag_text)
+            self.process_and_update(tree.getroot(), docno, parent_map, root_tag_text)
 
-    def process_and_update(self, element, docno, parent_map, parser_granularity, text):
+    def process_and_update(self, element, docno, parent_map, text):
         text = self.clean_and_unescape_text(text)
         xpath = self.get_xpath(element, parent_map)
         tokens = self.text_processor.pre_processing(text)
 
-        self.update_parsed_documents(docno, parser_granularity, tokens)
+        tag = re.sub(r'\[\d+\]', '', xpath).split("/")[-1]
+        # ! If you want to use a df with a cibled xpath, pass the xpath as tag
+        self.update_parsed_documents(docno, tag, tokens)
+
         # TODO : find a better way to do this
-        if self.is_bm25fr and parser_granularity == self.ARTICLE:
+        if self.is_bm25fr and tag == self.ARTICLE[3:]:
             return
 
-        self.update_inverted_index(tokens, docno, xpath, parser_granularity)
+        self.update_inverted_index(tokens, docno, xpath)
 
     def parse_xml_to_json(self, filename: str, lines: list) -> None:
         docno = filename.split('/')[-1].split('.')[0]
@@ -79,12 +82,12 @@ class DocumentParser (XmlParser):
             if parser_granularity == self.ARTICLE:
                 continue
             for balise in tree.findall(parser_granularity):
-                self.process_tag(balise, docno, parent_map, parser_granularity)
+                self.process_tag(balise, docno, parent_map)
 
-    def process_tag(self, balise, docno, parent_map, parser_granularity):
+    def process_tag(self, balise, docno, parent_map):
         text = self.extract_text(balise)
         if text is not None:
-            self.process_and_update(balise, docno, parent_map, parser_granularity, text)
+            self.process_and_update(balise, docno, parent_map, text)
 
     def update_parsed_documents(self, docno, parser_granularity, tokens):
         if docno not in self.parsed_documents:
@@ -99,18 +102,17 @@ class DocumentParser (XmlParser):
     def update_term_frequencies(self, term, docno, granularity):
         self.term_frequencies.setdefault(term, defaultdict(lambda: defaultdict(int)))[granularity][docno] += 1
 
-    def update_inverted_index(self, tokens, docno, last_xpath, granularity):
+    def update_inverted_index(self, tokens, docno, xpath):
         for term in tokens:
             if term in self.query_vocabulary:
                 if term in self.inverted_index:
                     entries = self.inverted_index[term]
-                    if granularity in entries:
-                        entries[granularity][docno] = last_xpath
+                    if xpath in entries:
+                        if docno not in entries[xpath]:
+                            entries[xpath].append(docno)
                     else:
-                        entry = {docno: last_xpath}
-                        entries[granularity] = entry
+                        entries[xpath] = [docno]
                 else:
-                    entry = {docno: last_xpath}
-                    self.inverted_index[term] = {granularity: entry}
+                    self.inverted_index[term] = {xpath: [docno]}
 
-            self.update_term_frequencies(term, docno, granularity)
+            self.update_term_frequencies(term, docno, xpath)
