@@ -21,7 +21,7 @@ class RunManager:
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
         # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
+        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
         self.args = args
 
     def run(self):
@@ -276,6 +276,7 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=(
                                     [".//bdy", ".//title", ".//categories"] if (self.args.bm25fw or self.args.bm25fr) else self.args.granularity),
+                                text_processor=CustomTextProcessorNoStem()
                                 )
 
         run_id = self.get_run_id(self.RUN_OUTPUT_FOLDER)
