@@ -5,7 +5,7 @@ from nltk.tokenize import word_tokenize
 from spacy.lang.en import English
 from spacy.lang.en.stop_words import STOP_WORDS
 
-from colorama import Fore 
+from colorama import Fore
 
 import re
 
@@ -75,7 +75,7 @@ class TextProcessor:
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.
-        """        
+        """
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
         tokens = self.stem(tokens)
@@ -143,6 +143,12 @@ class CustomTextProcessor(TextProcessor):
         """
         return [self.stemmer.stem(token) for token in tokens]
 
+    def get_text_processor_name(self):
+        """
+        Returns the name of the text processor.
+        """
+        return "stop" + str(len(self.stop_words)) + "_porter"
+
 
 class CustomTextProcessorNoStem(TextProcessor):
     def __init__(self) -> None:
@@ -171,6 +177,12 @@ class CustomTextProcessorNoStem(TextProcessor):
         Stems the tokens using PorterStemmer.
         """
         return [self.stemmer.stem(token) for token in tokens]
+
+    def get_text_processor_name(self):
+        """
+        Returns the name of the text processor.
+        """
+        return "stop" + str(len(self.stop_words)) + "_nostem"
 
 
 class CustomTextProcessorNoStop(TextProcessor):
@@ -201,6 +213,12 @@ class CustomTextProcessorNoStop(TextProcessor):
         """
         return [self.stemmer.stem(token) for token in tokens]
 
+    def get_text_processor_name(self):
+        """
+        Returns the name of the text processor.
+        """
+        return "nostop_porter"
+
 
 class CustomTextProcessorNoStopNoStem(TextProcessor):
     def __init__(self) -> None:
@@ -222,6 +240,12 @@ class CustomTextProcessorNoStopNoStem(TextProcessor):
         tokens = self.remove_empty(tokens)
 
         return tokens
+
+    def get_text_processor_name(self):
+        """
+        Returns the name of the text processor.
+        """
+        return "nostop_nostem"
 
 
 class RegexTextProcessor(TextProcessor):

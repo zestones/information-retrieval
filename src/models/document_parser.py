@@ -8,27 +8,6 @@ from models.xml_parser.xml_parser import XmlParser
 
 
 class DocumentParser (XmlParser):
-    def __init__(self, filename: str, text_processor, parser_granularity: list, is_bm25fr: bool = False):
-        self.is_bm25fr = is_bm25fr
-        self.filename = filename
-        self.text_processor = text_processor
-
-        self.ARTICLE = './/article'
-        self.QUERY_FILE = '../lib/data/practice_04/topics_M2DSC_7Q.txt'
-
-        self.query_vocabulary = set()
-
-        if (parser_granularity is None):
-            self.parser_granularity = [self.ARTICLE]
-        else:
-            self.parser_granularity = parser_granularity
-
-        # A dictionary with the document number as key and the content as value
-        # ex: {'doc1': [This, is, the, content, of, the, document]}
-        self.parsed_documents = {}
-        self.inverted_index = defaultdict(list)
-        self.term_frequencies = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-
     def parse_query_vocabulary(self):
         with open(self.QUERY_FILE, 'r') as file:
             for line in file.readlines():

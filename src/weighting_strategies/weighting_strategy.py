@@ -1,6 +1,7 @@
 from colorama import Fore, Style
 import json
 import math
+import re
 
 
 class WeightingStrategy:
@@ -13,7 +14,8 @@ class WeightingStrategy:
         """
         # Calculate the IDF
         # idf(i): IDF of term 'term'
-        return math.log10(collection.collection_size / collection.document_frequency(term, x_path))
+        tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+        return math.log10(collection.collection_size / collection.document_frequency(term, tag))
 
     def TF(self, collection, docno, term, x_path):
         """
@@ -36,7 +38,7 @@ class WeightingStrategy:
         Exports the weighted index to a JSON file.
         """
         weighted_index_data = {"weighted_index": weighted_index}
-        
+
         with open(filename, "w") as file:
             json.dump(weighted_index_data, file)
 
@@ -46,3 +48,15 @@ class WeightingStrategy:
         """
         print(Fore.YELLOW + "> Weighting time: " + str(end_time
               - start_time) + " seconds" + Style.RESET_ALL, end="\n\n")
+
+    def get_weighting_scheme_parameters(self):
+        """
+        Returns the parameters of the weighting scheme.
+        """
+        raise NotImplementedError("Subclasses must implement this method")
+
+    def get_weighting_scheme_name(self):
+        """
+        Returns the name of the weighting scheme.
+        """
+        return self.__class__.__name__.replace("Weighting", "").lower()

@@ -45,3 +45,9 @@ class BM25Weighting(WeightingStrategy):
         self.print_computation_time(start_time, end_time)
 
         return weighted_index
+
+    def get_weighting_scheme_parameters(self):
+        """
+        Returns the parameters of the weighting scheme.
+        """
+        return {"k": self.k1, "b": self.b}

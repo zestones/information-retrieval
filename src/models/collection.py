@@ -13,7 +13,6 @@ from weighting_strategies.bm25Fr_weighting import BM25FrWeighting
 from weighting_strategies.weighting_strategy import WeightingStrategy
 
 from models.statistics import Statistics
-from models.document_parser import DocumentParser
 from models.inverted_index import InvertedIndex
 
 import json
@@ -44,14 +43,10 @@ class Collection:
                  parser_granularity: list = ['.//article'],
                  text_processor: TextProcessor = CustomTextProcessor()
                  ):
-
         self.text_processor = text_processor
         self.filename = filename
 
-        # Init the DocumentParser with the filename and the text processor
-        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity, is_bm25fr=bm25fr_weighting)
-        self.inverted_index = InvertedIndex(self.document_parser)
-
+        self.inverted_index = InvertedIndex(self.filename, self.text_processor, parser_granularity, is_bm25fr=bm25fr_weighting)
         self.label = filename.split('/')[-1].split('.')[0]
 
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
@@ -67,35 +62,36 @@ class Collection:
             self.inverted_index.construct_inverted_index()
             if export_collection:
                 granularity_str = '_'.join(parser_granularity).replace('.//', '')
-                self.inverted_index.export_inverted_index(
-                    f'../res/{self.label}_{granularity_str}.json')
+                self.inverted_index.export_inverted_index(f'../res/{self.label}_{granularity_str}.json')
 
-        print(Fore.YELLOW + "> Indexing time:",
-              self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
+        print(Fore.YELLOW + "> Indexing time:", self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
         print()
 
-        self.collection_size = len(self.document_parser.parsed_documents)
-        self.statistics = Statistics(self, export_statistics=export_statistics)
+        self.collection_size = len(self.inverted_index.parsed_documents)
+        self.statistics = Statistics(self.inverted_index, export_statistics)
 
         if (ltn_weighting):
             self.print_title("LTN weighting")
-            self.weighted_index = LTNWeighting().calculate_weight(self)
+            self.weighting_strategy = LTNWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (ltc_weighting):
             self.print_title("LTC weighting")
-            self.weighted_index = LTCWeighting().calculate_weight(self)
+            self.weighting_strategy = LTCWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25_weighting):
             self.print_title("BM25 weighting")
-            self.weighted_index = BM25Weighting().calculate_weight(self)
+            self.weighting_strategy = BM25Weighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25fw_weighting):
             self.print_title("BM25Fw weighting")
-            self.weighted_index = BM25FwWeighting().calculate_weight(self)
+            self.weighting_strategy = BM25FwWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25fr_weighting):
             self.print_title("BM25Fr weighting")
-            self.weighted_index = BM25FrWeighting().calculate_weight(self)
-
+            self.weighting_strategy = BM25FrWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         if (export_weighted_idx):
-            WeightingStrategy().export_weighted_index(
-                self.weighted_index, f'../res/{self.label}_weighted.json')
+            WeightingStrategy().export_weighted_index(self.weighted_index, f'../res/{self.label}_weighted.json')
 
     def document_frequency(self, term: str, tag_cibled: str) -> int:
         """
@@ -130,18 +126,6 @@ class Collection:
         based on the granularity.
         """
         return self.statistics.document_lengths[docno][granularity]
-
-    def calculate_collection_frequencies(self):
-        """
-        Calculate collection frequency of terms.
-        """
-        for term, entries in self.inverted_index.IDX.items():
-            frequency = 0
-            for xpath, entry in entries.items():
-                frequency += sum(self.term_frequency(docno, term, xpath)
-                                 for docno, _ in entry.items())
-
-        self.collection_frequencies[term] = frequency
 
     def transform_index(self):
         """
