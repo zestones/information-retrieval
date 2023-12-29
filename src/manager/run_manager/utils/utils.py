@@ -18,9 +18,9 @@ def _construct_run_name(run_id, weighting_scheme, granularity=None, text_process
     if ("alpha" and "beta" and "gamma") in parameters.keys():
         base_filename = f"{base_filename}_alpha{parameters['alpha']}_beta{parameters['beta']}_gamma{parameters['gamma']}"
     else:
-        base_filename = f"{base_filename}.txt"
+        base_filename = f"{base_filename}"
 
-    return base_filename
+    return f"{base_filename}.txt"
 
 
 def _write_results(query_results, run_file_path):
