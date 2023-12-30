@@ -11,7 +11,7 @@ class QueryManager:
 
         self.QUERY_FILE = '../lib/data/practice_04/topics_M2DSC_7Q.txt'
 
-    def parse_query_file(self, query_file):
+    def parse_query_file(self, query_file=None):
         if (query_file is None):
             query_file = self.QUERY_FILE
 

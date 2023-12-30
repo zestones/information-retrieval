@@ -55,3 +55,9 @@ class LTCWeighting(WeightingStrategy):
                 sum_of_squares_dict[docno] += math.pow(entry['weight'], 2)
 
         return sum_of_squares_dict
+
+    def get_weighting_scheme_parameters(self):
+        """
+        Returns the parameters of the weighting scheme.
+        """
+        return {}

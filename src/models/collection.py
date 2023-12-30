@@ -7,16 +7,17 @@ from manager.text_processor import RegexTextProcessor
 
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
+from weighting_strategies.lnu_weighting import LNUWeighting
 from weighting_strategies.bm25_weighting import BM25Weighting
 from weighting_strategies.bm25Fw_weighting import BM25FwWeighting
 from weighting_strategies.bm25Fr_weighting import BM25FrWeighting
 from weighting_strategies.weighting_strategy import WeightingStrategy
 
 from models.statistics import Statistics
-from models.document_parser import DocumentParser
 from models.inverted_index import InvertedIndex
 
 import json
+import re
 
 from colorama import Fore, Style
 
@@ -30,12 +31,12 @@ from colorama import Fore, Style
 
 class Collection:
     def __init__(self, filename: str,
-                 plot_statistics: bool = True,
                  import_collection: bool = False,
                  export_collection: bool = False,
                  export_statistics: bool = False,
                  ltn_weighting: bool = False,
                  ltc_weighting: bool = False,
+                 lnu_weighting: bool = False,
                  bm25_weighting: bool = False,
                  bm25fw_weighting: bool = False,
                  bm25fr_weighting: bool = False,
@@ -44,13 +45,13 @@ class Collection:
                  text_processor: TextProcessor = CustomTextProcessor()
                  ):
 
+        if parser_granularity is None:
+            parser_granularity = ['.//article']
+
         self.text_processor = text_processor
         self.filename = filename
 
-        # Init the DocumentParser with the filename and the text processor
-        self.document_parser = DocumentParser(filename, self.text_processor, parser_granularity)
-        self.inverted_index = InvertedIndex(self.document_parser)
-
+        self.inverted_index = InvertedIndex(self.filename, self.text_processor, parser_granularity, is_bm25fr=bm25fr_weighting)
         self.label = filename.split('/')[-1].split('.')[0]
 
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
@@ -66,43 +67,56 @@ class Collection:
             self.inverted_index.construct_inverted_index()
             if export_collection:
                 granularity_str = '_'.join(parser_granularity).replace('.//', '')
-                self.inverted_index.export_inverted_index(
-                    f'../res/{self.label}_{granularity_str}.json')
+                self.inverted_index.export_inverted_index(f'../res/{self.label}_{granularity_str}.json')
 
-        print(Fore.YELLOW + "> Indexing time:",
-              self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
+        print(Fore.YELLOW + "> Indexing time:", self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
         print()
 
-        self.collection_size = len(self.document_parser.parsed_documents)
-        self.statistics = Statistics(self, export_statistics=export_statistics)
+        self.collection_size = len(self.inverted_index.parsed_documents)
+        self.statistics = Statistics(self.inverted_index, export_statistics)
 
         if (ltn_weighting):
             self.print_title("LTN weighting")
-            self.weighted_index = LTNWeighting().calculate_weight(self)
+            self.weighting_strategy = LTNWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (ltc_weighting):
             self.print_title("LTC weighting")
-            self.weighted_index = LTCWeighting().calculate_weight(self)
+            self.weighting_strategy = LTCWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
+        elif (lnu_weighting):
+            self.print_title("LNU weighting")
+            self.weighting_strategy = LNUWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25_weighting):
             self.print_title("BM25 weighting")
-            self.weighted_index = BM25Weighting().calculate_weight(self)
+            self.weighting_strategy = BM25Weighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25fw_weighting):
             self.print_title("BM25Fw weighting")
-            self.weighted_index = BM25FwWeighting().calculate_weight(self)
+            self.weighting_strategy = BM25FwWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         elif (bm25fr_weighting):
             self.print_title("BM25Fr weighting")
-            self.weighted_index = BM25FrWeighting().calculate_weight(self)
-
+            self.weighting_strategy = BM25FrWeighting()
+            self.weighted_index = self.weighting_strategy.calculate_weight(self)
         if (export_weighted_idx):
-            WeightingStrategy().export_weighted_index(
-                self.weighted_index, f'../res/{self.label}_weighted.json')
+            WeightingStrategy().export_weighted_index(self.weighted_index, f'../res/{self.label}_weighted.json')
 
-    def document_frequency(self, term: str, granularity: str) -> int:
+    def document_frequency(self, term: str, tag_cibled: str) -> int:
         """
         Returns the document frequency of a term.
         The document frequency is the sum of the frequencies of the term in all documents.
-        # ! We compute the df based on the granularity and not on the entire document
+        # ! We compute the df based on the xpath and not on the entire document
+        # - TO COMPUTE THE df based on the xpath use this formula:
+        # - df = len(self.inverted_index.IDX.get(term, {}).get(xpath, {}))
         """
-        return len(self.inverted_index.IDX.get(term, {}).get(granularity, {}).keys())
+        docno_set = set()
+        for x_path, docno_list in self.inverted_index.IDX.get(term, {}).items():
+            tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+            if tag == tag_cibled:
+                docno_set.update(docno_list)
+
+        return len(docno_set)
 
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
@@ -114,38 +128,31 @@ class Collection:
         else:
             return 0
 
-    def document_length(self, docno: str) -> int:
+    def document_length(self, docno: str, granularity: str) -> int:
         """
         Returns the length of a document.
+        The length of a document is the sum of the frequencies of all terms in the document
+        based on the granularity.
         """
-        return self.statistics.documents_lengths.get(docno, 0)
+        return self.statistics.document_lengths[docno][granularity]
 
-    def calculate_collection_frequencies(self):
-        """
-        Calculate collection frequency of terms.
-        """
-        for term, entries in self.inverted_index.IDX.items():
-            frequency = 0
-            for xpath, entry in entries.items():
-                frequency += sum(self.term_frequency(docno, term, xpath)
-                                 for docno, _ in entry.items())
-
-        self.collection_frequencies[term] = frequency
-
-    def transform_index(self, ):
+    def transform_index(self):
         """
         We transform the index to only contain the article node.
         """
         transformed_index = {}
+        new_granularity = '/article[1]'
+
+        transformed_index = {}
         for term, postings in self.inverted_index.IDX.items():
             transformed_index[term] = {}
-            for x_path, entry in postings.items():
-                if '/article[1]' not in transformed_index[term]:
-                    transformed_index[term]['/article[1]'] = {'docno': []}
+            for _, docno_list in postings.items():
+                if new_granularity not in transformed_index[term]:
+                    transformed_index[term][new_granularity] = []
 
-                for docno in entry.get('docno', []):
-                    if docno not in transformed_index[term]['/article[1]']['docno']:
-                        transformed_index[term]['/article[1]']['docno'].append(docno)
+                for docno in docno_list:
+                    if docno not in transformed_index[term][new_granularity]:
+                        transformed_index[term][new_granularity].append(docno)
 
         self.inverted_index.IDX = transformed_index
 
