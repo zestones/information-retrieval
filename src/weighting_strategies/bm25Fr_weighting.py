@@ -15,6 +15,10 @@ class BM25FrWeighting(WeightingStrategy):
         self.beta = beta
         self.gamma = gamma
 
+        self.ALPHA_GRANULARITY = 'title'
+        self.BETA_GRANULARITY = 'categories'
+        self.GAMMA_GRANULARITY = 'body'
+
         self.ARTICLE = 'article'
         self.ARTICLE_PATH = '/article[1]'
 
@@ -80,11 +84,11 @@ class BM25FrWeighting(WeightingStrategy):
         tf = 0
         term_freq = {}
         for docno, freq in entry.items():
-            if granularity == 'title':
+            if granularity == self.ALPHA_GRANULARITY:
                 tf = self.alpha * freq
-            elif granularity == 'categories':
+            elif granularity == self.BETA_GRANULARITY:
                 tf = self.beta * freq
-            elif granularity == 'bdy':
+            elif granularity == self.GAMMA_GRANULARITY:
                 tf = self.gamma * freq
 
             term_freq[docno] = tf
@@ -124,9 +128,6 @@ class BM25FrWeighting(WeightingStrategy):
 
         collection.statistics.document_lengths = updated_dl
 
-        with open('updated_document_lengths.json', 'w') as f:
-            json.dump(updated_dl, f)
-
     def calculate_weight(self, collection):
         """
         Constructs the weighted inverted index using the BM25Fr weighting scheme.
@@ -144,14 +145,8 @@ class BM25FrWeighting(WeightingStrategy):
 
         term_frequencies = self.compute_combined_tf(collection)
 
-        with open('term_frequencies.json', 'w') as f:
-            json.dump(term_frequencies, f)
-
         self.update_dl(collection, term_frequencies)
         collection.transform_index()
-
-        with open('transformed_index.json', 'w') as f:
-            json.dump(collection.inverted_index.IDX, f)
 
         weighted_index = self.calculate_bm25_weight_with_combined_tf(collection, term_frequencies)
         self.print_computation_time(start_time, time.time())
