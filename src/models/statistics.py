@@ -21,6 +21,8 @@ class Statistics:
         # Dataframe to store the average document length and document length of each XPath and document
         self.avdl_df = pd.DataFrame(columns=['XPath', 'N', 'avdl', 'number_of_words'])
         self.document_lengths = {}          # {docno: {XPath: dl}}
+        self.distinct_terms_in_document = {}  # {docno: distinct_terms}
+        self.avg_distinct_terms_in_document = 0  # Average distinct terms in the document
 
         self.export_statistics = export_statistics
         self.inverted_index = inverted_index
@@ -83,17 +85,21 @@ class Statistics:
         """
         Computes the statistics for the parsed documents.
         """
-        vocabulary = set()
+        collection_vocabulary = set()
         new_rows = []
 
         for docno, data in self.inverted_index.parsed_documents.items():
+            document_vocabulary = set()
             for x_path in data.keys():
                 number_of_words = len(data[x_path]["terms"])
                 N = data[x_path]["N"]
-                vocabulary.update(data[x_path]["terms"])
+                collection_vocabulary.update(data[x_path]["terms"])
+                document_vocabulary.update(data[x_path]["terms"])
 
                 self._compute_document_length(docno, x_path, number_of_words)
                 self._compute_average_document_length(x_path, N, number_of_words)
+
+            self.distinct_terms_in_document[docno] = len(document_vocabulary)
 
         if new_rows:
             new_data = pd.DataFrame(new_rows)
@@ -101,7 +107,8 @@ class Statistics:
 
         # compute the average document length
         self.avdl_df['avdl'] = self.avdl_df['number_of_words'] / self.avdl_df['N']
-        self.collection_vocabulary_sizes = len(vocabulary)
+        self.collection_vocabulary_sizes = len(collection_vocabulary)
+        self.avg_distinct_terms_in_document = sum(self.distinct_terms_in_document.values()) / len(self.distinct_terms_in_document)
 
         # self.collection_frequency_of_terms = sum(list(self.collection_frequencies.values()))
 
@@ -115,6 +122,7 @@ class Statistics:
             'avg_term_lengths_in_collection': self.avg_term_lengths_in_collection,
             'collection_vocabulary_sizes': self.collection_vocabulary_sizes,
             'collection_frequency_of_terms': self.collection_frequency_of_terms,
+            'avg_distinct_terms_in_document': self.avg_distinct_terms_in_document,
         }
 
         avg_collection_lengths = self.avdl_df.loc[self.avdl_df['XPath'] == './/article']['avdl'].values
@@ -126,6 +134,9 @@ class Statistics:
 
         with open(self.RESOURCES_FOLDER + 'dl.json', 'w') as outfile:
             json.dump(self.document_lengths, outfile, indent=4)
+
+        with open(self.RESOURCES_FOLDER + 'distinct_terms_in_document.json', 'w') as outfile:
+            json.dump(self.distinct_terms_in_document, outfile, indent=4)
 
         # write the dataframe to a file
         self.avdl_df.to_csv(self.RESOURCES_FOLDER + 'avdl.csv', index=False)

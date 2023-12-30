@@ -13,12 +13,9 @@ def _construct_run_name(run_id, weighting_scheme, granularity=None, text_process
     else:
         base_filename = f"../docs/resources/runs/BengezzouIdrissMezianeGhilas_{run_id}_{weighting_scheme}_article_{text_processor}"
 
-    if "k" in parameters and "b" in parameters:
-        base_filename = f"{base_filename}_k{parameters['k']}_b{parameters['b']}"
-    if ("alpha" and "beta" and "gamma") in parameters.keys():
-        base_filename = f"{base_filename}_alpha{parameters['alpha']}_beta{parameters['beta']}_gamma{parameters['gamma']}"
-    else:
-        base_filename = f"{base_filename}"
+    if parameters:
+        for key, value in parameters.items():
+            base_filename += f"_{key}{value}"
 
     return f"{base_filename}.txt"
 

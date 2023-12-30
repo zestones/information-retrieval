@@ -6,7 +6,7 @@ from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
 
 from manager.run_manager.run_generator.baseline import Baseline
-from manager.run_manager.run_generator.grid_search import BM25GridSearch
+from manager.run_manager.run_generator.grid_search import ParametersTuning
 import manager.run_manager.utils.utils as utils
 
 import os
@@ -26,18 +26,18 @@ class RunManager:
         if self.args.baseline:
             Baseline(self.COLLECTION_FILE, self.args).run_baseline()
         elif self.args.bm25_optimization:
-            BM25GridSearch(self.COLLECTION_FILE, self.args).run_bm25_optimization()
+            ParametersTuning(self.COLLECTION_FILE, self.args).run_optimization()
         else:
             self.run_custom()
 
     def run_custom(self):
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=self.args.import_inverted_index,
                                 export_collection=self.args.export_inverted_index,
                                 export_statistics=self.args.statistics,
                                 ltn_weighting=self.args.ltn,
                                 ltc_weighting=self.args.ltc,
+                                lnu_weighting=self.args.lnu,
                                 bm25_weighting=self.args.bm25,
                                 bm25fw_weighting=self.args.bm25fw,
                                 bm25fr_weighting=self.args.bm25fr,

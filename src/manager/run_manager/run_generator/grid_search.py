@@ -3,6 +3,7 @@ from models.collection import Collection
 from weighting_strategies.bm25_weighting import BM25Weighting
 from weighting_strategies.bm25Fr_weighting import BM25FrWeighting
 from weighting_strategies.bm25Fw_weighting import BM25FwWeighting
+from weighting_strategies.lnu_weighting import LNUWeighting
 
 import itertools
 import numpy as np
@@ -10,15 +11,37 @@ import numpy as np
 from manager.run_manager.utils.utils import evaluate_run
 
 
-class BM25GridSearch:
+class ParametersTuning:
     def __init__(self, collection_file, args):
         self.COLLECTION_FILE = collection_file
         self.args = args
-        
-    def run_bm25_optimization(self):
+
+    def run_optimization(self):
         self.bm25_grid_search()
         self.bm25fw_grid_search()
         self.bm25fr_grid_search()
+        self.lnu_search()
+
+    def lnu_search(self):
+        import_collection = False
+        exort_collection = True
+
+        for slope in np.arange(0, 1.2, 0.1):
+            slope = round(slope, 2)
+            collection = Collection(self.COLLECTION_FILE,
+                                    import_collection=import_collection,
+                                    export_collection=exort_collection,
+                                    export_statistics=self.args.statistics,
+                                    lnu_weighting=True,
+                                    export_weighted_idx=self.args.export_weighted_idx,
+                                    )
+            import_collection = True
+            exort_collection = False
+
+            collection.weighting_strategy = LNUWeighting(slope=slope)
+            collection.weighted_index = collection.weighting_strategy.calculate_weight(collection)
+
+            evaluate_run(collection, self.args.granularity)
 
     def bm25_grid_search(self):
         """
@@ -30,15 +53,11 @@ class BM25GridSearch:
         for k1 in np.arange(0, 4.2, 0.2):
             k1 = round(k1, 2)
             collection = Collection(self.COLLECTION_FILE,
-                                    plot_statistics=self.args.plot,
                                     import_collection=import_collection,
                                     export_collection=exort_collection,
                                     export_statistics=self.args.statistics,
-                                    ltn_weighting=False,
-                                    ltc_weighting=False,
                                     bm25_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
-                                    parser_granularity=[".//article"]
                                     )
             import_collection = True
             exort_collection = False
@@ -51,15 +70,11 @@ class BM25GridSearch:
         for b in np.arange(0, 1.1, 0.1):
             b = round(b, 2)
             collection = Collection(self.COLLECTION_FILE,
-                                    plot_statistics=self.args.plot,
                                     import_collection=import_collection,
                                     export_collection=exort_collection,
                                     export_statistics=self.args.statistics,
-                                    ltn_weighting=False,
-                                    ltc_weighting=False,
                                     bm25_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
-                                    parser_granularity=[".//article"]
                                     )
             import_collection = True
             exort_collection = False
@@ -94,15 +109,11 @@ class BM25GridSearch:
             gamma = round(gamma, 2)
 
             collection = Collection(self.COLLECTION_FILE,
-                                    plot_statistics=self.args.plot,
                                     import_collection=import_collection,
                                     export_collection=exort_collection,
                                     export_statistics=self.args.statistics,
-                                    ltn_weighting=False,
-                                    ltc_weighting=False,
                                     bm25fw_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
-                                    parser_granularity=[".//bdy", ".//title", ".//categories"]
                                     )
 
             import_collection = True
@@ -138,15 +149,11 @@ class BM25GridSearch:
             gamma = round(gamma, 2)
 
             collection = Collection(self.COLLECTION_FILE,
-                                    plot_statistics=self.args.plot,
                                     import_collection=import_collection,
                                     export_collection=exort_collection,
                                     export_statistics=self.args.statistics,
-                                    ltn_weighting=False,
-                                    ltc_weighting=False,
                                     bm25fr_weighting=True,
                                     export_weighted_idx=self.args.export_weighted_idx,
-                                    parser_granularity=[".//bdy", ".//title", ".//categories"]
                                     )
 
             import_collection = True
