@@ -8,3 +8,5 @@ gensim
 tabulate
 lxml
 ftfy
+jsonlines
+beir

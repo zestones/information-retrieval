@@ -15,7 +15,6 @@ class DocumentParser (XmlParser):
                 self.query_vocabulary.update(query)
 
     def parse_documents(self) -> None:
-
         self.parse_query_vocabulary()
         if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
