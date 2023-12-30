@@ -1,12 +1,25 @@
-Ce qui à changé :
+Correction de bugs:
 ----------------
-- Correction de bugs concernant la différence entre une run "article" et une run "bdy"
-    Nos run "bdy" était très différente de nos run "article" car les documents était groupé par xpath dans notre indexation.
-    Nous avons donc changé notre indexation pour que les documents soit groupé par "balise" et non plus par "xpath".
+- Correction de bugs concernant le calcul des stats de la collection :
+    Nous avons remarqué que le calcul des stats (donc du dl, avdl et N) n'était pas correcte pour les runs éléments.
 
-- Correction de bugs concernant le calcul des stats de la collection
-    Nous avons remarqué que les stats de la collection n'était pas correcte, en effet après avoir fait pas mal de modification
-    sur la structure de notre indexation, nous avons remarqué que les stats de la collection n'était plus correcte.
-    Cela était du au fait que nous n'indexions plus tout les termes de la collection, mais seulement les termes des requêtes.
+- Correction de bugs concernant bm25fr:
+    Après la combinaison du tf, nous ne recalculions pas les dl donc les résultats n'étaient pas correcte.
 
-- Correction de bugs concernant bm25fr, en effet nous ne recalculions pas le dl pour chaque document après avoir combiné les tf
+
+Quelque expérimentations:
+-------------------------
+- Concernant la différence entre une run "article" et une run "bdy" que nous avions évoqué dans le rapport précédent :
+    Après avoir fait des tests, nous avons remarqué que le calcul de notre df prenait en compte les xpath, nous avons donc 
+    voulu essayer de calculer un df sans tenir compte des xpath. Ce qui nous a permis d'obtenir des résultats plus cohérents, puisque 
+    une run "article" et une run "bdy" ont des résultats très proches maintenant. 
+    Les résultats des runs éléments qui ont été faites jusque la avait toute été faite avec le calcul de df qui prenait en compte les xpath c'est pourquoi nos résultats de run éléments étaient si mauvais.
+    Toute les expérimentations que nous avons faites par la suite ont été faites avec ce nouveau calcul de df (sans les xpath).
+
+
+RESTE A FAIRE:
+--------------
+- bm25fw à corriger
+- lnu à faire
+- créer une methode de pondération très simple, qui compte la fréquence des termes dans le document,
+et qui les pondère en fonction de leur fréquence 
