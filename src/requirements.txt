@@ -10,3 +10,5 @@ lxml
 ftfy
 jsonlines
 beir
+reportlab
+wordcloud
