@@ -23,7 +23,6 @@ class Baseline:
 
     def run_baseline_with_stop_and_stem(self):
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 export_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltn_weighting=True,
@@ -34,7 +33,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
@@ -44,7 +42,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
@@ -55,7 +52,6 @@ class Baseline:
 
     def run_baseline_with_stop_and_no_stem(self):
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 export_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltn_weighting=True,
@@ -66,7 +62,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
@@ -76,7 +71,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
@@ -87,7 +81,6 @@ class Baseline:
 
     def run_baseline_with_no_stop_and_stem(self):
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 export_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltn_weighting=True,
@@ -98,7 +91,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
@@ -108,7 +100,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
@@ -119,7 +110,6 @@ class Baseline:
 
     def run_baseline_with_no_stop_and_no_stem(self):
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 export_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltn_weighting=True,
@@ -130,7 +120,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
@@ -140,7 +129,6 @@ class Baseline:
         evaluate_run(collection, self.args.granularity)
 
         collection = Collection(self.COLLECTION_FILE,
-                                plot_statistics=self.args.plot,
                                 import_collection=True,
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,

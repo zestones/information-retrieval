@@ -1,6 +1,9 @@
-import json
-import time
 from collections import defaultdict
+
+import tabulate
+import time
+import json
+import re
 
 from models.document_parser import DocumentParser
 
@@ -19,6 +22,7 @@ class InvertedIndex(DocumentParser):
         self.ARTICLE = './/article'
         self.QUERY_FILE = '../lib/data/practice_04/topics_M2DSC_7Q.txt'
 
+        self.tag_pattern = re.compile(r'<[^>]+>')
         self.query_vocabulary = set()
 
         self.is_bm25fr = is_bm25fr
@@ -40,6 +44,7 @@ class InvertedIndex(DocumentParser):
         self.term_frequencies = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
         self.indexing_time = 0
+        self.total_time = 0
 
     def construct_inverted_index(self) -> dict:
         """
@@ -48,13 +53,24 @@ class InvertedIndex(DocumentParser):
         Returns:
             dict: The constructed inverted index.
         """
-        parse_time = time.time()
+        self.total_time = time.time()
         self.parse_documents()
-        parse_time = time.time() - parse_time
+        self.total_time = time.time() - self.total_time
 
-        self.indexing_time = parse_time
+        self.indexing_time = self.inverted_index_time_processing
         self.IDX = self.inverted_index
         self.TF = self.term_frequencies
+
+        print(tabulate.tabulate([
+            ['parsed_documents_time_processing', self.parsed_documents_time_processing],
+            ['inverted_index_time_processing', self.inverted_index_time_processing],
+            ['xpath_time_processing', self.xpath_time_processing],
+            ['clean_time_processing', self.clean_time_processing],
+            ['tf_time_processing', self.tf_time_processing],
+            ['extract_text_time_processing', self.extract_text_time_processing],
+            ['xml_to_json_time_processing', self.xml_to_json_time_processing],
+            ['Total Parse Time', self.total_time]
+        ]))
 
     def export_inverted_index(self, filename: str) -> None:
         """

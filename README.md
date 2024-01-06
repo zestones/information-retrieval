@@ -29,8 +29,6 @@ Here is the options you can use:
 | Option                     | Description                                     |
 |----------------------------|-------------------------------------------------|
 | -h, --help                 | Show the help message and exit                  |
-| -d, --display              | Display collections indexes                      |
-| -t, --indexing-time        | Plot indexing time by collection size            |
 | -e, --export-inverted-index| Export collection                               |
 | -i, --import-inverted-index| Import collection                               |
 | -s, --statistics           | Export statistics                               |
@@ -41,11 +39,11 @@ Here is the options you can use:
 | --bm25fw                    | Use BM25Fw weighting scheme                      |
 | --bm25fr                    | Use BM25Fr weighting scheme                      |
 | --cos-sim                   | Use cosine similarity for evaluation             |
-| --export-weighted-idx       | Export weighted index to JSON file               |
-| --query-file QUERY_FILE     | File containing queries                          |
+| -o, --bm25_optimization     | Run BM25 parameter optimization experiment       |
 | -g, --granularity GRANULARITY | Granularity of the XPath query                  |
 | --baseline                  | Run baseline                                    |
-| -o, --bm25_optimization     | Run BM25 parameter optimization experiment       |
+| --export-weighted-idx       | Export weighted index to JSON file               |
+| --query-file QUERY_FILE     | File containing queries                          |
 
 
 #### Examples

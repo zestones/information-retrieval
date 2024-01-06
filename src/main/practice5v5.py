@@ -8,9 +8,7 @@ import argparse
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Process command-line options.')
-    parser.add_argument('-d', '--display', action='store_true', help='Display collections indexes')
 
-    parser.add_argument('-t', '--indexing-time', action='store_true', help='Plot indexing time by collection size')
     parser.add_argument('-e', '--export-inverted-index', action='store_true', help='Export collection')
     parser.add_argument('-i', '--import-inverted-index', action='store_true', help='Import collection')
 

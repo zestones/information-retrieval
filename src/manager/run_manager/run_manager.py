@@ -4,6 +4,7 @@ from manager.query_manager import QueryManager
 from manager.text_processor import CustomTextProcessorNoStopNoStem
 from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
+from manager.text_processor import RegexTextProcessor
 
 from manager.run_manager.run_generator.baseline import Baseline
 from manager.run_manager.run_generator.grid_search import ParametersTuning
@@ -19,7 +20,7 @@ class RunManager:
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
         # XML-Coll-withSemg
-        self.COLLECTION_FILE = '../lib/data/practice_05/small.zip'
+        self.COLLECTION_FILE = '../lib/processed_data/XML-Coll-withSem_stop671_porter.zip'
         self.args = args
 
     def run(self):
@@ -44,7 +45,6 @@ class RunManager:
                                 export_weighted_idx=self.args.export_weighted_idx,
                                 parser_granularity=(
                                     [".//bdy", ".//title", ".//categories"] if (self.args.bm25fw or self.args.bm25fr) else self.args.granularity),
-                                text_processor=CustomTextProcessorNoStem()
                                 )
 
         utils.evaluate_run(collection, self.args.granularity)
