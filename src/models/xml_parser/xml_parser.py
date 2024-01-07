@@ -77,5 +77,5 @@ class XmlParser:
         Returns:
             str: The extracted text content.
         """
-        clean_text = self.tag_pattern.sub(' ', ET.tostring(element, encoding='unicode'))
+        clean_text = self.tag_pattern.sub('', ET.tostring(element, encoding='unicode'))
         return clean_text

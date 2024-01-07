@@ -43,29 +43,53 @@ class TextProcessor:
         """
         return [token for token in tokens if token not in self.stop_words]
 
-    def remove_numbers(self, text: str) -> str:
+    # def remove_numbers(self, text: str) -> str:
+    #     """
+    #     Removes tokens containing numbers from the list of tokens.
+    #     """
+    #     return re.sub(r'\d+', '', text)
+
+    # def remove_punctuation(self, text: str) -> str:
+    #     """
+    #     Removes punctuation from the list of tokens using a regex.
+    #     """
+    #     return re.sub(r'[^\w\s]', '', text)
+
+    # def remove_uni_chars(self, text: str) -> str:
+    #     """
+    #     Removes single characters from the list of tokens using a regex.
+    #     """
+    #     return re.sub(r'\b\w\b', '', text)
+
+    # def remove_unicode(self, text: str) -> str:
+    #     """
+    #     Removes unicode characters from the list of text using a regex.
+    #     """
+    #     return re.sub(r'[^\x00-\x7F]+', '', text)
+    
+    def remove_numbers(self, tokens: list) -> list:
         """
         Removes tokens containing numbers from the list of tokens.
         """
-        return re.sub(r'\d+', '', text)
+        return [token for token in tokens if not re.search(r'\d', token)]
 
-    def remove_punctuation(self, text: str) -> str:
+    def remove_punctuation(self, tokens: list) -> list:
         """
         Removes punctuation from the list of tokens using a regex.
         """
-        return re.sub(r'[^\w\s]', '', text)
+        return [re.sub(r'[^\w\s]', '', token) for token in tokens]
 
-    def remove_uni_chars(self, text: str) -> str:
+    def remove_uni_chars(self, tokens: list) -> list:
         """
         Removes single characters from the list of tokens using a regex.
         """
-        return re.sub(r'\b\w\b', '', text)
+        return [re.sub(r'\b\w\b', '', token) for token in tokens]
 
-    def remove_unicode(self, text: str) -> str:
+    def remove_unicode(self, tokens: list) -> list:
         """
-        Removes unicode characters from the list of text using a regex.
+        Removes unicode characters from the list of tokens using a regex.
         """
-        return re.sub(r'[^\x00-\x7F]+', '', text)
+        return [re.sub(r'[^\x00-\x7F]+', '', token) for token in tokens]
 
     def remove_empty(self, tokens: list) -> list:
         """
@@ -77,16 +101,28 @@ class TextProcessor:
         """
         Performs pre-processing on the text.
         """
-        text = self.remove_punctuation(text)
-        text = self.remove_numbers(text)
-        text = self.remove_uni_chars(text)
-        text = self.remove_unicode(text)
+        # text = self.remove_punctuation(text)
+        # text = self.remove_numbers(text)
+        # text = self.remove_uni_chars(text)
+        # text = self.remove_unicode(text)
+        
+        # tokens = self.tokenize(text)
+        # tokens = self.normalize(tokens)
+        # tokens = self.remove_stop_words(tokens)
+        # tokens = self.stem(tokens)
+        
+        # tokens = self.remove_empty(tokens)
         
         tokens = self.tokenize(text)
         tokens = self.normalize(tokens)
-        tokens = self.remove_stop_words(tokens)
         tokens = self.stem(tokens)
-        
+
+        tokens = self.remove_stop_words(tokens)
+        tokens = self.remove_punctuation(tokens)
+        tokens = self.remove_numbers(tokens)
+
+        tokens = self.remove_uni_chars(tokens)
+        tokens = self.remove_unicode(tokens)
         tokens = self.remove_empty(tokens)
 
         return tokens

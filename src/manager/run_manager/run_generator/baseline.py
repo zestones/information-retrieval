@@ -66,7 +66,8 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStem()
                                 )
         evaluate_run(collection, self.args.granularity)
 
@@ -75,7 +76,8 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStem()
                                 )
         evaluate_run(collection, self.args.granularity)
 
@@ -95,7 +97,8 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStop()
                                 )
         evaluate_run(collection, self.args.granularity)
 
@@ -104,7 +107,8 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStop()
                                 )
         evaluate_run(collection, self.args.granularity)
 
@@ -124,7 +128,8 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 ltc_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStopNoStem()
                                 )
         evaluate_run(collection, self.args.granularity)
 
@@ -133,6 +138,7 @@ class Baseline:
                                 export_statistics=self.args.statistics,
                                 bm25_weighting=True,
                                 export_weighted_idx=self.args.export_weighted_idx,
-                                parser_granularity=self.args.granularity
+                                parser_granularity=self.args.granularity,
+                                text_processor=CustomTextProcessorNoStopNoStem()
                                 )
         evaluate_run(collection, self.args.granularity)

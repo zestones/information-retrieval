@@ -6,6 +6,7 @@ import io
 import re
 
 from models.xml_parser.xml_parser import XmlParser
+from tqdm import tqdm
 
 
 class DocumentParser (XmlParser):
@@ -27,9 +28,11 @@ class DocumentParser (XmlParser):
         self.parse_query_vocabulary()
         if self.filename.endswith('.zip'):
             with zipfile.ZipFile(self.filename, 'r') as zip_file:
-                for file in zip_file.namelist():
+                xml_file_name = zip_file.namelist()
+                for file in tqdm(xml_file_name, desc="Processing files"):
                     with zip_file.open(file) as xml_file:
                         self.parse_xml_to_json(file, xml_file)
+                        
         elif self.filename.endswith('.xml'):
             with open(self.filename, 'rb') as xml_file:
                 self.parse_xml_to_json(self.filename, xml_file)
@@ -52,7 +55,8 @@ class DocumentParser (XmlParser):
         self.xpath_time_processing += end - start
 
         start = time.time()
-        tokens = text.split()
+        # tokens = text.split()
+        tokens = self.text_processor.pre_processing(text)
         end = time.time()
         self.clean_time_processing += end - start
 
