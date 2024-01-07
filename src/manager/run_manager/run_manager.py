@@ -19,7 +19,7 @@ class RunManager:
         if not os.path.exists(self.RUN_OUTPUT_FOLDER):
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
-        # XML-Coll-withSemg
+        # XML-Coll-withSem
         self.COLLECTION_FILE = '../lib/processed_data/XML-Coll-withSem_stop671_porter.zip'
         self.args = args
 

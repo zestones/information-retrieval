@@ -16,7 +16,7 @@ This class is responsible for processing the text.
 The class provides methods to tokenize, normalize, stem, and remove stop words.
 """
 STOP_WORDS_FILE = '../lib/data/practice_04/stop-words-english4.txt'
-
+LOW_FREQ_WORDS_FILE = '../lib/processed_data/words_to_remove.txt'
 
 class TextProcessor:
     def tokenize(self, text: str) -> list:
@@ -72,7 +72,26 @@ class TextProcessor:
         Removes empty strings from the list of tokens.
         """
         return [token for token in tokens if token != '']
-
+    
+    def remove_non_alpha(self, tokens: list) -> list:
+        """
+        Removes non-alphabetic tokens from the list of tokens.
+        """
+        return [token for token in tokens if token.isalpha()]
+    
+    def remove_outliers(self, tokens: list) -> list:
+        """
+        Removes outlier tokens from the list of tokens.
+        The outlier tokens are tokens with a length smaller or equal to 2 or larger than 30.
+        """
+        return [token for token in tokens if len(token) > 2 and len(token) < 30]
+    
+    def remove_low_freq(self, tokens: list) -> list:
+        """
+        Removes tokens with a frequency lower than 5 from the list of tokens.
+        """
+        return [token for token in tokens if token not in self.words_to_remove]
+        
     def pre_processing(self, text: str) -> list:
         """
         Performs pre-processing on the text.
@@ -87,6 +106,10 @@ class TextProcessor:
         tokens = self.remove_stop_words(tokens)
         tokens = self.stem(tokens)
         
+        # tokens = self.remove_non_alpha(tokens)
+        # tokens = self.remove_outliers(tokens)
+        # tokens = self.remove_low_freq(tokens)
+        
         tokens = self.remove_empty(tokens)
 
         return tokens
@@ -95,6 +118,11 @@ class TextProcessor:
         with open(file_path, 'r') as file:
             stopwords = set(word.strip() for word in file)
         return stopwords
+    
+    def load_low_freq_words_from_file(self, file_path: str):
+        with open(file_path, 'r') as file:
+            words = set(word.strip() for word in file)
+        return words
 
 
 class NltkTextProcessor(TextProcessor):
@@ -133,10 +161,46 @@ class SpacyTextProcessor(TextProcessor):
         return [token.lemma_ for token in self.nlp(' '.join(tokens)) if not token.is_stop]
 
 
+class ReferenceTextProcessor(TextProcessor):
+    def __init__(self) -> None:
+        self.stemmer = PorterStemmer()
+        self.stop_words = set(stopwords.words('english'))
+        
+    def pre_processing(self, text: str) -> list:
+        """
+        Performs pre-processing on the text.
+        """
+        text = self.remove_punctuation(text)
+        text = self.remove_numbers(text)
+        text = self.remove_uni_chars(text)
+        text = self.remove_unicode(text)
+        
+        tokens = self.tokenize(text)
+        tokens = self.normalize(tokens)
+        tokens = self.remove_stop_words(tokens)
+        tokens = self.stem(tokens)
+        
+        tokens = self.remove_empty(tokens)
+
+        return tokens
+
+    def stem(self, tokens: list) -> list:
+        """
+        Stems the tokens using PorterStemmer.
+        """
+        return [self.stemmer.stem(token) for token in tokens]
+
+    def get_text_processor_name(self):
+        """
+        Returns the name of the text processor.
+        """
+        return "ref_stop" + str(len(self.stop_words)) + "_porter"
+
 class CustomTextProcessor(TextProcessor):
     def __init__(self) -> None:
         self.stemmer = PorterStemmer()
         self.stop_words = self.load_stopwords_from_file(STOP_WORDS_FILE)
+        self.words_to_remove = self.load_low_freq_words_from_file(LOW_FREQ_WORDS_FILE)
 
     def stem(self, tokens: list) -> list:
         """

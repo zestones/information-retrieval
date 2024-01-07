@@ -2,6 +2,7 @@ from collections import defaultdict
 import xml.etree.ElementTree as ET
 import zipfile
 import time
+import json
 import io
 import re
 
@@ -35,6 +36,8 @@ class DocumentParser (XmlParser):
                 self.parse_xml_to_json(self.filename, xml_file)
 
         self.inverted_index_time_processing -= self.tf_time_processing
+        with open('term_frequencies.json', 'w') as file:
+            json.dump(self.term_frequencies, file, indent=4)
     
     def parse_article(self, tree, docno, parent_map):
         start = time.time()
