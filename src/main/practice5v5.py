@@ -1,9 +1,10 @@
 from manager.run_manager.run_manager import RunManager
 
+from colorama import Fore, Style
 import argparse
+import time
 import sys
 
-import argparse
 
 
 def main(argv):
@@ -28,10 +29,17 @@ def main(argv):
     parser.add_argument('-g', '--granularity', type=str, nargs='+', help='Granularity of the XPath query')
     parser.add_argument('--baseline', action='store_true', help='Run baseline')
     parser.add_argument('-o', '--bm25_optimization', action='store_true', help='Run BM25 parameter optimization experiment')
-
+    parser.add_argument('-p', '--pre-processed', action='store_true', help='Use pre-processed collection to run the experiment')
+    
     args = parser.parse_args(argv)
 
+    start_time = time.time()
     RunManager(args).run()
+    end_time = time.time()
+    
+    print("--------------------------")
+    print(f"{Fore.CYAN}Total time: {end_time - start_time} seconds{Style.RESET_ALL}")
+
 
 
 if __name__ == "__main__":

@@ -55,8 +55,10 @@ class DocumentParser (XmlParser):
         self.xpath_time_processing += end - start
 
         start = time.time()
-        # tokens = text.split()
-        tokens = self.text_processor.pre_processing(text)
+        if self.is_preprocessed:
+            tokens = text.split()
+        else:
+            tokens = self.text_processor.pre_processing(text)
         end = time.time()
         self.clean_time_processing += end - start
 

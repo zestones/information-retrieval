@@ -1,9 +1,5 @@
 from manager.text_processor import TextProcessor
-from manager.text_processor import SnowballTextProcessor
-from manager.text_processor import NltkTextProcessor
-from manager.text_processor import SpacyTextProcessor
 from manager.text_processor import CustomTextProcessor
-from manager.text_processor import RegexTextProcessor
 
 from weighting_strategies.ltn_weighting import LTNWeighting
 from weighting_strategies.ltc_weighting import LTCWeighting
@@ -42,7 +38,8 @@ class Collection:
                  bm25fr_weighting: bool = False,
                  export_weighted_idx: bool = False,
                  parser_granularity: list = ['.//article'],
-                 text_processor: TextProcessor = CustomTextProcessor()
+                 text_processor: TextProcessor = CustomTextProcessor(),
+                 is_collection_pre_processed: bool = False
                  ):
 
         if parser_granularity is None:
@@ -51,7 +48,7 @@ class Collection:
         self.text_processor = text_processor
         self.filename = filename
 
-        self.inverted_index = InvertedIndex(self.filename, self.text_processor, parser_granularity, is_bm25fr=bm25fr_weighting)
+        self.inverted_index = InvertedIndex(self.filename, self.text_processor, parser_granularity, is_preprocessed=is_collection_pre_processed,  is_bm25fr=bm25fr_weighting)
         self.label = filename.split('/')[-1].split('.')[0]
 
         # A dictionary with the term as key and a dictionary of document numbers and term frequencies as value
@@ -59,19 +56,17 @@ class Collection:
         self.collection_frequencies = {}
         if (import_collection):
             granularity_str = '_'.join(parser_granularity).replace('.//', '')
-            print(Fore.GREEN
-                  + f'Importing collection : {self.label}_{granularity_str}' + Style.RESET_ALL)
+            print(Fore.GREEN + f'Importing collection : {self.label}_{granularity_str}' + Style.RESET_ALL)
             self.inverted_index.import_inverted_index(f'../res/{self.label}_{granularity_str}.json')
         else:
             print(Fore.GREEN + f'Indexing collection : {self.label}' + Style.RESET_ALL)
             self.inverted_index.construct_inverted_index()
             if export_collection:
+                print(Fore.GREEN + f'Exporting collection... : {self.label}' + Style.RESET_ALL)
                 granularity_str = '_'.join(parser_granularity).replace('.//', '')
                 self.inverted_index.export_inverted_index(f'../res/{self.label}_{granularity_str}.json')
 
-        print(Fore.YELLOW + "> Indexing time:", self.inverted_index.indexing_time, "seconds" + Style.RESET_ALL)
-        print()
-
+        print(Fore.GREEN + f'Calculating Statistics... :' + Style.RESET_ALL)
         self.collection_size = len(self.inverted_index.parsed_documents)
         self.statistics = Statistics(self.inverted_index, export_statistics)
 
@@ -110,14 +105,8 @@ class Collection:
         # - TO COMPUTE THE df based on the xpath use this formula:
         # - df = len(self.inverted_index.IDX.get(term, {}).get(xpath, {}))
         """
-        docno_set = set()
-        for x_path, docno_list in self.inverted_index.IDX.get(term, {}).items():
-            tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
-            if tag == tag_cibled:
-                docno_set.update(docno_list)
-
-        return len(docno_set)
-
+        return self.inverted_index.DF.get(term, {}).get(tag_cibled, 0)
+    
     def term_frequency(self, docno: str, term: str, x_path: str) -> int:
         """
         Returns the term frequency of a term in a document at a specific XPath.

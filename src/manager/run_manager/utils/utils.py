@@ -32,15 +32,18 @@ def _get_run_id(folder_path=RUN_OUTPUT_FOLDER):
     return len(files) + 1
 
 
-def evaluate_run(collection, granularity):
+def evaluate_run(collection, granularity, use_pre_processed_collection):
     """
     Runs the baseline. The baseline generates 12 runs : 3 (weighting schemes) * 2 (stop-list) * 2 (stemmer)
     """
     run_id = _get_run_id(RUN_OUTPUT_FOLDER)
     scheme = collection.weighting_strategy.get_weighting_scheme_name()
     parameters = collection.weighting_strategy.get_weighting_scheme_parameters()
-    # text_processor = "_".join(collection.label.split("_")[1:])
+    
     text_processor = collection.text_processor.get_text_processor_name()
+    
+    if use_pre_processed_collection:
+        text_processor = "_".join(collection.label.split("_")[1:])
 
     run_file_path = _construct_run_name(run_id, scheme, granularity=granularity, text_processor=text_processor, parameters=parameters)
     query_manager = QueryManager(collection)

@@ -1,8 +1,6 @@
 import xml.etree.ElementTree as ET
 import html
 import ftfy
-import re
-
 
 class XmlParser:
     def __init__(self, xml_file):
@@ -77,5 +75,5 @@ class XmlParser:
         Returns:
             str: The extracted text content.
         """
-        clean_text = self.tag_pattern.sub('', ET.tostring(element, encoding='unicode'))
-        return clean_text
+        return ' '.join(element.itertext())
+    
