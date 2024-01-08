@@ -73,16 +73,16 @@ class InvertedIndex(DocumentParser):
         self.DF = self.document_frequencies
 
         print(tabulate.tabulate([
-            ['parsed_documents_time_processing', self.parsed_documents_time_processing],
-            ['inverted_index_time_processing', self.inverted_index_time_processing],
-            ['document_frequency_time', self.document_frequency_time],
-            ['xpath_time_processing', self.xpath_time_processing],
-            ['clean_time_processing', self.clean_time_processing],
-            ['tf_time_processing', self.tf_time_processing],
-            ['extract_text_time_processing', self.extract_text_time_processing],
-            ['xml_to_json_time_processing', self.xml_to_json_time_processing],
-            ['Total Parse Time', self.total_time]
+            ['Parsed documents', self.parsed_documents_time_processing],
+            ['Inverted index', self.inverted_index_time_processing],
+            ['Documents frequency', self.document_frequency_time],
+            ['Term Frequency', self.tf_time_processing],
+            ['XPath retrieval', self.xpath_time_processing],
+            ['Pre processing', self.clean_time_processing],
+            ['Text extraction', self.extract_text_time_processing],
+            ['Total Time', self.total_time]
         ]))
+        
         print(Fore.YELLOW + "> Indexing time:", self.indexing_time, "seconds" + Style.RESET_ALL)
         print()
     

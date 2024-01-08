@@ -5,6 +5,7 @@ from manager.text_processor import CustomTextProcessorNoStopNoStem
 from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
 from manager.text_processor import ReferenceTextProcessor
+from manager.text_processor import CustomTextProcessor
 
 from manager.run_manager.run_generator.baseline import Baseline
 from manager.run_manager.run_generator.grid_search import ParametersTuning
@@ -14,15 +15,18 @@ import os
 
 class RunManager:
     def __init__(self, args):
-        
         self.RUN_OUTPUT_FOLDER = "../docs/resources/runs/"
         if not os.path.exists(self.RUN_OUTPUT_FOLDER):
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
-        # XML-Coll-withSem
-        self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
-        # self.COLLECTION_FILE = '../lib/processed_data/XML-Coll-withSem_stop670_porter.zip'
         self.args = args
+        # XML-Coll-withSem
+        if self.args.pre_processed:
+            self.COLLECTION_FILE = '../lib/processed_data/XML-Coll-withSem_stop670_porter.zip'
+            self.text_processor = CustomTextProcessor()
+        else:
+            self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
+            self.text_processor = CustomTextProcessor()
 
     def run(self):        
         if self.args.baseline:
@@ -47,7 +51,7 @@ class RunManager:
                                 is_collection_pre_processed=self.args.pre_processed,
                                 parser_granularity=(
                                     [".//bdy", ".//title", ".//categories"] if (self.args.bm25fw or self.args.bm25fr) else self.args.granularity),
-                                text_processor=ReferenceTextProcessor()
+                                text_processor=self.text_processor
                                 )
 
         utils.evaluate_run(collection, self.args.granularity, self.args.pre_processed)
