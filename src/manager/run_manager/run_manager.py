@@ -5,6 +5,7 @@ from manager.text_processor import CustomTextProcessorNoStopNoStem
 from manager.text_processor import CustomTextProcessorNoStem
 from manager.text_processor import CustomTextProcessorNoStop
 from manager.text_processor import ReferenceTextProcessor
+from manager.text_processor import ReferenceRearrangedTextProcessor
 from manager.text_processor import CustomTextProcessor
 
 from manager.run_manager.run_generator.baseline import Baseline
@@ -20,11 +21,12 @@ class RunManager:
             os.makedirs(self.RUN_OUTPUT_FOLDER)
 
         self.args = args
-        # XML-Coll-withSem
         if self.args.pre_processed:
+            # XML-Coll-withSem_stop670_porter
             self.COLLECTION_FILE = '../lib/processed_data/XML-Coll-withSem_stop670_porter.zip'
             self.text_processor = CustomTextProcessor()
         else:
+            # XML-Coll-withSem
             self.COLLECTION_FILE = '../lib/data/practice_05/XML-Coll-withSem.zip'
             self.text_processor = CustomTextProcessor()
 

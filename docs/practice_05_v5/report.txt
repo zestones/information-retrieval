@@ -1,53 +1,188 @@
-Correction de bugs:
+==============================================
+OVERVIEW DES RUNS:
 ----------------
-- Correction de bugs concernant le calcul des stats de la collection :
-    Nous avons remarqué que le calcul des stats (donc du dl, avdl et N) n'était pas correcte pour les runs éléments.
 
-- Correction de bugs concernant bm25fr:
-    Après la combinaison du tf, nous ne recalculions pas les dl donc les résultats n'étaient pas correcte.
-
-
-Quelque expérimentations:
--------------------------
-- Concernant la différence entre une run "article" et une run "bdy" que nous avions évoqué dans le rapport précédent :
-    Après avoir fait des tests, nous avons remarqué que le calcul de notre df prenait en compte les xpath, nous avons donc 
-    voulu essayer de calculer un df sans tenir compte des xpath. Ce qui nous a permis d'obtenir des résultats plus cohérents, puisque 
-    une run "article" et une run "bdy" ont des résultats très proches maintenant. 
-    Les résultats des runs éléments qui ont été faites jusque la avait toute été faite avec le calcul de df qui prenait en compte les xpath c'est pourquoi nos résultats de run éléments étaient si mauvais.
-    Toute les expérimentations que nous avons faites par la suite ont été faites avec ce nouveau calcul de df (sans les xpath).
-
-
-
----- 
-EXPERIMENTATION:
----------------
-
-Ancienne method article:
+Preprocessing a la volé:
 ------------------------
-preprocess Reference:
-- bm25F (~2) 1bm25FW + 1bm25FR
-- lnu (~1)
+preprocess Reference fait à la volé:
+- bm25 (1) - 1
 
 preprocess Reference réarangé:
-- bm25 (~1)
+- bm25 (1) - 2
 
-Nouvelle Method:
----------------
+Preprocessing (réalisé une seule fois):
+--------------------------------------
 Processing Reference 
-- bm25 (~1)
-- bm25F (~2)
+- bm25 (1) - 3
  
 Processing Reference réarangé:
-- bm25 (~1)
+- bm25 (1) - 4
 
 Processing With new steps:
-- baseline (~12)
+- baseline (12) - 5 - 16
 - element (~10)
-- gridSearch (~50)
+- Optimization :
+    - lnu (~12)
+    - bm25 (~20)
 
-----------------
+- DeepLearning (~4)
 
-stats de la collection sur ancienne methode avec preprocess reference:
+Explications des choix des runs éléments:
+--------------------------------
+Pour chaqu'une des runs nous les comparons a la run baseline (BengezzouIdrissMezianeGhilas_7_bm25_article_stop670_porter_k1_b0.5.txt)
+Pour chaque run nous mettons le rapport associé dans le dossier ./comparison_report/
+
+- Nous avons générer une run article et bdy.
+-> Résultats: Corrélation de 100% avec la run baseline. Mais ce qui est important ici c'est la fréquence du tag bdy et article dans les résultats.
+    On remarque que article est présent 10387fois et bdy 113 fois.
+-> Conclusion: Pour toute les runs éléments nous allons garder la balise article !! (voir rapport: comparison_report_no_id_bm25_article_bdy_stop670_porter_k1_b0.pdf)
+
+- Une run avec article header sec p list st ss1 template reflist link entry
+-> Résultats: Correlation de 3% - 5% avec la run baseline. 
+    On remarque que les sec sont très présente dans les résultats (~3110), les balise: st, link, entry, template, reflist sont très peu présente.
+    (voir rapport: comparison_report_19_bm25_article_header_sec_p_list_st_ss1_template_reflist_link_entry_stop670_porter_k1_b0.pdf)
+
+Nous avons donc réaliser des tests avec les balises restante à savoir : sec, header, p, list, ss1.
+
+- Une run article sec:
+-> Résultats: Correlation de 4% - 7% avec la run baseline. 
+-> Hypothèse: Probablement notre meilleur run éléments !
+
+- Une run article sec p:
+-> Résultats: Correlation de 4% - 6% avec la run baseline.
+    On remarque moins d'osciation sur la courbe d'évolution de la corrélation comparé à la run article sec.
+    (rapport: comparison_report_22_bm25_article_sec_p_stop670_porter_k1_b0.pdf)
+
+
+===============================================
+CORRECTION DE BUGS:
+-------------------
+
+- Correction de bugs concernant le calcul des stats de la collection :
+Nous avons remarqué que le calcul des stats (donc du dl, avdl et N) n'était pas correct pour les runs éléments.
+
+- Correction de bugs concernant bm25fr:
+Après la combinaison du tf, nous ne recalculions pas les dl donc les résultats n'étaient pas corrects.
+
+
+UNE PREMIERE EXPERIMENTATION:
+----------------------------
+- Concernant la différence entre une run "article" et une run "bdy" que nous avions évoqué dans le rapport précédent (practice_05_v4):
+Après avoir fait des tests, nous avons remarqué que le calcul de notre df prenait en compte les xpath, nous avons donc 
+voulu essayer de calculer un df sans tenir compte des xpath. Ce qui nous a permis d'obtenir des résultats plus cohérents, puisque 
+une run "article" et une run "bdy" ont des résultats très proches maintenant. 
+Les résultats des runs éléments qui ont été faites jusque la avait toute été faite avec le calcul de df qui prenait en compte les xpath c'est pourquoi nos résultats de run éléments étaient si mauvais.
+Toute les expérimentations que nous avons faites par la suite ont été faites avec ce nouveau calcul de df (sans les xpath).
+
+
+===============================================
+EXPERIMENTATIONS & ANALYSE DU PREPROCESSING:
+--------------------------------------------
+
+Pour améliorer les performances nous avons decidé de faire un preprocessing de la collection et de sauvegarder toute la collection preprocessée dans une nouvelle archive.
+Cette étape est relativement rapide (~5min) et permet de gagner énormément de temps lors de l'execution de run éléments. Car une run éléments demande a faire le preprocessing parfois plusieurs fois du même contenu.
+(example: le contenu d'une balise p est dans article).
+
+Donc la première étape a été de vérifier que le fait de faire le preprocessing de la collection de cette manière ne change pas les résultats des runs. Car en effet la logique est légèrement différente, auparavant nous
+utilisions une regex pour supprimer toutes les balises et garder tout le contenu texte. 
+Puisque nous avons voulu faire un preprocessing des fichier xml et de les enregistrer sans modifier l'architechture des fichiers xml, nous avons donc décidé de parser les fichiers xml avec la librairie ElementTree.
+Donc nous recupérons maintenant récursivement le contenu de chaque balise et nous le remplaçons par le contenu preprocessé.
+
+
+Voici une courte synthèse des résultats obetenu en comparant donc les stats de la collection avec l'ancienne methode et la nouvelle methode:
+
+Ancienne methode:
+╒═════════════════════════╤═════════════╕               
+│ Statistic               │    Value    │               
+╞═════════════════════════╪═════════════╡               
+│ Average document length │   654.008   │               
+├─────────────────────────┼─────────────┤               
+│ Average word length     │   8.39066   │               
+├─────────────────────────┼─────────────┤               
+│ Total unique words      │   210232    │               
+├─────────────────────────┼─────────────┤               
+│ Total words             │ 6.41189e+06 │               
+╘═════════════════════════╧═════════════╛               
+
+Nouvelle methode:
+╒═════════════════════════╤═════════════╕
+│ Statistic               │    Value    │
+╞═════════════════════════╪═════════════╡
+│ Average document length │   653.745   │
+├─────────────────────────┼─────────────┤
+│ Average word length     │   8.39819   │
+├─────────────────────────┼─────────────┤
+│ Total unique words      │   210144    │
+├─────────────────────────┼─────────────┤
+│ Total words             │ 6.40932e+06 │
+╘═════════════════════════╧═════════════╛
+
+Donc on a que très peu de changements, et ces changements sont dûs aux mots à cheval entre deux balise, par exemple : 
+<p>Ceci est un exemple de te<b>xte gras</b></p>
+Le mots texte est coupé par une balise ce qui fait que lors du processing nous allons avoir 2 mots "te" et "xte" au lieu d'un seul "texte".
+C'est pourquoi nous avons une légère différence sur le nombre de mots total (~2000 mots en moins). 
+En analysant un peu plus en détail sur quel balise nous avons ce problème, nous avons remarqué que c'était principalement sur les balises <b> et <it>
+Nous avons donc décidé de supprimer ces balises de la collection, car elle ne nous serviront pas lors d'éxécution de run éléments. 
+
+
+De plus en analysant comment on évoluer les fréquences des mots de la query dans la collection :
+
+                        actor    algorithm    analysi    benefit    exclus    film    health    hill    inform    learn    link    machin    model    mutual    network    oil    oliv    oper    probabilist    rank    retriev    score    supervis    system    web
+--------------------  -------  -----------  ---------  ---------  --------  ------  --------  ------  --------  -------  ------  --------  -------  --------  ---------  -----  ------  ------  -------------  ------  ---------  -------  ----------  --------  -----
+Original method          7115        35312       8143       4716      1893   16708     11414    4526     17490     6027   12306      9165    15424      2711      17912  14407    3025   16621           1229    3673      13578     4198         589     38947  20188
+New method               7112        35324       8143       4716      1894   16707     11414    4526     17502     6028   12304      9163    15431      2711      17920  14412    3025   16632           1230    3671      13580     4197         589     38964  20186
+Frequency difference       -3           12          0          0         1      -1         0       0        12        1      -2        -2        7         0          8      5       0      11              1      -2          2       -1           0        17     -2
+----------------------------------------
+Overall difference: 64
+
+On a observé que nous récupérons maintenant 64 mots de plus dans la query, ce qui est un bon point.
+
+Notre test final a été de comparer la corrélation entre deux runs BM25 avec un preprocessing fait à la volée (comme avant) et avec une collection déja nettoyée (nouvelle méthode pour améliorer nos temps d'éxecution) :
+- Résultats nos deux runs sont corrélés à plus de 70%.
+
+
+Dans la suite de la partie expérimentations nous expliquerons comment nous avons décidé d'améliorer notre méthode de preprocessing.
+Définition de quelques appellations:
+- Preprocessing Reference: Ancienne methode de preprocessing
+- Processing Reference fait à la volée  : Ancienne methode de preprocessing mais fait à la volée (donc sans utiliser le zip de la collection déja nettoyé)
+- Processing Reference Réarrangé: Ancienne methode de preprocessing mais avec une réorganisation des étapes de preprocessing.
+- Preprocessing With new steps: Nouvelle methode de preprocessing avec une réorganisation des étapes de preprocessing + l'ajout d'une étapes de suppression des termes "aberrants" (mots trop longs, mots trop courts, mots avec une fréquence trop faible)
+
+
+Voici quelques expérimentations qui nous ont poussé a améliorer notre méthode de preprocessing:
+- Nous avons remarqué que la tokenization ne fonctionnait pas très bien par moment, par exemple :
+    "World Ltd. World Ltd." était tokenizé en : "World", "Ltd", "." et "World", "Ltd." ce qui n'est pas correct. la fonction word_tokenize à parfois du mal a tokenizer correctement les mots.
+
+Nous avons donc décidé de revoir notre méthode de preprocessing et de la réorganiser pour essayer de corriger ce problème.
+L'ordre des étapes de notre preprocessing de reference était le suivant:
+- tokenization
+- lower case
+- stemming
+- stopword removal
+- remove punctuation	
+- remove numbers
+- remove special characters
+- remove empty tokens
+
+Nous avons également remarqué un second point qui nous a poussé a réorganiser notre méthode de preprocessing:
+L'étape de stopword removal est faite après l'étape de stemming, ce qui fait que des mots comme "approximately" qui est présent dans la liste des stopwords n'est pas supprimé car il est transformé en "approxim" par l'étape de stemming.
+Donc pour palier a ces problèmes nous avons décidé de réorganiser notre méthode de preprocessing de la maniere suivante:
+- remove punctuation
+- remove numbers
+- remove special characters
+- tokenization
+- lower case
+- stopword removal
+- stemming
+- remove empty tokens
+
+Pour faciliter l'étape de tokenization et éviter que word_tokenize ne découpe mal les mots, nous supprimons dans un premier temps la ponctuation, les nombres et les caractères spéciaux.
+Puis nous tokenizons le contenu de la balise et mettons tout les mots en minuscule (tout les mots de la stop list sont en minuscule).
+et enfin nous supprimons les stopwords et nous faisons le stemming.
+
+Voici une comparaison des stats entre notre methode de preprocessing de reference et le preprocessing reference réarrangé:
+
+Tout d'abord voici un rappel des stats obtenu sur notre collection avec notre preprocessing reference fait à la volée:
 ╒═════════════════════════╤═════════════╕
 │ Statistic               │    Value    │
 ╞═════════════════════════╪═════════════╡
@@ -72,7 +207,7 @@ Stats de la collection sur nouvelle methode avec processing reference rearrangé
 ├─────────────────────────┼─────────────┤
 │ Total words             │ 6.15953e+06 │
 ╘═════════════════════════╧═════════════╛
-Du fait de la supression des stopwords avant toute modif des mots, on a moins de mots dans la collection
+Hypothèse: Du fait de la suppression des stopwords avant toute modif des mots, on a moins de mots dans la collection
 ~250000 mots en moins.
 
 En observant comment ont évolué les mots de la requete avec la nouvelle methode:
@@ -85,10 +220,11 @@ Frequency difference       27          264         79         45         3     1
 ----------------------------------------
 Overall difference: -15393
 
-?? Information a disparu vérification de pourquoi: :
-le mot est présent dans la liste des stopwords 
+?? le mot "Information" a disparu vérification de pourquoi:
+-> Solution: le mot est présent dans la liste des stopwords !! 
+-> Ce qui confirme que nos étapes de preprocessing sont dans le bon ordre et est plus efficace que l'ancienne methode. 
 
-Apres supression du mots information des stopwords:
+Après suppression du mot "information" de la liste de stopwords:
                         actor    algorithm    analysi    benefit    exclus    film    health    hill    inform    learn    link    machin    model    mutual    network    oil    oliv    oper    probabilist    rank    retriev    score    supervis    system    web
 --------------------  -------  -----------  ---------  ---------  --------  ------  --------  ------  --------  -------  ------  --------  -------  --------  ---------  -----  ------  ------  -------------  ------  ---------  -------  ----------  --------  -----
 Original method          7086        35062       8085       4671      1888   16595     11391    4513     17440     6003   12090      9122    15337      2708      17820  14270    3023   16591           1230    3643      13560     4179         588     38683  20128
@@ -97,16 +233,17 @@ Frequency difference       27          264         79         45         3     1
 ----------------------------------------
 Overall difference: 2119
 
-On remarque que la deuxieme methode permet de recuperer +2119 mots de la query !!
-
-?? Nous avons remarqué un probleme tout les mots de la collection pas recupérer regex ajoute pas espace
+On remarque que la deuxième méthode permet de récuperer +2119 mots de la query !!
+La différence étant énorme nous avons décidé de creuser un peu plus pour comprendre pourquoi nous avons une telle différence.
+En réalité, nous avons remarqué un probleme avec notre méthode de preprocessing reference fait à la volée, tous les mots de la collection ne sont pas recupérés correctement.
+Nous utilisions une regex mais nous ne remplaçions pas les balises par un espace, ce qui fait que certain mots était fusionné avec le contenu de la balise suivante.
 -> Ajout espace dans la regex
 clean_text = self.tag_pattern.sub('', ET.tostring(element, encoding='unicode'))
 
 Maintenant:
 -> clean_text = self.tag_pattern.sub(' ', ET.tostring(element, encoding='unicode'))
 
-Apres supression du mots information des stopwords et la recupertion de tout les mots correctement:
+Apres suppression du mot 'information' des stopwords et la récuperation de tous les mots correctement:
 
                         actor    algorithm    analysi    benefit    exclus    film    health    hill    inform    learn    link    machin    model    mutual    network    oil    oliv    oper    probabilist    rank    retriev    score    supervis    system    web
 --------------------  -------  -----------  ---------  ---------  --------  ------  --------  ------  --------  -------  ------  --------  -------  --------  ---------  -----  ------  ------  -------------  ------  ---------  -------  ----------  --------  -----
@@ -116,11 +253,11 @@ Frequency difference       -2           14         21          0        -2      
 ----------------------------------------
 Overall difference: 508
 
-Donc on a gagné 508 mots en plus dans la query en parsant correctement les documents cet fois.
-Donc la nouvelle methode de preprocessing nous fait gagner 508 mots en plus. 
-Mais en réalité c'est plus de 2119 qui sont ajouter du fait que la regex ne prenait pas en compte tout les mots de la collection.
+Donc on a gagné 508 mots en plus dans la query en parsant correctement les documents de la collection.
+Donc la nouvelle methode de preprocessing nous fait gagner 508 mots en plus, 
+Mais en réalité c'est plus de 2119 qui sont ajoutés du fait que la regex ne prenait pas en compte tous les mots de la collection.
 
-Voici les stats de la collection sur ancienne methode avec preprocess reference suite a la correction de la regex:
+Voici les stats de la collection en utilisant le preprocessing reference fait à la volée mais avec la regex qui prend en compte tout les mots de la collection:
 ╒═════════════════════════╤════════════╕
 │ Statistic               │   Value    │
 ╞═════════════════════════╪════════════╡
@@ -132,33 +269,36 @@ Voici les stats de la collection sur ancienne methode avec preprocess reference 
 ├─────────────────────────┼────────────┤
 │ Total words             │ 6.3817e+06 │
 ╘═════════════════════════╧════════════╛
-c'est donc environ 150000 mots de plus récupérer dans la collection.
+C'est donc environ 150000 mots de plus récupérés dans la collection.
 
-======
+==================================================
+Analyse pour un processing ENCORE plus performant:
+==================================================
+voir le notebook (./notebook/pre_processing_analysis.ipynb) pour plus de détails.
 
-En utilisant la loi de zipf on peut remarqué que le slope à été réduit grace a notre nouvelle methode :
+En utilisant la loi de zipf on peut remarquer que le slope à été réduit grâce à notre nouvelle méthode :
 
 Estimated slope for Reference collection (power law exponent): -1.368963310392746
-Slope + 1: 0.3689633103927461
+abs(Slope + 1): 0.3689633103927461
 ---------
 Estimated slope for Further processed collection (power law exponent): -1.332048566362227
-Slope + 1: 0.332048566362227
+abs(Slope + 1): 0.332048566362227
 
-Une 3eme methode de preprocessing:
+
+Une 3eme methode de preprocessing (Preprocessing With new steps):
 ----------------------------------
-- On a remarqué qu'il y avait pas mal de données "abérantes" dans la collection,
-par exemple des mots dont la taille est supérieur a 30 caractères, ou des mots qui sont composé de 2 caractères.
-On a donc exploré les données et pour les long mots la plupart du temps c'est des urls et pour les mots constitué de 2 caractères
-ce sont principalement des mots tel que f_x p_x ect... qui provienne de formule mathématique.
-Nous avons également décidé de les supprimer.
+- On a remarqué qu'il y avait pas mal de données "aberrantes" dans la collection, par exemple des mots dont la taille est supérieure à 30 caractères,
+ou des mots qui sont composés de 2 caractères. On a donc exploré les données et pour les mots les plus longs la plupart du temps c'est des urls et pour les mots constitués de 2 caractères
+ce sont principalement des mots tel que f_x p_x ect... qui provienne de formules mathématiques.
+
+Nous avons donc décidé de les considérer comme des outliers et de les supprimer de la collection dans une nouvelle étape de preprocessing.
 
 De plus nous avons observer qu'il y avais énormément de mots avec une fréquence inférieur a 5, 
-nous avons donc décidé de les supprimer également car pour la plupart du temps ce sont des mots mal formé ou des mots qui ont été mal tokenizé.
+nous avons donc décidé de les supprimer également car pour la plupart du temps ce sont des mots mal formés ou des mots qui ont été mal tokenizés.
 par exemple: vrbgkt, sctcb, ovccb ect... 
 Nous avons également supprimé ces mots.
 
 Voici donc les nouvelles stats de la collection avec ces modifications:
-
 ╒═════════════════════════╤═════════════╕
 │ Statistic               │    Value    │
 ╞═════════════════════════╪═════════════╡
@@ -171,5 +311,17 @@ Voici donc les nouvelles stats de la collection avec ces modifications:
 │ Total words             │ 5.69448e+06 │
 ╘═════════════════════════╧═════════════╛
 
-Donc on réduit encore la taille de la collection.
-Et surtout on réduit le vocabulaire de la collection.
+Donc on réduit encore la taille de la collection. Et surtout on réduit le vocabulaire de la collection ! 
+Ce qui est intéressant c'est qu'il ne nous reste plus que 40763 mots unique dans la collection contre 210000 mots unique dans la collection de reference.
+
+
+==================================================
+Quelques chiffres sur les performance:
+-------------------------------------
+- Une run éléments avec "'.//article' './/header' './/sec' './/p' './/list' './/st' './/ss1' './/template' './/reflist' './/link' './/entry'"
+-> Ne met que 17.381043195724487 seconds à indexer (une telle run était impossible jusque là car trop longue a indexer) 
+
+Ceci est maintenant possible grâce à notre nouvelle méthode de preprocessing qui est réalisé en amont et qui permet de gagner énormément de temps lors de l'indexation.
+Le temps d'indexation est autant réduit sur les runs éléments car pour une run élément le même contenu est parfois indexé plusieurs fois
+exemple: le contenu d'une balise p est dans article, donc si on fait une run éléments avec article et p, le contenu de p sera indexé 2 fois.
+Et cela est d'autant plus vrai que l'on augmente le nombre de balise dans la run éléments.

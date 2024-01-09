@@ -21,9 +21,9 @@ class Baseline:
                 self.collection_name = self.collection_name.split("_no_stop")[0]
                 
             self.COLLECTION_FILE_STOP_PORTER = self.collection_dir + self.collection_name + "_stop670_porter.zip"
-            self.COLLECTION_FILE_STOP_NO_STEM = self.collection_dir + self.collection_name + "_stop670_no_stem.zip"
-            self.COLLECTION_FILE_NO_STOP_PORTER = self.collection_dir + self.collection_name + "_no_stop_porter.zip"
-            self.COLLECTION_FILE_NO_STOP_NO_STEM = self.collection_dir + self.collection_name + "_no_stop_no_stem.zip"
+            self.COLLECTION_FILE_STOP_NO_STEM = self.collection_dir + self.collection_name + "_stop670_nostem.zip"
+            self.COLLECTION_FILE_NO_STOP_PORTER = self.collection_dir + self.collection_name + "_nostop_porter.zip"
+            self.COLLECTION_FILE_NO_STOP_NO_STEM = self.collection_dir + self.collection_name + "_nostop_nostem.zip"
 
     def run_baseline(self):
         """

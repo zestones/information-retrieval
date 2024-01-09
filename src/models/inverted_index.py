@@ -58,7 +58,7 @@ class InvertedIndex(DocumentParser):
             dict: The constructed inverted index.
         """
         self.total_time = time.time()
-        
+        print(Fore.CYAN + "> Granularity:", self.parser_granularity, Style.RESET_ALL) 
         self.parse_documents()
 
         start = time.time()

@@ -77,7 +77,7 @@ baseline:
 # $(PYTHON) $(MAIN_DIR)/practice5v3.py --baseline -g './/p' './/sec' './/entry' './/row' './/category' './/list'
 
 custom:
-	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/list' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/list' './/ss1' './/reflist' && \
-	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/category' './/list' './/table'
+	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/list' -p && \
+	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/list' -p && \
+	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/list' './/ss1' './/reflist' -p && \
+	$(PYTHON) $(MAIN_DIR)/practice5v5.py --bm25 -g './/article' './/p' './/sec' './/entry' './/row' './/category' './/list' './/table' -p
