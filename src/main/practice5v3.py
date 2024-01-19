@@ -1,4 +1,4 @@
-from manager.run_manager import RunManager
+from manager.run_manager.run_manager import RunManager
 
 import argparse
 import sys

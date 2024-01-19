@@ -2,6 +2,8 @@ from weighting_strategies.weighting_strategy import WeightingStrategy
 
 import math
 import time
+import json
+import re
 
 
 class BM25Weighting(WeightingStrategy):
@@ -16,16 +18,16 @@ class BM25Weighting(WeightingStrategy):
         weighted_index = {}
         start_time = time.time()
 
-        N = collection.collection_size                       # Total number of documents in the collection
-        avdl = collection.statistics.avg_collection_lengths  # Average document length in the collection
-
         for term, postings in collection.inverted_index.IDX.items():
-            for x_path, entry in postings.items():
-                df = collection.document_frequency(term, x_path)    # Document frequency
-                idf = math.log10((N - df + 0.5) / (df + 0.5))       # Inverse document frequency
+            for x_path, docno_list in postings.items():
+                tag = re.sub(r'\[\d+\]', '', x_path).split("/")[-1]
+                N = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == tag]['N'].values[0]
+                avdl = collection.statistics.avdl_df.loc[collection.statistics.avdl_df['XPath'] == tag]['avdl'].values[0]
 
-                for docno in entry.get('docno', []):
-                    dl = collection.document_length(docno)          # Document length
+                df = collection.document_frequency(term, tag)          # Document frequency
+                idf = math.log10((N - df + 0.5) / (df + 0.5))          # Inverse document frequency
+                for docno in docno_list:
+                    dl = collection.document_length(docno, tag)  # Document lengt
                     tf = collection.term_frequency(docno, term, x_path)
 
                     # Calculate BM25 weight for the term in the document
@@ -37,10 +39,15 @@ class BM25Weighting(WeightingStrategy):
                     if term not in weighted_index:
                         weighted_index[term] = []
 
-                    weighted_index[term].append(
-                        {"XPath": x_path, "docno": docno, "weight": weight})
+                    weighted_index[term].append({"XPath": x_path, "docno": docno, "weight": weight})
 
         end_time = time.time()
         self.print_computation_time(start_time, end_time)
 
         return weighted_index
+
+    def get_weighting_scheme_parameters(self):
+        """
+        Returns the parameters of the weighting scheme.
+        """
+        return {"k": self.k1, "b": self.b}

@@ -8,3 +8,7 @@ gensim
 tabulate
 lxml
 ftfy
+jsonlines
+beir
+reportlab
+wordcloud
