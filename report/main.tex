@@ -354,19 +354,18 @@ Les composants individuels sont calculés de la manière suivante :
 \text{TF}(i, d) = \text{Fréquence du Terme}(i, d)
 \end{equation}
 
-Dans le cadre de notre système, l'$\text{IDF}$ et le $\text{TF}$ sont calculés en tenant compte des balises
-ciblé.
+Dans le cadre de notre système, l'$\text{IDF}$ et le $\text{TF}$ sont calculés en tenant compte des balises ciblées.
 
 \begin{table}[h]
     \centering
-    \begin{tabular}{l l}
+    \begin{tabular}{l c c}
         \toprule
-        \textbf{Run Name} & \textbf{MAGP Value} & \textbf{P[0, 1]}\\
+        \textbf{Run Name} & \textbf{MAGP Value} & \textbf{P[0, 1]} \\
         \midrule
-        BengezzouIdrissMezianeGhilas\_5\_ltn\_article\_stop670\_porter & 0.1687 & 0.3835 \\
-        BengezzouIdrissMezianeGhilas\_8\_ltn\_article\_stop670\_nostem & 0.1699 & 0.3996 \\
-        BengezzouIdrissMezianeGhilas\_11\_ltn\_article\_nostop\_porter & 0.1515 & 0.3265 \\
-        BengezzouIdrissMezianeGhilas\_14\_ltn\_article\_nostop\_nostem & 0.1699 & 0.3996 \\
+        \dots\_5\_ltn\_article\_stop670\_porter & 0.1687 & 0.3835 \\
+        \dots\_8\_ltn\_article\_stop670\_nostem & 0.1699 & 0.3996 \\
+        \dots\_11\_ltn\_article\_nostop\_porter & 0.1515 & 0.3265 \\
+        \dots\_14\_ltn\_article\_nostop\_nostem & 0.1699 & 0.3996 \\
         \bottomrule
     \end{tabular}
     \caption{Résultats de la méthode Smart LTN}
@@ -381,33 +380,94 @@ alors que le run 8 a été réalisé avec la racinisation des mots, et le run 14
 
 
 
-
-
-
-
 \newpage
 
 \subsubsection{Méthodes de Recherche d'Information : Smart LTC}
-Le schéma de pondération LTC (Logarithmique-Term Frequency and Cosine Normalization) est une stratégie de pondération avancée utilisée dans les systèmes de recherche d'informations pour améliorer la précision des résultats de recherche en tenant compte de la fréquence des termes et de la longueur des documents. 
-Dans le contexte de notre projet, LTC est appliqué pour calculer le poids des termes dans les documents de manière à rendre les résultats de recherche plus pertinents et précis. Voici le processus que nous avons suivi afin d'implémenter le weighting LTC:
+Le schéma de pondération LTC (Logarithmique-Term Frequency and Cosine Normalization) optimise la précision des recherches en ajustant les poids des termes selon leur fréquence et la longueur des documents. Voici les étapes clés de notre implémentation :
 
 \begin{enumerate}
-\item{\textbf{Calcul du Poids LTC}}:  
-Le poids LTC d'un terme dans un document est calculé en utilisant une combinaison de la fréquence logarithmique du terme (L), la fréquence inverse du document (T), et la normalisation cosinus (C). Cette approche vise à équilibrer l'importance des termes fréquents dans les documents courts par rapport aux documents longs et à assurer que les documents de différentes longueurs soient comparables.
+\item \textbf{Calcul du Poids LTC} : Utilise la fréquence logarithmique du terme (L), la fréquence inverse du document (T), et la normalisation cosinus (C) pour équilibrer l'importance des termes entre documents de longueurs variées.
 
-\item{\textbf{Fréquence Logarithmique du Terme (L)}}: La fréquence logarithmique d'un terme dans un document est calculée pour atténuer l'impact des termes très fréquents. Cela se fait typiquement en prenant le logarithme (souvent en base 10) de la fréquence brute du terme dans le document, puis en ajoutant un pour s'assurer que les termes avec une fréquence de un ne sont pas ignorés.
+\item \textbf{Fréquence Logarithmique du Terme (L)} :
+\begin{equation}
+L(i, d) = 1 + \log_{10}(\text{TF}(i, d))
+\end{equation}
+$\text{TF}(i, d)$ représente la fréquence du terme $i$ dans le document $d$.
 
-\item{\textbf{Fréquence Inverse du document (T)}}
-La fréquence inverse du document est utilisée pour augmenter le poids des termes qui sont rares dans l'ensemble de la collection de documents, car ces termes sont souvent plus informatifs. Elle est généralement calculée en prenant le logarithme du quotient de la taille totale de la collection de documents par le nombre de documents contenant le terme.
+\item \textbf{Fréquence Inverse du Document (T)} :
+\begin{equation}
+T(i) = \log_{10}\left(\frac{N}{\text{DF}(i)}\right)
+\end{equation}
+$N$ est le nombre total de documents, et $\text{DF}(i)$ le nombre de documents contenant le terme $i$.
 
-\item{\textbf{Normalisation Cosinus (C) :}} La normalisation cosinus est appliquée pour ajuster le poids des termes en fonction de la longueur des documents. Cela permet de s'assurer que les documents plus longs ne dominent pas les résultats de recherche simplement parce qu'ils contiennent plus de mots. La normalisation est réalisée en divisant le poids de chaque terme par la racine carrée de la somme des carrés des poids de tous les termes dans le document.
+\item \textbf{Normalisation Cosinus (C)} :
+\begin{equation}
+C(d) = \frac{1}{\sqrt{\sum_{i \in d} (L(i, d) \times T(i))^2}}
+\end{equation}
+\item \textbf{Poids Final LTC} :
+\begin{equation}
+\text{LTC}(i, d) = (L(i, d) \times T(i)) \times C(d)
+\end{equation}
+\end{enumerate}
 
-\item{\textbf{Processus de Pondération et de Normalisation :}}
-Dans notre programme le processus commence par calculer un index pondéré initial en utilisant une méthode de pondération précédente (LTNWeighting) qui est ensuite ajustée par une normalisation de longueur pour obtenir l'index final pondéré selon le schéma LTC. Cela implique de calculer d'abord la somme des carrés des poids pour chaque document, puis d'ajuster les poids de chaque terme dans chaque document en fonction de cette somme, selon la formule de normalisation cosinus.
+L'implémentation de ce schéma a permis à notre système une évaluation équilibrée des termes en fonction de leur fréquence et de la longueur des documents, améliorant la pertinence des résultats de recherche.
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l c c}
+        \toprule
+        \textbf{Run Name} & \textbf{MAGP Value} & \textbf{P[0, 1]} \\
+        \midrule
+        BengezzouIdrissMezianeGhilas\_6\_ltc\_article\_stop670\_porter & 0.0834 & 0.22818 \\
+        BengezzouIdrissMezianeGhilas\_9\_ltc\_article\_stop670\_nostem & 0.0699& 0.1987 \\
+        BengezzouIdrissMezianeGhilas\_12\_ltc\_article\_nostop\_porter & 0.0668 & 0.1930 \\
+        BengezzouIdrissMezianeGhilas\_15\_ltc\_article\_nostop\_nostem & 0.0699 & 0.1987 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Résultats de la méthode Smart LTC}
+    \label{tab:result_ltn}
+\end{table}
 
-\end{enumerate} 
+\subsubsection{Méthodes de Recherche d'Information : Smart LNU}
+Le schéma de pondération LNU (Logarithmic Normalization and Unique-term adjustment) optimise la recherche d'informations en ajustant les poids des termes selon leur fréquence, la longueur des documents, et le nombre de termes distincts. Voici le processus détaillé :
+
+\begin{enumerate}
+\item \textbf{Calcul de la Fréquence Logarithmique Normalisée (LNN)} : Diminue l'effet des termes fréquemment répétés en les soumettant à une transformation logarithmique, renforçant l'importance des termes moins communs.
+\begin{equation}
+\text{LNN}(i, d, x) = 1 + \log_{10}(\text{TF}(i, d, x))
+\end{equation}
+$\text{TF}(i, d, x)$ indique la fréquence du terme $i$ dans le document $d$ et le chemin XPath $x$.
+
+\item \textbf{Normalisation par la Longueur des Documents} : Compense les variations de longueur entre les documents, permettant une comparaison équitable des poids des termes.
+\begin{equation}
+\text{LN}(d, t) = 1 + \log_{10}\left(\frac{\text{Length}(d, t)}{\text{AVDL}(t)}\right)
+\end{equation}
+où $\text{Length}(d, t)$ est la longueur du document $d$ pour le tag $t$, et $\text{AVDL}(t)$ est la longueur moyenne des documents pour le tag $t$.
+
+\item \textbf{Ajustement Basé sur le Nombre de Termes Distincts} : Prend en compte la diversité lexicale du document pour ajuster le poids des termes, favorisant une évaluation plus nuancée.
+\begin{equation}
+\text{Adjustement}(d) = (1 - \text{slope}) + \text{slope} \times \frac{\text{NTD}(d)}{\text{Pivot}}
+\end{equation}
+$\text{NTD}(d)$ est le nombre de termes distincts dans le document $d$, et $\text{Pivot}$ est le nombre moyen de termes distincts dans tous les documents. Le paramètre $\text{slope}$ ajuste l'influence de la diversité des termes.
+
+\item \textbf{Calcul du Poids Final} : Intègre la fréquence des termes, la longueur des documents, et la diversité des termes pour déterminer le poids final d'un terme dans un document.
+\begin{equation}
+\text{Weight}(i, d, x) = \frac{\text{LNN}(i, d, x)}{\text{LN}(d, t)} / \text{Adjustement}(d)
+\end{equation}
+\end{enumerate}
+
+Le schéma LNU représente une approche sophistiquée pour évaluer la pertinence des termes en prenant en compte leur distribution dans les documents, la structure des documents, et la variété lexicale. Cette méthode permet d'affiner la pertinence des résultats de recherche en assurant une analyse détaillée et contextualisée des termes.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{LNU_magp_results.png}
+    \caption{MaGP pour LNU en fonction de différents slopes}
+    \label{fig:lnu_results}
+\end{figure}
+
+\newpage
 
 
+\newpage
 
 \subsubsection{Méthodes de Recherche d'Information : BM25}
 
@@ -428,17 +488,16 @@ où :
     \item $\text{DL}$ est la longueur du document.
     \item $\text{AVDL}$ est la longueur moyenne des documents dans la collection.
     \item $\text{IDF}$ est la fréquence inverse du document pour le terme.
-    \item $\text{k1}$ et $\text{b}$ sont des paramètres de réglage qui contrôlent l'impact de la fréquence du terme et de la longueur du document, respectivement.
+    \item $\text{k1}$ et $\text{b}$ sont des paramètres de réglage qui contrôlent l'impact de la fréquence du terme et de la longueur du document, respectivement. \\
 \end{itemize}
 
-La mise en œuvre de la méthode BM25 dans notre système de recherche d'information est réalisée par la 
-classe \texttt{BM25Weighting}, héritant de la classe abstraite \texttt{WeightingStrategy}. Cette classe propose une méthode \texttt{calculate\_weight} 
+La mise en œuvre de la méthode BM25 dans notre système de recherche d'information est réalisée par la  classe \texttt{BM25Weighting}, héritant de la classe abstraite \texttt{WeightingStrategy}. Cette classe propose une méthode \texttt{calculate\_weight} 
 qui construit l'index inversé pondéré en utilisant la pondération BM25. 
-Les paramètres $\text{k1}$ et $\text{b}$ sont configurables lors de l'instanciation de la classe \texttt{BM25Weighting}, 
-pour permettre d'expérimenter avec différentes valeurs de ces paramètres.
+Les paramètres $\text{k1}$ et $\text{b}$ sont configurables lors de l'instanciation de la classe \texttt{BM25Weighting}, pour permettre d'expérimenter avec différentes valeurs de ces paramètres.
 
 Les résultats obtenus avec cette méthode seront présentés dans la section suivante,
 soulignant son impact sur les performances du système de recherche d'information.
+
 
 \begin{table}[h]
   \centering
@@ -461,17 +520,49 @@ avec la racinisation des mots (stemming), et sans l'élimination des mots vides 
 
 De plus, en comparaisons avec les résultats obtenus avec la méthode Smart LTN et la méthode Smart LTC, BM25 
 a obtenu les meilleurs résultats, avec un score de MaGP de 0.2368 sur la run 7, et un P[0, 1] de 0.5634 sur la run 10.
-
-Lors de nos expérimentations, nous nous sommes principalement concentrés sur cette méthodes qui 
-semblait être la plus prometteuse. 
-Nous avons donc réalisé plusieurs expérimentations avec cette méthode, 
-en modifiant les paramètres $\text{k1}$ et $\text{b}$, pour essayer de trouver la meilleure configuration possible.
-
-Tout au long de nos expérimentations, nous avons constaté que les meilleurs résultats 
-étaient obtenus avec des paramètres $\text{k1}$ entre 1 et 1.5 et des paramètres $\text{b}$ entre 0.5 et 0.8.
-
-
  
+Lors de nos expérimentations, nous avons remarqué que nos meilleurs run ont été réalisés avec des paramètres $\text{k1}$ entre 1 et 1.5 et des paramètres $\text{b}$ entre 0.5 et 0.8.
+Nous avons donc décidé de réaliser une grid search pour trouver les meilleurs paramètres :
+
+
+\begin{table}[!h]
+    \begin{minipage}{0.55\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{image.png}
+        \label{fig:enter-label}
+        \caption{Evolution de MaGP en fonction de k1 et b}
+    \end{minipage}%
+    \hspace{0.05\linewidth} % Add a 5% width margin
+    \begin{minipage}{0.45\linewidth}
+        Nous pouvons remarquer que notre score de MaGP est maximisé pour des valeurs de $\text{b}$ 
+        assez faible (entre 0.5 et 0.65) et des valeurs de $\text{k1}$ entre 1 et 1.1. \\
+
+        Nous pouvons remarquer très clairement sur le graphique que notre score de MaGP est maximisé avec une valeur de $\text{b}$ 
+        égale à 0.5. En effet, sur notre interval de recherche pour $\text{k1}$, nous avons un score élevé et assez stable 
+        pour des valeurs de $\text{k1}$ entre 1 et 1.4.
+    \end{minipage}
+\end{table}
+
+Nous avons également voulu observer si les valeurs de $\text{k1}$ et $\text{b}$ qui maximisent notre score de MaGP
+maximisent également notre score de P[0, 1]. 
+Voici les résultats obtenus :
+
+\begin{table}[!h]
+    \begin{minipage}{0.45\linewidth}
+        Nous remarquons tout de suite que les valeurs maximisant notre score de MaGP ne maximisent pas notre score de P[0, 1].
+        En effet, nous avons un score de P[0, 1] maximisé pour des valeurs de $\text{b}$ entre 0.65 et 0.75,
+        et des valeurs de $\text{k1}$ entre 1.0 et 1.3. \\
+
+        Nous savons donc que les valeurs permettant de maximiser notre score de MaGP ne maximisent pas notre score de P[0, 1].
+    \end{minipage}
+    \hspace{0.05\linewidth} % Add a 5% width margin
+    \begin{minipage}{0.55\linewidth}
+        \centering
+        \includegraphics[width=1\linewidth]{heatmap_p_bm25.png}
+        \label{fig:enter-label}
+        \caption{Evolution de P[0, 1] en fonction de k1 et b}
+    \end{minipage}%
+\end{table}
 
 Méthodes utilisées :
 LTN 
