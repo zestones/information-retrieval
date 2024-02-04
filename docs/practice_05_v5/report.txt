@@ -25,17 +25,18 @@ Processing With new steps:
     - lnu (~12)
     - bm25 (~20)
 
-- DeepLearning (~4)
+- DeepLearning (~3)
 
+==============================================
 Explications des choix des runs éléments:
 --------------------------------
-Pour chaqu'une des runs nous les comparons a la run baseline (BengezzouIdrissMezianeGhilas_7_bm25_article_stop670_porter_k1_b0.5.txt)
-Pour chaque run nous mettons le rapport associé dans le dossier ./comparison_report/
+Pour chae dqu'unes runs nous les comparons a notre meilleur run baseline (BengezzouIdrissMezianeGhilas_7_bm25_article_stop670_porter_k1_b0.5.txt)
+Pour chaque run pertinente nous mettons le rapport associé dans le dossier ./comparison_report/
 
 - Nous avons générer une run article et bdy.
 -> Résultats: Corrélation de 100% avec la run baseline. Mais ce qui est important ici c'est la fréquence du tag bdy et article dans les résultats.
-    On remarque que article est présent 10387fois et bdy 113 fois.
--> Conclusion: Pour toute les runs éléments nous allons garder la balise article !! (voir rapport: comparison_report_no_id_bm25_article_bdy_stop670_porter_k1_b0.pdf)
+    On remarque que article est présent 10387 fois et bdy 113 fois.
+-> Conclusion: Pour toute les runs éléments nous allons garder la balise article !! 
 
 - Une run avec article header sec p list st ss1 template reflist link entry
 -> Résultats: Correlation de 3% - 5% avec la run baseline. 
@@ -53,6 +54,34 @@ Nous avons donc réaliser des tests avec les balises restante à savoir : sec, h
     On remarque moins d'osciation sur la courbe d'évolution de la corrélation comparé à la run article sec.
     (rapport: comparison_report_22_bm25_article_sec_p_stop670_porter_k1_b0.pdf)
 
+- Une run article event title:
+-> Résultats: Correlation de 10% - 13% avec la run baseline.
+    On gardera event pour les prochain tests.
+
+- Une run article sec event:
+-> Résultats: Correlation de 3% - 5% avec la run baseline.
+    event est très peut présent comparé à sec + baisse de la corrélation par rapport à la run article sec.
+
+
+Run DeepLearning:
+-----------------
+Nous avons également trouvé énormément de documentation concerant l'IR et le DeepLearning, nous avons donc voulu tester quelque runs avec des models pré-entrainés.
+Nous avons trouvé ce papiers très intéressant: https://openreview.net/forum?id=wCu6T5xFjeJ
+Dans lequel on peut retrouvé un benchmark de plusieurs models sur différents datasets, de plus les auteurs ont mis à disposition leur code sur github:
+https://github.com/beir-cellar/beir 
+
+Nous avons donc pu générer quelques runs avec leur code, nous avons utilisé les modèles suivants:
+┌───────────────────────────────────────────────────────┬──────────────────────────┬───────────────────┬──────────────────────────────────────────────────────────────────────┐
+│ Modèle                                                │ Architecture / Modèle    │ Fonction de Score │ Particularité                                                        │
+├───────────────────────────────────────────────────────┼──────────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ msmarco-distilbert-base-tas-b                         │ DistilBERT               │ Cosine Similarity │ Embeddings de la query et du document dans le même espace vectoriel  │ 
+├───────────────────────────────────────────────────────┼──────────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ msmarco-roberta-base-ance-firstp                      │ Sentence-BERT            │ Dot Product       │ ANCE, approximation de voisins les plus proches (ANN)                │
+│                                                       │                          │                   │  pour les embeddings multilingues                                    │
+├───────────────────────────────────────────────────────┼──────────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────┤
+│ facebook/dpr-question_encoder-multiset-base           │ DPR (Encodeurs de        │ Dot Product       │ Encodeurs de question et de contexte pour la récupération dense de   │
+│                                                       │ question/contexte)       │                   │ passages                                                             │
+└───────────────────────────────────────────────────────┴──────────────────────────┴───────────────────┴──────────────────────────────────────────────────────────────────────┴
 
 ===============================================
 CORRECTION DE BUGS:
@@ -313,7 +342,7 @@ Voici donc les nouvelles stats de la collection avec ces modifications:
 
 Donc on réduit encore la taille de la collection. Et surtout on réduit le vocabulaire de la collection ! 
 Ce qui est intéressant c'est qu'il ne nous reste plus que 40763 mots unique dans la collection contre 210000 mots unique dans la collection de reference.
-
+De plus la taille moyenne des mots ce rapproche de la taille moyenne des mots dans la langue anglaise (4.7 caractères).
 
 ==================================================
 Quelques chiffres sur les performance:
@@ -322,6 +351,19 @@ Quelques chiffres sur les performance:
 -> Ne met que 17.381043195724487 seconds à indexer (une telle run était impossible jusque là car trop longue a indexer) 
 
 Ceci est maintenant possible grâce à notre nouvelle méthode de preprocessing qui est réalisé en amont et qui permet de gagner énormément de temps lors de l'indexation.
-Le temps d'indexation est autant réduit sur les runs éléments car pour une run élément le même contenu est parfois indexé plusieurs fois
+Le temps d'indexation est autant réduit sur les runs éléments car pour une run élément le même contenu est généralement indexé plusieurs fois
 exemple: le contenu d'une balise p est dans article, donc si on fait une run éléments avec article et p, le contenu de p sera indexé 2 fois.
 Et cela est d'autant plus vrai que l'on augmente le nombre de balise dans la run éléments.
+
+De plus le fait d'avoir indexé uniquement les mots de la query permet de plus avoir à s'inquiéter de la mémoire de notre machine.
+
+Quelque chiffres sur l'indexation:
+----------------------------------
+> Granularity: ['.//bdy', './/header', './/sec', './/p'] 
+> Indexing time: 5.622357368469238 seconds
+
+> Granularity: ['.//bdy', './/header', './/sec', './/p', './/list'] 
+> Indexing time: 5.9937944412231445 seconds
+
+> Granularity: ['.//bdy', './/header', './/sec', './/p', './/list', './/entry']
+> Indexing time: 6.763724088668823 seconds
