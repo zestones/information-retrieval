@@ -1,0 +1,502 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{lmodern}
+\usepackage{moreverb}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{url}
+
+\usepackage{geometry}
+\usepackage{booktabs}
+
+\geometry{a4paper, total={6in, 9in}}
+\def\UrlBreaks{\do\/\do-}  % Permet des sauts de ligne dans les URL au niveau des "/" et des "-"
+
+\usepackage{float}
+\usepackage[a4paper,left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+
+\pagestyle{headings}
+\pagestyle{plain}
+
+\usepackage{listings} 
+
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\makeatletter
+
+
+\makeatother
+
+\makeatletter
+\def\toclevel@subsubsubsection{4}
+\def\toclevel@paragraph{5}
+\def\toclevel@subparagraph{6}
+\makeatother
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\newcommand{\hsp}{\hspace{20pt}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+
+\begin{document}
+
+\begin{titlepage}
+  \begin{sffamily}
+  \begin{center}
+
+   
+    \textsc{\LARGE }\\[2cm]
+
+    \textsc{\Large M2 DSC - Université Jean Monnet}\\[1.5cm]
+
+    % Title
+    \HRule \\[0.4cm]
+    { \huge  \textsc{Information Retrieval} \\
+    \textsc{\Large Rapport de projet} \\[0.4cm] }
+	
+    \HRule \\[2cm]
+    \textsc {Idriss BENGUEZZOU \\Ghilas MEZIANE}
+ \begin{figure}
+     \centering
+    \includegraphics[scale=0.2]{logoUJM.png}
+     \label{fig:ujm_logo}
+ \end{figure}
+
+    \vfill
+
+    % Bottom of the page
+    {\large {} 02/02/2024}
+
+  \end{center}
+  \end{sffamily}
+\end{titlepage}
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+Ce projet a pour but de mettre en pratique les notions vues en cours et en TD. 
+Il s'agit de réaliser un système de recherche d'information sur un corpus de documents, en utilisant les méthodes vues en cours. 
+Le corpus de documents est constitué de 9804 documents, et les requêtes sont au nombre de sept.
+
+L'idée est de répondre aux exigences spécifiques de compétitions comme l'INEX, qui imposent des standards stricts pour évaluer les performances des systèmes de recherche d'information.
+Notre rapport détaillera notre démarche, les choix méthodologiques, les paramétrages utilisés, et les résultats obtenus, en mettant particulièrement 
+l'accent sur notre démarche de recherche de la meilleure configuration possible pour notre système de recherche d'information.
+
+
+\section{Méthodologie}
+
+Nous avons choisi de travailler avec le langage de programmation Python, au vu de sa popularité et de sa richesse en bibliothèques pour le traitement de texte. 
+En outre, aucune bibliothèque n'a été utilisée pour la recherche d'information, l'indexation, ou le calcul de similarité. Nous allons détailler notre démarche pour chaque étape du projet.
+
+\subsection{Prétraitement des données}
+
+Lors de nos expérimentations, nous avons constaté que l'étape de prétraitement des données est cruciale pour la qualité des résultats obtenus.
+En effet, tout au long de nos expérimentations, nous avons constaté que les résultats obtenus étaient très sensibles à la qualité du prétraitement des données. 
+Avec un prétraitement de qualité, nous avons pu améliorer notre score de MaGP de 0.198 à 0,2512. 
+
+Tout d'abord, nous avons utilisé la bibliothèque \texttt{nltk} pour le prétraitement des données.
+Nous avons utilisé la fonction \texttt{word\_tokenize} pour la tokenisation des documents, et la fonction \texttt{PorterStemmer} pour la racinisation des mots.
+Nous avons également utilisé la liste de stopwords fournie en cours pour élimer les mots vides.
+
+\subsubsection{Prétraitement des données initial}
+
+Notre implémentation initiale des étapes de prétraitement des données a été la suivante:
+
+\begin{enumerate}
+  \item Tokenisation
+  \item Mise en minuscule
+  \item Racinisation des mots (stemming)
+  \item Élimination des mots vides (suppression des stopwords)
+  \item Élimination de la ponctuation
+  \item Élimination des nombres
+  \item Élimination des caractères spéciaux
+  \item Élimination des mots chaines de caractères vides  
+\end{enumerate}
+
+Ces étapes de prétraitement des données était réaliser à chaque fois que nous devions indexer les documents.
+Nous verrons plus tard que par soucis d'optimisation des temps, nous avons choisi de réaliser ces étapes de prétraitement des données une seule fois, et de sauvegarder les résultats dans une nouvelle collection.
+Nous avons nommé cette première méthode de prétraitement des données : \texttt{Processing Reference},
+car elle est réalisée à chaque fois que nous devons indexer les documents.
+Voici les statistiques de notre collection après cette première méthode de prétraitement des données:
+
+\begin{table}[!h]
+  \begin{minipage}{0.35\linewidth}
+      \centering
+      \resizebox{\textwidth}{!}{%
+          \begin{tabular}{|c|c|c|}
+              \hline
+              \textbf{Statistiques} & \textbf{Valeur} \\
+              \hline
+              Taille moyenne des documents &  654.008 \\
+              Taille moyenne des mots &  8.391 \\
+              Nombre de mots unique &  210,232 \\
+              Nombre de mots total &  6.41189e+06 \\
+              \hline
+          \end{tabular}%
+      }
+      \caption{Statistiques de la collection}
+  \end{minipage}%
+  \hspace{0.05\linewidth} % Add a 5% width margin
+  \begin{minipage}{0.60\linewidth}
+      Ces valeurs sont obtenues après avoir réalisé les étapes de prétraitement des données décrites ci-dessus.
+      Elles nous ont permis d'avoir une référérence pour la suite de nos expérimentations, et de comparer les résultats obtenus avec d'autres méthodes de prétraitement des données.
+      Une run de notre système de recherche d'information avec ces valeurs nous a donné un score de MaGP de 0.198.
+  \end{minipage}
+\end{table}
+
+\subsubsection{Optimisation du Prétraitement des Données : Expérimentations avec un Ordre Modifié des Étapes}
+
+Suite à quelque expérimentations, nous avons constaté plusieurs choses qui nous ont poussé à modifier l'ordre des étapes de prétraitement des données.
+Nous avons remarqué que l'étape de \texttt{tokenisation} ne fonctionnait pas correctement par moment, par exemple:
+En tokenisant la phrase "World Ltd. World Ltd." nous obtenions ["World", "Ltd", ".", "World", "Ltd."] au lieu de ["world", "ltd", ".", "world", "ltd", "."]. 
+En effet, en menant quelques recherches, nous avons remarqué que la tokenisation pouvais ne pas fonctionner correctement avec les abréviations, les mots vides, et les mots composés.
+Nous avons donc décidé de modifier l'ordre des étapes de prétraitement des données, et de réaliser la tokenisation après l'élimination de la ponctuation, des nombres, et des caractères spéciaux.
+
+De plus, en parcourant notre liste de mots vides (stopwords), nous avons remarqué que tout les mots présent dans 
+cette liste était en minuscule. Donc il était nécessaire de mettre en minuscule les mots avant de chercher à
+éliminer les mots vides. C'est à ce moment que nous avons remarqué que l'étape de racinisation des mots (stemming)
+était réalisée avant l'étape de suppression des mots vides. Ce qui fait que les mots vides n'étaient pas éliminés
+correctement. Nous avons donc décidé de réaliser la racinisation des mots après l'élimination des mots vides.
+
+Notre nouvelle méthode de prétraitement des données est la suivante:
+\begin{enumerate}
+  \item Élimination de la ponctuation
+  \item Élimination des nombres
+  \item Élimination des caractères spéciaux
+  \item Tokenisation
+  \item Mise en minuscule
+  \item Élimination des mots vides (suppression des stopwords)
+  \item Racinisation des mots (stemming)
+  \item Élimination des mots chaines de caractères vides  
+\end{enumerate}
+
+Nous avons nommé cette nouvelle méthode de prétraitement des données : \texttt{Processing Reference Réarrangé}.
+Voici les statistiques de notre collection après cette nouvelle méthode de prétraitement des données:
+
+\begin{table}[!h]
+  \begin{minipage}{0.35\linewidth}
+      \centering
+      \resizebox{\textwidth}{!}{%
+          \begin{tabular}{|c|c|c|}
+              \hline
+              \textbf{Statistiques} & \textbf{Valeur} \\
+              \hline
+              Taille moyenne des documents &  628.267 \\
+              Taille moyenne des mots &  9.227 \\
+              Nombre de mots unique &  226,564 \\
+              Nombre de mots total &  6.15953e+06 \\
+              \hline
+          \end{tabular}%
+      }
+      \caption{Statistiques de la collection}
+  \end{minipage}%
+  \hspace{0.05\linewidth} % Add a 5% width margin
+  \begin{minipage}{0.60\linewidth}
+    Nous pouvons tout de suite remarquer que la taille moyenne des documents a légèrement diminué, 
+    et que la taille moyenne des mots a légèrement augmenté. Le vocabulaire de notre collection a également
+    augmenté. De plus nous avons un total de mots légèrement inférieur à la première méthode de prétraitement des données, 
+    environ 25,000 mots de moins.    
+  \end{minipage}
+\end{table}
+
+Pour évaluer l'amplitude de l'impact de cette nouvelle méthode de prétraitement des données, 
+nous avons décidé d'observer la fréquence des mots de nos requêtes avant et après cette nouvelle méthode.
+
+\begin{table}[!h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            \textbf{} & \textbf{actor} & \textbf{algorithm} & \textbf{analysi} &
+            \textbf{benefit} & \textbf{exclus} & \textbf{film} & \textbf{health} &
+            \textbf{hill} & \textbf{inform} & \textbf{learn} & \textbf{link} & 
+            \textbf{machin} \\
+            \hline
+            \textbf{Processing Reference} & 7086 & 35062 & 8085 & 4671 & 1888 & 16595 & 11391 & 4513 & 17440 & 6003 & 12090 & 9122 \\
+            \textbf{Processing Reference Réarrangé} & 7113 & 35326 & 8164 & 4716 & 1891 & 16708 & 11411 & 4526 & 0 & 6028 & 12306 & 9160 \\
+            \textbf{Différence} & 27 & 264 & 79 & 45 & 3 & 113 & 20 & 13 & -17440 & 25 & 216 & 38 \\
+            \hline
+        \end{tabular}%
+    }
+    \caption{Fréquence des mots des requêtes (Partie 1)}
+\end{table}
+
+\begin{table}[!h]
+    \centering
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+            \hline
+            \textbf{} & \textbf{model} & \textbf{mutual} & \textbf{network} &
+            \textbf{oil} & \textbf{oliv} & \textbf{oper} & \textbf{probabilist} & 
+            \textbf{rank} & \textbf{retriev} & \textbf{score} & \textbf{supervis} &
+            \textbf{system} & \textbf{web} \\
+            \hline
+            \textbf{Processing Reference} & 15337 & 2708 & 17820 & 14270 & 3023 & 16591 & 1230 & 3643 & 13560 & 4179 & 588 & 38683 & 20128 \\
+            \textbf{Processing Reference Réarrangé} & 15422 & 2711 & 17968 & 14409 & 3027 & 16622 & 1229 & 3680 & 13570 & 4198 & 589 & 39351 & 20188 \\
+            \textbf{Différence} & 85 & 3 & 148 & 139 & 4 & 31 & -1 & 37 & 10 & 19 & 1 & 668 & 60 \\
+            \hline
+        \end{tabular}%
+    }
+    \caption{Fréquence des mots des requêtes (Partie 2)}
+\end{table}
+Nous avons au total -15393 mots sur les mots de la requête. Nous remarquons immédiatement que le mot "information" (inform) à disparu de notre collection.
+Cela est dû à l'étape de suppression des mots vides (stopwords), qui a éliminé le mot "information" de notre collection.
+Ceci confirme que nos étapes de prétraitement sont bien réalisées 
+
+Après avoir retiré le mot "information" de notre list de mots vides (stopwords), 
+nous avons un total de 2119 mots en plus sur les mots de la requête.
+
+Voici une nouvelle fois les statistiques de notre collection après cette nouvelle méthode de prétraitement :
+
+\begin{table}[!h]
+  \begin{minipage}{0.35\linewidth}
+      \centering
+      \resizebox{\textwidth}{!}{%
+          \begin{tabular}{|c|c|c|}
+              \hline
+              \textbf{Statistiques} & \textbf{Valeur} \\
+              \hline
+              Taille moyenne des documents &  650.929  \\
+              Taille moyenne des mots & 8.42026 \\
+              Nombre de mots unique &  211,770 \\
+              Nombre de mots total &  6.3817e+06 \\
+              \hline
+          \end{tabular}%
+      }
+      \caption{Statistiques de la collection}
+  \end{minipage}%
+  \hspace{0.05\linewidth} % Add a 5% width margin
+  \begin{minipage}{0.60\linewidth}
+    Nous récupérons maintenant environs 150,000 mots en plus avec une taille moyenne des mots légèrement inférieure.    
+    En théorie, nous devrions obtenir de meilleurs résultats avec cette nouvelle méthode, donc en ce basant sur cette
+    hypothèse, nous avons décider d'améliorer encore un peu plus notre méthode de prétraitement des données.
+  \end{minipage}
+
+\end{table}
+
+\subsubsection{Optimisation du Prétraitement des Données : Expérimentations avec l'Élimination des Mots Rares}
+Nous avions remarqué que le vocabulaire de notre collection était très grand, 
+nous avions environs 200,000 mots uniques. Cependant, en observant les mots de notre vocabulaire, 
+nous nous sommes rendu compte que beaucoup de mots avait une fréquence très faible ou ne possédaient 
+aucun sens. Nous avons donc décidé de créer une liste de mots que nous avons nommé \texttt{outliers},
+qui contient les mots qui apparaissent moins de 5 fois dans notre collection et les mots ayant 
+une longueur inférieure à 3 caractères. Nous avons ensuite éliminé ces mots de notre collection.
+
+
+Voici les statistiques de notre collection après cette nouvelle méthode de prétraitement des données:
+
+\begin{table}[!h]
+  \begin{minipage}{0.35\linewidth}
+      \centering
+      \resizebox{\textwidth}{!}{%
+          \begin{tabular}{|c|c|c|}
+              \hline
+              \textbf{Statistiques} & \textbf{Valeur} \\
+              \hline
+              Taille moyenne des documents &  580.832  \\
+              Taille moyenne des mots & 6.68121 \\
+              Nombre de mots unique &  40,763 \\
+              Nombre de mots total &  5.69448e+06 \\
+              \hline
+          \end{tabular}%
+      }
+      \caption{Statistiques de la collection}
+  \end{minipage}%
+  \hspace{0.05\linewidth} % Add a 5% width margin
+  \begin{minipage}{0.60\linewidth}
+    A l'aide de cette nouvelle méthode notre vocabulaire est maintenant constitué de 40,763 mots uniques,
+    avec une taille moyenne des mots de 6.68121. Nous avons donc réduit notre vocabulaire de plus de 150,000 mots.
+    Nous avons également une taille moyenne des documents de 580.832 mots, ce qui est une réduction de 70 mots par rapport à la méthode précédente.
+  \end{minipage}
+\end{table}
+
+\section{Méthodes et Paramétrages}
+
+Nous avons utilisé plusieurs méthodes et modèles pour la recherche d'information et avons 
+réalisé plusieurs expérimentations pour essayé de trouver la meilleure configuration possible. Nous présentons
+dans cette section les différentes méthodes et modèles que nous avons utilisé, ainsi que les paramétrages que nous avons utilisé, 
+et les résultats obtenus.
+
+\subsection{Méthodes de Recherche d'Information}
+
+\subsubsection{Méthodes de Recherche d'Information : Smart LTN}
+
+Le poids TF-IDF (\textit{Term Frequency-Inverse Document Frequency}) d'un terme dans un document est déterminé par la formule suivante :
+
+\begin{equation}
+\text{TF-IDF}(i, d) = \left(1 + \log_{10}(\text{TF}(i, d))\right) \times \text{IDF}(i)
+\end{equation}
+
+où :
+\begin{itemize}
+    \item $\text{TF}(i, d)$ représente la fréquence du terme $i$ dans le document $d$.
+    \item $\text{IDF}(i)$ est la fréquence inverse du document pour le terme $i$.
+\end{itemize}
+
+Les composants individuels sont calculés de la manière suivante :
+
+\begin{equation}
+\text{IDF}(i) = \log_{10}\left(\frac{\text{Taille de la Collection}}{\text{Fréquence du Terme}(i)}\right)
+\end{equation}
+
+\begin{equation}
+\text{TF}(i, d) = \text{Fréquence du Terme}(i, d)
+\end{equation}
+
+Dans le cadre de notre système, l'$\text{IDF}$ et le $\text{TF}$ sont calculés en tenant compte des balises
+ciblé.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{l l}
+        \toprule
+        \textbf{Run Name} & \textbf{MAGP Value} & \textbf{P[0, 1]}\\
+        \midrule
+        BengezzouIdrissMezianeGhilas\_5\_ltn\_article\_stop670\_porter & 0.1687 & 0.3835 \\
+        BengezzouIdrissMezianeGhilas\_8\_ltn\_article\_stop670\_nostem & 0.1699 & 0.3996 \\
+        BengezzouIdrissMezianeGhilas\_11\_ltn\_article\_nostop\_porter & 0.1515 & 0.3265 \\
+        BengezzouIdrissMezianeGhilas\_14\_ltn\_article\_nostop\_nostem & 0.1699 & 0.3996 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Résultats de la méthode Smart LTN}
+    \label{tab:result_ltn}
+\end{table}
+
+Nous pouvons remarquer que le fait de ne pas éliminer les mots vides (stopwords) 
+a un impact négatif sur les résultats obtenus. En effet, les runs 8 et 14 ont obtenu les meilleurs résultats,
+avec un score de MaGP de 0.1699, et un P[0, 1] de 0.3996. Nous avons également remarqué que la racinisation des mots (stemming)
+n'a pas d'impact significatif sur les résultats obtenus. En effet, les runs 8 et 14 ont obtenu les mêmes résultats,
+alors que le run 8 a été réalisé avec la racinisation des mots, et le run 14 sans la racinisation des mots.
+
+
+
+
+
+
+
+\newpage
+
+\subsubsection{Méthodes de Recherche d'Information : Smart LTC}
+Le schéma de pondération LTC (Logarithmique-Term Frequency and Cosine Normalization) est une stratégie de pondération avancée utilisée dans les systèmes de recherche d'informations pour améliorer la précision des résultats de recherche en tenant compte de la fréquence des termes et de la longueur des documents. 
+Dans le contexte de notre projet, LTC est appliqué pour calculer le poids des termes dans les documents de manière à rendre les résultats de recherche plus pertinents et précis. Voici le processus que nous avons suivi afin d'implémenter le weighting LTC:
+
+\begin{enumerate}
+\item{\textbf{Calcul du Poids LTC}}:  
+Le poids LTC d'un terme dans un document est calculé en utilisant une combinaison de la fréquence logarithmique du terme (L), la fréquence inverse du document (T), et la normalisation cosinus (C). Cette approche vise à équilibrer l'importance des termes fréquents dans les documents courts par rapport aux documents longs et à assurer que les documents de différentes longueurs soient comparables.
+
+\item{\textbf{Fréquence Logarithmique du Terme (L)}}: La fréquence logarithmique d'un terme dans un document est calculée pour atténuer l'impact des termes très fréquents. Cela se fait typiquement en prenant le logarithme (souvent en base 10) de la fréquence brute du terme dans le document, puis en ajoutant un pour s'assurer que les termes avec une fréquence de un ne sont pas ignorés.
+
+\item{\textbf{Fréquence Inverse du document (T)}}
+La fréquence inverse du document est utilisée pour augmenter le poids des termes qui sont rares dans l'ensemble de la collection de documents, car ces termes sont souvent plus informatifs. Elle est généralement calculée en prenant le logarithme du quotient de la taille totale de la collection de documents par le nombre de documents contenant le terme.
+
+\item{\textbf{Normalisation Cosinus (C) :}} La normalisation cosinus est appliquée pour ajuster le poids des termes en fonction de la longueur des documents. Cela permet de s'assurer que les documents plus longs ne dominent pas les résultats de recherche simplement parce qu'ils contiennent plus de mots. La normalisation est réalisée en divisant le poids de chaque terme par la racine carrée de la somme des carrés des poids de tous les termes dans le document.
+
+\item{\textbf{Processus de Pondération et de Normalisation :}}
+Dans notre programme le processus commence par calculer un index pondéré initial en utilisant une méthode de pondération précédente (LTNWeighting) qui est ensuite ajustée par une normalisation de longueur pour obtenir l'index final pondéré selon le schéma LTC. Cela implique de calculer d'abord la somme des carrés des poids pour chaque document, puis d'ajuster les poids de chaque terme dans chaque document en fonction de cette somme, selon la formule de normalisation cosinus.
+
+\end{enumerate} 
+
+
+
+\subsubsection{Méthodes de Recherche d'Information : BM25}
+
+La méthode de pondération BM25, également connue sous le nom de Best Matching 25,
+est une technique couramment utilisée en recherche d'information pour attribuer des poids aux termes dans un index inversé.
+Cette méthode prend en compte la fréquence du terme dans un document, la fréquence du terme dans l'ensemble de la collection,
+et la longueur du document.
+
+Le calcul du poids BM25 pour un terme dans un document est défini par la formule suivante :
+
+\begin{equation}
+\text{BM25}(i, d) = \frac{{\text{TF} \times (\text{k1} + 1)}}{{\text{k1} \times \left((1 - \text{b}) + \text{b} \times \left(\frac{\text{DL}}{\text{AVDL}}\right)\right) + \text{TF}}} \times \text{IDF}
+\end{equation}
+
+où :
+\begin{itemize}
+    \item $\text{TF}$ est la fréquence du terme dans le document.
+    \item $\text{DL}$ est la longueur du document.
+    \item $\text{AVDL}$ est la longueur moyenne des documents dans la collection.
+    \item $\text{IDF}$ est la fréquence inverse du document pour le terme.
+    \item $\text{k1}$ et $\text{b}$ sont des paramètres de réglage qui contrôlent l'impact de la fréquence du terme et de la longueur du document, respectivement.
+\end{itemize}
+
+La mise en œuvre de la méthode BM25 dans notre système de recherche d'information est réalisée par la 
+classe \texttt{BM25Weighting}, héritant de la classe abstraite \texttt{WeightingStrategy}. Cette classe propose une méthode \texttt{calculate\_weight} 
+qui construit l'index inversé pondéré en utilisant la pondération BM25. 
+Les paramètres $\text{k1}$ et $\text{b}$ sont configurables lors de l'instanciation de la classe \texttt{BM25Weighting}, 
+pour permettre d'expérimenter avec différentes valeurs de ces paramètres.
+
+Les résultats obtenus avec cette méthode seront présentés dans la section suivante,
+soulignant son impact sur les performances du système de recherche d'information.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{l c c}
+      \toprule
+      \textbf{Run Name} & \textbf{MAGP Value} & \textbf{P[0, 1]} \\
+      \midrule
+      \dots\_7\_bm25\_article\_stop670\_porter\_k1\_b0.5 & 0.2368 & 0.5157 \\
+      \dots\_10\_bm25\_article\_stop670\_nostem\_k1\_b0.5 & 0.2364 & 0.5634 \\
+      \dots\_13\_bm25\_article\_nostop\_porter\_k1\_b0.5 & 0.1924 & 0.4325 \\
+      \dots\_16\_bm25\_article\_nostop\_nostem\_k1\_b0.5 & 0.2332 & 0.5537 \\
+      \bottomrule
+  \end{tabular}
+  \caption{Résultats de la méthode BM25}
+  \label{tab:result_bm25}
+\end{table}
+
+Nous remarquons encore une fois que les runs ayant les meilleurs résultats sont ceux qui ont été réalisés 
+avec la racinisation des mots (stemming), et sans l'élimination des mots vides (stopwords).
+
+De plus, en comparaisons avec les résultats obtenus avec la méthode Smart LTN et la méthode Smart LTC, BM25 
+a obtenu les meilleurs résultats, avec un score de MaGP de 0.2368 sur la run 7, et un P[0, 1] de 0.5634 sur la run 10.
+
+Lors de nos expérimentations, nous nous sommes principalement concentrés sur cette méthodes qui 
+semblait être la plus prometteuse. 
+Nous avons donc réalisé plusieurs expérimentations avec cette méthode, 
+en modifiant les paramètres $\text{k1}$ et $\text{b}$, pour essayer de trouver la meilleure configuration possible.
+
+Tout au long de nos expérimentations, nous avons constaté que les meilleurs résultats 
+étaient obtenus avec des paramètres $\text{k1}$ entre 1 et 1.5 et des paramètres $\text{b}$ entre 0.5 et 0.8.
+
+
+ 
+
+Méthodes utilisées :
+LTN 
+LTC
+LNU
+BM25
+BM25F
+BM25W
+Deep Learning
+
+Explication pour chaque méthode 
+paramétrages avec grid search les comparaisons report
+correlation entre runs
+analyse de la freq des balises presentes dans les runs
+ect...
+
+
+\section{Résultats}
+Quelque graph rapel precision recall f1 score ect...
+Analyse des résultats
+
+\section{Performances \& Optimisations}
+
+\section{Conclusion}
+
+\section{Annexes}
+
+\end{document} 
