@@ -330,6 +330,18 @@ et les résultats obtenus.
 
 \subsection{Méthodes de Recherche d'Information}
 
+Tout au long de ce projet, nous avons recherché à trouver et optimiser la meilleure méthode de recherche d'information. N'ayant pas la capacité d'évaluer de 
+notre côter nos modèles, nous avons mis en place quelque outils pour nous permettre de comparer des runs entre elles.
+
+Nous avons notamment utilisé des mesures de corrélation pour comparer les résultats obtenus, ainsi nous étions en mesures 
+de savoir si des changements dans le code modifiaient les runs produites. Cette mesure de corrélations ne nous à pas permis d'évaluer
+nos modèles, mais nous à permis de comparer une run "référérence" en l'occurrence une run baseline, avec d'autres runs pour voir si les changements
+celles ci avait un classement similaires ou pas.
+
+En ce qui concerne les runs éléments, nous avons calculé le nombre de balises ciblées retourné dans les runs. Ainsi, si une balise ciblée était
+très peu présente dans les runs, nous pouvions en déduire que cette balise ne comportait pas beaucoup d'information, et que nous devions peut-être
+la retirer de notre liste de balises ciblées.
+
 \subsubsection{Méthodes de Recherche d'Information : Smart LTN}
 
 Le poids TF-IDF (\textit{Term Frequency-Inverse Document Frequency}) d'un terme dans un document est déterminé par la formule suivante :
@@ -355,7 +367,7 @@ Les composants individuels sont calculés de la manière suivante :
 \end{equation}
 
 Dans le cadre de notre système, l'$\text{IDF}$ et le $\text{TF}$ sont calculés en tenant compte des balises ciblées.
-
+Ci-dessous quelques résultats obtenus sur notre run baseline.
 \begin{table}[h]
     \centering
     \begin{tabular}{l c c}
@@ -378,9 +390,6 @@ avec un score de MaGP de 0.1699, et un P[0, 1] de 0.3996. Nous avons également 
 n'a pas d'impact significatif sur les résultats obtenus. En effet, les runs 8 et 14 ont obtenu les mêmes résultats,
 alors que le run 8 a été réalisé avec la racinisation des mots, et le run 14 sans la racinisation des mots.
 
-
-
-\newpage
 
 \subsubsection{Méthodes de Recherche d'Information : Smart LTC}
 Le schéma de pondération LTC (Logarithmique-Term Frequency and Cosine Normalization) optimise la précision des recherches en ajustant les poids des termes selon leur fréquence et la longueur des documents. Voici les étapes clés de notre implémentation :
@@ -428,41 +437,44 @@ L'implémentation de ce schéma a permis à notre système une évaluation équi
 \end{table}
 
 \subsubsection{Méthodes de Recherche d'Information : Smart LNU}
-Le schéma de pondération LNU (Logarithmic Normalization and Unique-term adjustment) optimise la recherche d'informations en ajustant les poids des termes selon leur fréquence, la longueur des documents, et le nombre de termes distincts. Voici le processus détaillé :
+Le schéma de pondération LNU (Logarithmic Normalization and Unique-term adjustment) ajuste le poids des termes en fonction de leur fréquence, de la longueur du document, et du nombre de termes distincts. Le processus est résumé comme suit :
 
 \begin{enumerate}
-\item \textbf{Calcul de la Fréquence Logarithmique Normalisée (LNN)} : Diminue l'effet des termes fréquemment répétés en les soumettant à une transformation logarithmique, renforçant l'importance des termes moins communs.
-\begin{equation}
-\text{LNN}(i, d, x) = 1 + \log_{10}(\text{TF}(i, d, x))
-\end{equation}
-$\text{TF}(i, d, x)$ indique la fréquence du terme $i$ dans le document $d$ et le chemin XPath $x$.
-
-\item \textbf{Normalisation par la Longueur des Documents} : Compense les variations de longueur entre les documents, permettant une comparaison équitable des poids des termes.
-\begin{equation}
-\text{LN}(d, t) = 1 + \log_{10}\left(\frac{\text{Length}(d, t)}{\text{AVDL}(t)}\right)
-\end{equation}
-où $\text{Length}(d, t)$ est la longueur du document $d$ pour le tag $t$, et $\text{AVDL}(t)$ est la longueur moyenne des documents pour le tag $t$.
-
-\item \textbf{Ajustement Basé sur le Nombre de Termes Distincts} : Prend en compte la diversité lexicale du document pour ajuster le poids des termes, favorisant une évaluation plus nuancée.
-\begin{equation}
-\text{Adjustement}(d) = (1 - \text{slope}) + \text{slope} \times \frac{\text{NTD}(d)}{\text{Pivot}}
-\end{equation}
-$\text{NTD}(d)$ est le nombre de termes distincts dans le document $d$, et $\text{Pivot}$ est le nombre moyen de termes distincts dans tous les documents. Le paramètre $\text{slope}$ ajuste l'influence de la diversité des termes.
-
-\item \textbf{Calcul du Poids Final} : Intègre la fréquence des termes, la longueur des documents, et la diversité des termes pour déterminer le poids final d'un terme dans un document.
-\begin{equation}
-\text{Weight}(i, d, x) = \frac{\text{LNN}(i, d, x)}{\text{LN}(d, t)} / \text{Adjustement}(d)
-\end{equation}
+    \item \textbf{Fréquence Logarithmique Normalisée (LNN)} : 
+    \begin{equation}
+    \text{LNN}(i, d) = 1 + \log_{10}(\text{TF}(i, d))
+    \end{equation}
+    où \(\text{TF}(i, d)\) est la fréquence du terme \(i\) dans le document \(d\).
+    
+    \item \textbf{Normalisation par la Longueur} : 
+    \begin{equation}
+    \text{LN}(d) = 1 + \log_{10}\left(\frac{\text{Length}(d)}{\text{AVDL}}\right)
+    \end{equation}
+    ajuste le poids selon la longueur du document \(d\) par rapport à la longueur moyenne des documents \(\text{AVDL}\).
+    
+    \item \textbf{Ajustement Basé sur les Termes Distincts} : 
+    \begin{equation}
+    \text{Adjustement}(d) = (1 - \text{slope}) + \text{slope} \times \frac{\text{NTD}(d)}{\text{Pivot}}
+    \end{equation}
+    où \(\text{NTD}(d)\) est le nombre de termes distincts dans \(d\).
+    
+    \item \textbf{Poids Final} : 
+    \begin{equation}
+    \text{Weight}(i, d) = \frac{\text{LNN}(i, d)}{\text{LN}(d)} / \text{Adjustement}(d)
+    \end{equation}
+    combinant les éléments ci-dessus.
 \end{enumerate}
+Voici les scores MaGP que nous avons obtenu en essayant de faire varier le slope de 0.1 à 1.1 
+[\ref{fig:lnu_results}].
 
-Le schéma LNU représente une approche sophistiquée pour évaluer la pertinence des termes en prenant en compte leur distribution dans les documents, la structure des documents, et la variété lexicale. Cette méthode permet d'affiner la pertinence des résultats de recherche en assurant une analyse détaillée et contextualisée des termes.
+Comme nous pouvons le remarquer ici, le MaGP est bien loin des scores que nous avons pu atteindre en utilisant d'autres modèle de pondération. Après révision du code, nous nous sommes aperçus d'une erreur au niveau du calcul de l'ajustement dans la formule LNU. 
+Les poids étaient calculés de la manière suivante :
+\begin{center}
+\texttt{adjustement = (1 - self.slope) + pivot + (self.slope * nt\_d) \\
+weight = (lnn / length\_normalization) / adjustement}
+\end{center} 
+Cette erreur a conduit à un calcul inexact de l'ajustement, impactant directement le poids final attribué à chaque terme dans les documents, et cette mauvaise estimation a affecté la capacité du modèle à distinguer efficacement les documents pertinents des non pertinents, ce qui se reflète dans une baisse de la précision moyenne (MaGP)
 
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{LNU_magp_results.png}
-    \caption{MaGP pour LNU en fonction de différents slopes}
-    \label{fig:lnu_results}
-\end{figure}
 
 \newpage
 
@@ -498,7 +510,6 @@ Les paramètres $\text{k1}$ et $\text{b}$ sont configurables lors de l'instancia
 Les résultats obtenus avec cette méthode seront présentés dans la section suivante,
 soulignant son impact sur les performances du système de recherche d'information.
 
-
 \begin{table}[h]
   \centering
   \begin{tabular}{l c c}
@@ -521,9 +532,6 @@ avec la racinisation des mots (stemming), et sans l'élimination des mots vides 
 De plus, en comparaisons avec les résultats obtenus avec la méthode Smart LTN et la méthode Smart LTC, BM25 
 a obtenu les meilleurs résultats, avec un score de MaGP de 0.2368 sur la run 7, et un P[0, 1] de 0.5634 sur la run 10.
  
-Lors de nos expérimentations, nous avons remarqué que nos meilleurs run ont été réalisés avec des paramètres $\text{k1}$ entre 1 et 1.5 et des paramètres $\text{b}$ entre 0.5 et 0.8.
-Nous avons donc décidé de réaliser une grid search pour trouver les meilleurs paramètres :
-
 
 \begin{table}[!h]
     \begin{minipage}{0.55\linewidth}
@@ -564,30 +572,197 @@ Voici les résultats obtenus :
     \end{minipage}%
 \end{table}
 
-Méthodes utilisées :
-LTN 
-LTC
-LNU
-BM25
-BM25F
-BM25W
-Deep Learning
-
-Explication pour chaque méthode 
-paramétrages avec grid search les comparaisons report
-correlation entre runs
-analyse de la freq des balises presentes dans les runs
-ect...
+Voir \ref{fig:rap_prec_best_art_bm25} la courbe de rappel-précision pour notre meilleur run article avec BM25.
 
 
-\section{Résultats}
-Quelque graph rapel precision recall f1 score ect...
-Analyse des résultats
+
+En nous concentrant sur la courbe de rappel-précision,
+nous pouvons observer que notre modèle BM25 a une précision assez faible pour des valeurs de rappel assez élevées.
+
+Nous avons par la suite essayé d'évaluer notre modèle BM25 en essayant de cibler les balises.
+En ciblant uniquement la balise \texttt{body}, nous
+avons obtenu notre meilleur score de MaGP, avec un score de 0.2512 et un P[0, 1] de 0.5136.
+
+\newpage
+
+Concernant les résultats obtenus avec la méthode BM25 en ciblant les balises, nous avons obtenu les meilleurs résultats en 
+associant systématiquement la balise \texttt{body} ou \texttt{article} avec d'autres balises plus spécifiques, comme \texttt{header} ou \texttt{section}.
+
+\begin{table}[!h]
+  \centering
+  \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|c|c|c|c|c|}
+      \hline
+      \textbf{Run Id} & \textbf{Granularity} & \textbf{MAPGP Score} & \textbf{P[0, 1] Score} \\
+      \hline
+      92 & bdy, header & 0.1685 & 0.3731 \\
+      88 & article, event, title & 0.1667 & 0.3299 \\
+      18 & article, header & 0.1621 & 0.3711 \\
+      20 & article, sec & 0.1499 & 0.3817 \\
+      93 & bdy, header, sec & 0.1454 & 0.3708 \\
+      \hline
+  \end{tabular}%
+  }
+  \caption{Résultats de la méthode BM25 avec ciblage de balises}
+\end{table}
+
+De plus, lors de nos expérimentations nous avons essayé deux approche différentes pour le 
+calcul du DF (Document Frequency). 
+Nous avons calculé le DF en prenant en compte les chemins des balises, et en ne prenant pas en compte les chemins des balises.
+Nous avons constaté que le fait de ne pas prendre en compte les chemins des balises a un impact très négatif sur les résultats obtenus.
+En effet, une simple run avec la balise \texttt{body} nous a donné un 
+score de MaGP de 0,0752 et une precision de 0,3379 (voir run \texttt{6\_bm25\_bdy\_stop671\_porter\_k1\_b0.5} practice 5v4).
+
+En ne prenant pas en compte les chemins des balises, nous sommes revenus à des run 
+\texttt{body} et \texttt{article} très similaires.
+
+
+\subsubsection{Méthodes de Recherche d'Information : BM25F_w}
+
+La méthode de pondération $BM25F_w$ étend la méthode BM25 traditionnelle en intégrant une approche pondérée des champs pour améliorer la précision de la recherche d'information. Cette technique est particulièrement efficace pour les documents structurés, où les termes peuvent avoir une importance différente selon leur contexte dans le document.
+
+La formule de base pour le calcul du poids $BM25F_w$ pour un terme dans un document multi-champs est :
+
+\begin{equation}
+\text{$BM25F_w$}(i, d) = \sum_{f \in F} w_f \times \frac{\text{TF}_{f} \times (\text{k1} + 1)}{\text{k1} \times \left((1 - \text{b}) + \text{b} \times \left(\frac{\text{DL}_f}{\text{AVDL}_f}\right)\right) + \text{TF}_f} \times \text{IDF}
+\end{equation}
+
+La différence principale réside dans l'introduction de poids de champ ($w_f$) dans BM25F\_w, permettant d'ajuster l'importance relative de chaque champ dans le calcul de la pertinence. Cette approche permet à BM25F\_w de reconnaître que certains termes peuvent avoir plus de signification lorsqu'ils apparaissent dans certaines parties du document, comme le titre, par rapport à leur présence dans le corps du texte.
+
+Nous avons évalué les performances de notre modèle BM25F\_w en utilisant différentes combinaisons des paramètres \(\alpha\), \(\beta\), et \(\gamma\), avec \(k1=1.2\) et \(b=0.75\). 
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{results_BM25FW.png}
+        \caption{Résultats MaGP BM25FW sous différents paramètres}
+        \label{fig:magp_bm25fw}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{results_PRECISION_BM25FW.png}
+        \caption{Résultats de précision P[0,1] pour BM25FW sous différents paramètres}
+        \label{fig:precision_bm25fw}
+    \end{minipage}
+\end{figure}
+
+\textbf{Analyse des résultats \\}
+Concernant la Mean Average Precision (MaGP), nous avons constaté des variations similaires en fonction des paramètres \(\alpha\), \(\beta\), et \(\gamma\). Les configurations initiales \((\alpha=1.0, \beta=1.0)\) ont montré une performance robuste indépendamment de la valeur de \(\gamma\), tandis que l'augmentation de \(\alpha\) et \(\beta\) a conduit à une diminution de MaGP, particulièrement pour \((\alpha=1.5, \beta=1.5, \gamma=1.0)\).
+
+Les meilleures performances en termes de précision P[0,1] ont été observées pour les configurations \((\alpha=1.0, \beta=1.0, \gamma=1.0)\) et \((\alpha=1.0, \beta=1.0, \gamma=1.5)\), avec une précision de \(0.22\). La diminution de la précision pour des valeurs plus élevées de \(\beta\) et \(\gamma\) suggère que surpondérer ces champs par rapport à \(\alpha\) n'améliore pas la qualité des premiers résultats de recherche. La précision la plus faible a été enregistrée pour la combinaison \((\alpha=1.5, \beta=1.5, \gamma=1.0)\), soulignant l'importance d'un équilibre approprié entre les paramètres pour maximiser l'efficacité du modèle. 
+Dans notre cas, l'application du modèle BM25F\_w sur des balises d'articles a produit un Mean Average Precision (MaGP) différent de celui observé lors de l'utilisation du modèle BM25 classique. Cette différence suggère que le choix des balises sur lesquelles le modèle est appliqué inluence de manière significative les résultats obtenus, car BM25F\_w est conçu pour tirer parti de la structure des documents en attribuant des poids différents aux termes selon leur emplacement dans différents champs ou balises du document.
+
+\newpage
+
+
+\subsubsection{Méthodes de Recherche d'Information : BM25F_r}
+Dans le cadre de ce projet nous avons aussi eu l'occasion d'implémenter une autre méthode de pondération: $BM25F_r$. La méthode de pondération $BM25F_r$, proposée par Robertson, est une variante du modèle BM25 classique qui est spécifiquement conçue pour améliorer la recherche d'informations dans des documents structurés. Tout comme $BM25F_w$, $BM25F_r$ étend le modèle BM25 en prenant en compte la structure des documents, mais avec une approche différente focalisée sur la représentation et la pondération des termes en fonction de leur pertinence dans divers champs du document.
+
+Contrairement à BM25F\_w, qui ajuste l'importance des champs dans le calcul de la pertinence à travers des poids statiques \(w_f\), BM25F\_r adopte une approche de pondération dynamique. Cette méthode ajuste la contribution de chaque champ en fonction de ses caractéristiques propres, utilisant des facteurs de normalisation et de pondération variables. Cela permet une évaluation plus précise et adaptative de la pertinence des termes selon le contexte spécifique de chaque champ, suivant les principes énoncés par Robertson.
+La formule de pondération pour BM25F\_r est représentée comme suit :
+
+\begin{equation}
+\text{$BM25F_r$}(t, D) = IDF(t) \times \sum_{f \in F} \left( \frac{(k_1 + 1) \times TF_{f, t, D}}{K_{f, D} + TF_{f, t, D}} \right) \times W_f
+\end{equation}
+
+Ci-dessous les résultats obtenus par nos runs $BM25F_r$:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{results_BM25FR.png}
+    \caption{MaGP and Precision - BM25F_r}
+    \label{fig:enter-label}
+\end{figure}
+
+Encore une fois, nos résultat sont très éloignés d'une run BM25 "classique" pour des paramètres à 1. Cela est très probablement du au choix des balises pour réaliser nos runs, car en effet, 
+en effectuant des tests sur des collection beaucoup plus petite nous obtenions des résultats identiques à ceux de BM25.
+Malheureusement, nous n'avons pas eu le temps de réaliser des expérimentations plus poussées pour sélectionner les bonnes balises. Cependant, nous avons quand même
+pu observer qu'en sélectionnant les balises \texttt{body} et \texttt{article} nous obtenions les même résultats que pour BM25.
+
+\newpage
+
+
+\subsubsection{Méthodes de Recherche d'Information : DeepLearning}
+
+Dans cette section, nous explorons l'utilisation de méthodes de recherche d'information basées
+sur le Deep Learning. Notre démarche s'est concentrée sur l'exploration de modèles pré-entraînés
+et l'évaluation de leur performance dans le contexte de la recherche d'information (IR).
+
+Nous avons entrepris des recherches approfondies dans la littérature liée à l'IR et au Deep Learning,
+identifiant de nombreuses ressources pertinentes.
+Souhaitant évaluer ces méthodes, nous avons choisi d'effectuer plusieurs runs, en utilisant 
+des modèles pré-entraînés disponibles.
+
+Parmi les documents que nous avons trouvés particulièrement intéressants, nous mettons en avant le papier 
+intitulé "BEIR: A Heterogeneous Benchmark for Zero-shot Evaluation of Information Retrieval Models" 
+(\href{https://openreview.net/forum?id=wCu6T5xFjeJ}{https://openreview.net}). 
+Ce document propose un benchmark de plusieurs modèles sur divers ensembles de données. 
+De plus, les auteurs ont rendu leur code accessible sur \href{https://github.com/beir-cellar/beir}{Github}.
+
+Pour nos expérimentations, nous avons utilisé le code mis à disposition par les auteurs et généré des runs pour évaluer les performances de ces modèles sur notre collection de documents.
+\begin{itemize}
+    \item \textbf{msmarco-distilbert-base-tas-b} : Utilisation de DistilBERT avec une fonction de similarité cosinus. Les embeddings de la requête et du document sont générés dans le même espace vectoriel.
+    \item \textbf{msmarco-roberta-base-ance-firstp} : Utilisation de Sentence-BERT avec une fonction de produit scalaire. Intègre ANCE, une approximation d'ANN (Approximate Nearest Neighbors), pour les embeddings multilingues.
+    \item \textbf{facebook/dpr-question\_encoder-multiset-base} : Utilisation de DPR (Deep Passage Retrieval) avec des encodeurs de question et de contexte. La fonction de score est basée sur le produit scalaire pour la récupération dense de passages. \\
+\end{itemize}
+
+
+La librairie BEIR fournit d'autres modèles et techniques, telles que le Re-ranking, qui permet de réordonner les résultats d'une recherche initiale en utilisant un modèle de Deep Learning. Les auteurs proposent 5 techniques différentes : \\
+\begin{itemize}
+    \item \textbf{Lexical Retrieval :} Avec un BM25 associé à ElasticSearch ou Anserini.
+    \item \textbf{Sparse Retrieval :} Utilisation de modèles DeepCT, SPARTA, et DocT5query.
+    \item \textbf{Dense Retrieval :} Utilisation de modèles DPR, ANCE, TAS-B, et GenQ.
+    \item \textbf{Late-Interaction :} Utilisation de ColBERT pour l'agrégation des interactions tardives.
+    \item \textbf{Re-Ranking Model :} Utilisation de modèles comme BM25 + CE, qui réordonne les résultats d'une recherche initiale avec un modèle de distillation des connaissances. \\
+\end{itemize}
+
+Les résultats obtenus avec ces modèles était très faible sur notre collection. Il est possible que les transformers utilisés pour ces modèles ne soient pas adaptés à notre collection de documents. 
+
+
+\newpage
+
 
 \section{Performances \& Optimisations}
 
+Dans cette section, nous présentons les efforts déployés pour améliorer les performances et optimiser le code, réduisant ainsi les temps d'exécution.
+Nous avons adopté les principes de la Programmation Orientée Objet (POO) pour structurer notre code de manière plus efficace.
+
+En ce qui concerne les structures de données, nous avons entrepris des optimisations sur des éléments clés tels que l'index inversé, la fréquence des termes,
+la fréquence des documents, etc. L'objectif principal était d'optimiser ces structures pour favoriser les accès directs aux données,
+atteignant ainsi une complexité temporelle de O(1) dans de nombreux cas.
+
+Par ailleurs, afin d'optimiser l'efficacité des recherches, nous avons suivi les conseils donnés en classe. Une des approches adoptées a été de n'indexer 
+que les mots présent dans les requêtes, réduisant ainsi la taille de l'index et améliorant les performances globales du système. Ces ajustements ont été réalisés 
+dans le but d'obtenir des temps d'exécution plus rapides et une utilisation plus efficace des ressources.
+
+
 \section{Conclusion}
+Ce projet nous a permis de mettre en pratique les connaissances acquises en cours de Recherche d'Information. Nous avons exploré diverses méthodes et paramétrages pour optimiser un système de recherche d'information sur un corpus de documents. Notre travail s'est concentré sur l'implémentation de modèles basés sur les pondérations TF-IDF, BM25, BM25F_w, et BM25F_r, ainsi que sur l'expérimentation avec des techniques de prétraitement des données pour améliorer les performances.
+
+Les résultats obtenus ont montré l'importance cruciale du prétraitement des données et du choix judicieux des paramètres pour les modèles de pondération. Nous avons constaté que des ajustements fins des paramètres, comme ceux de BM25 (\(k1\) et \(b\)), ainsi que la sélection stratégique des balises pour BM25F_w et BM25F_r, peuvent avoir un impact significatif sur la qualité des résultats de recherche. L'erreur détectée dans le calcul de l'ajustement pour BM25F_r souligne également l'importance d'une vérification rigoureuse du code pour garantir l'exactitude des implémentations.
+
+En outre, nos expérimentations avec BM25F_w et BM25F_r ont révélé que la structure des documents et le choix des balises ciblées jouent un rôle déterminant dans la performance des systèmes de recherche d'information. Il est apparu que l'application de ces modèles sur des balises spécifiques peut influencer de manière significative les résultats, soulignant l'importance de comprendre la structure des documents pour une indexation et une recherche efficaces.
+
+En conclusion, ce projet a non seulement renforcé notre compréhension des principes fondamentaux de la recherche d'information mais a également mis en lumière les défis associés à l'optimisation des systèmes de recherche d'information. Les leçons apprises ici, notamment l'importance du prétraitement, le choix des paramètres, et la compréhension de la structure des documents, seront précieuses pour nos futurs travaux dans le domaine.
+
+Pour les perspectives futures, nous envisageons d'explorer l'intégration de techniques de Deep Learning pour la recherche d'information, ainsi que l'expansion de notre système pour traiter des corpus de documents plus divers et plus vastes. Il serait également intéressant de développer des interfaces utilisateur intuitives pour permettre aux utilisateurs d'interagir plus facilement avec le système de recherche d'information.
+
+\newpage
 
 \section{Annexes}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{LNU_magp_results.png}
+    \caption{MaGP pour LNU en fonction de différents slopes}
+    \label{fig:lnu_results}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\linewidth]{recall_precision_bm25_baseline.png}
+    \caption{Courbe de rappel-précision pour BM25}
+    \label{fig:rap_prec_best_art_bm25}
+\end{figure}
 
 \end{document} 
