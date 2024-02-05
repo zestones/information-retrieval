@@ -44,7 +44,7 @@ Here is the options you can use:
 | --baseline                  | Run baseline                                    |
 | --export-weighted-idx       | Export weighted index to JSON file               |
 | --query-file QUERY_FILE     | File containing queries                          |
-| -p   | Use pre-processed collection to run the experiment                        |
+| -p, --pre-processed  | Use pre-processed collection to run the experiment                        |
 
 
 #### Examples
