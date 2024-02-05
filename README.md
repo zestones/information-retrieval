@@ -44,6 +44,7 @@ Here is the options you can use:
 | --baseline                  | Run baseline                                    |
 | --export-weighted-idx       | Export weighted index to JSON file               |
 | --query-file QUERY_FILE     | File containing queries                          |
+| -p   | Use pre-processed collection to run the experiment                        |
 
 
 #### Examples
@@ -55,3 +56,12 @@ make practice5v5 -- --bm25 -g "'.//article'" "'.//title'"
 
 make practice5v5 -- --baseline
 ```
+
+Using the ```-p``` or ```--pre-processed``` option will use the pre-processed collection to run the experiment.
+
+```bash
+make practice5v5 -- --bm25 -g "'.//article'" "'.//title'" -p
+```
+The time of execution will be faster using the pre-processed collection, but you need to have the pre-processed collection in the ````/lib/processed_data/```` folder.	
+
+If you don't have the pre-processed collection, you can use the ```pre_processing``` notebook to generate it.
